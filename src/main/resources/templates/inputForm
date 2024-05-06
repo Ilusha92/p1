@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <title>Input Form</title>
+</head>
+<body>
+<h2>Input Form</h2>
+<form action="/saveInput" method="post">
+    <label for="eventName">Event Name:</label><br/>
+    <input type="text" id="eventName" name="eventName"/><br/>
+    <label for="eventLocation">Event Location:</label><br/>
+    <input type="text" id="eventLocation" name="eventLocation"/><br/>
+    <label for="eventDate">Event Date:</label><br/>
+    <input type="date" id="eventDate" name="eventDate"/><br/>
+    <label for="eventWorkStartTime">Event Work Start Time:</label><br/>
+    <input type="time" id="eventWorkStartTime" name="eventWorkStartTime"/><br/>
+    <label for="eventWorkEndTime">Event Work End Time:</label><br/>
+    <input type="time" id="eventWorkEndTime" name="eventWorkEndTime"/><br/>
+    <label for="visitorsCount">Visitors Count:</label><br/>
+    <input type="number" id="visitorsCount" name="visitorsCount"/><br/>
+    <input type="submit" value="Submit"/>
+</form>
+</body>
+</html>

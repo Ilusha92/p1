@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <title>Input Details</title>
+</head>
+<body>
+<h2>Input Details</h2>
+<div>
+    <p>Customer: <span th:text="${input.customer}"></span></p>
+    <p>Event Name: <span th:text="${input.eventName}"></span></p>
+    <p>Event Location: <span th:text="${input.eventLocation}"></span></p>
+    <p>Event Start Date: <span th:text="${input.eventStartDate}"></span></p>
+    <p>Event End Date: <span th:text="${input.eventEndDate}"></span></p>
+    <p>Event Work Start Time: <span th:text="${input.eventWorkStartTime}"></span></p>
+    <p>Event Work End Time: <span th:text="${input.eventWorkEndTime}"></span></p>
+    <p>Visitors Count: <span th:text="${input.visitorsCount}"></span></p>
+</div>
+</body>
+</html>

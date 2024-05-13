@@ -1,21 +1,31 @@
 package com.example.demo.services;
 
-import com.example.demo.entities.Input; // Правильный импорт
+import com.example.demo.entities.InputBody;
+import com.example.demo.entities.InputHeader;
 
 import java.util.List;
 
 public interface InputService {
-    // Создание новой записи Input в базе данных
-    void createInput(Input input);
 
-    // Редактирование существующей записи Input в базе данных
-    void editInput(Input input);
+    Long createInputHeader(InputHeader header);
 
-    Input getInputById(Long id);
+    Long saveInputHeader(InputHeader header, String username);
 
-    // Сохранение записи Input в базе данных
-    void saveInput(Input input);
+    InputHeader getInputHeaderById(Long id);
 
-    List<Input> getUserInputs();
+    void saveInputBody(List<InputBody> bodies);
+
+    InputBody getInputBodyById(Long id);
+
+
+
+
+
+    // Редактирование существующей записи InputHeader в базе данных
+    void editInput(InputHeader header);
+
+
+
+    List<InputHeader> getUserInputs();
 
 }

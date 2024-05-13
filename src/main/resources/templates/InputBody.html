@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Input Body Form</title>
+</head>
+<body>
+
+<form id="inputForm" action="/input/saveBodyInput" method="post">
+
+  <!-- Hidden Field to Store HeaderId -->
+  <input type="hidden" id="headerId" name="headerId" th:value="${headerId}">
+  <input type="hidden" id="workDays" name="workDays" th:value="${workDays}">
+
+  <!-- Loop through workDays to create inputBody sections -->
+  <th:block th:each="i : ${#numbers.sequence(0, workDays - 1)}">
+    <h2>Input Body <span th:text="${i + 1}"></span></h2>
+
+    <!-- Soft Device Section -->
+    <h3>Soft Device</h3>
+    <label for="softDevice">Soft Device:</label>
+    <input type="text" id="softDevice" name="bodies[__${i}__].softDevice">
+
+    <label for="sDeviceCount">Soft Device Count:</label>
+    <input type="text" id="sDeviceCount" name="bodies[__${i}__].sDeviceCount">
+
+    <label for="sDevicePrice">Soft Device Price:</label>
+    <input type="text" id="sDevicePrice" name="bodies[__${i}__].sDevicePrice">
+
+    <!-- Printer Device Section -->
+    <h3>Printer Device</h3>
+    <label for="printerDevice">Printer Device:</label>
+    <input type="text" id="printerDevice" name="bodies[__${i}__].printerDevice">
+
+    <label for="pDeviceCount">Printer Device Count:</label>
+    <input type="text" id="pDeviceCount" name="bodies[__${i}__].pDeviceCount">
+
+    <label for="pDevicePrice">Printer Device Price:</label>
+    <input type="text" id="pDevicePrice" name="bodies[__${i}__].pDevicePrice">
+
+    <!-- Additional input fields for other device sections can be added here -->
+  </th:block>
+
+  <button type="submit">Submit</button>
+</form>
+
+</body>
+</html>

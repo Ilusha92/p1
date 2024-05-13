@@ -1,20 +1,19 @@
 package com.example.demo.entities;
 
+import jakarta.persistence.*;
 import lombok.*;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.List;
 
 @Getter
 @Setter
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PUBLIC)
-@Entity(name = "input")
-public class Input {
+@Entity(name = "input_header")
+public class InputHeader {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -26,4 +25,10 @@ public class Input {
     private LocalTime eventWorkStartTime;
     private LocalTime eventWorkEndTime;
     private int visitorsCount;
+    private String author;
+    private int workDays;
+    private boolean sameEquipmentForAllDays;
+    @OneToMany(mappedBy = "header")
+    private List<InputBody> inputBodies;
+
 }

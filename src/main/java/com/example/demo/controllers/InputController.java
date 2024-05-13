@@ -1,16 +1,20 @@
 package com.example.demo.controllers;
 
-import com.example.demo.entities.Input;
+import com.example.demo.entities.InputHeader;
+import com.example.demo.entities.InputBody;
 import com.example.demo.services.InputService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Controller
@@ -23,28 +27,58 @@ public class InputController {
         this.inputService = inputService;
     }
 
-    @GetMapping("/input/form")
-    public String showInputForm(Model model) {
-        model.addAttribute("input", new Input());
-        return "inputForm";
+    @GetMapping("/input/header")
+    public String showInputHeader(Model model) {
+        model.addAttribute("input", new InputHeader());
+        return "inputHeader";
     }
 
-    @PostMapping("/input/saveInput")
-    public String saveInput(@Valid @ModelAttribute("input") Input input, BindingResult bindingResult) {
+    @PostMapping("/input/saveHeaderInput")
+    public String saveInput(@Valid @ModelAttribute("inputHeader") InputHeader header
+            , BindingResult bindingResult, Authentication authentication) {
         if (bindingResult.hasErrors()) {
-            // Если есть ошибки валидации, возвращаем обратно на форму ввода с сообщениями об ошибках
-            return "inputForm";
+            return "inputHeader";
+        }
+        String currentUsername = authentication.getName();
+        Long headerId = inputService.saveInputHeader(header, currentUsername);
+        return "redirect:/input/body?headerId=" + headerId;
+    }
+
+    @GetMapping("/input/body")
+    public String showInputBody(@RequestParam("headerId") Long headerId, Model model) {
+        InputHeader header = inputService.getInputHeaderById(headerId);
+        if (header == null) {
+            return "errorPageHeader"; // Здесь errorPage - название вашего представления с сообщением об ошибке
+        }
+        model.addAttribute("headerId", headerId); // Добавляем inputId в контекст модели
+        model.addAttribute("workDays", header.getWorkDays());
+        model.addAttribute("inputBody", new InputBody());
+
+        return "inputBody";
+    }
+
+    @PostMapping("/input/saveBodyInput")
+    public String saveInputBody(@Valid @ModelAttribute("inputBody") List<InputBody> bodies,
+                                @RequestParam("headerId") Long headerId,
+                                BindingResult bindingResult) {
+        if (bindingResult.hasErrors()) {
+            System.out.println("Binding result has errors:");
+            bindingResult.getAllErrors().forEach(error -> System.out.println(error));
+            return "errorBodyPage";
         }
 
-        inputService.saveInput(input);
-        return "redirect:/input/form";
-    }
+        // Получаем InputHeader по его идентификатору
+        InputHeader header = inputService.getInputHeaderById(headerId);
+        if (header == null) {
+            return "errorPageHeader"; // Обработка случая, когда header не найден
+        }
 
-//    @GetMapping("/lk")
-//    public String showInputs(Model model) {
-//        // Получаем имеющиеся у пользователя input'ы из сервиса
-//        List<Input> userInputs = inputService.getUserInputs(); // Предполагается, что есть метод в InputService для получения input'ов пользователя
-//        model.addAttribute("userInputs", userInputs);
-//        return "userInputsPage"; // Предполагается, что у вас есть страница для отображения input'ов пользователя
-//    }
+        // Привязываем каждый InputBody к InputHeader
+        for (InputBody body : bodies) {
+            body.setHeader(header);
+        }
+
+        inputService.saveInputBody(bodies);
+        return "redirect:/somepage?inputBodyId=" + headerId;
+    }
 }

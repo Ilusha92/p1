@@ -33,13 +33,13 @@ public class InputBody {
     private String rfidReaderDeviceCount;
     private String rfidReaderDevicePrice;
 
-    private String switching;
+    private String switchingCount;
     private String switchingPrice;
 
-    private String network;
+    private String networkCount;
     private String networkPrice;
 
-    private String tsd;
+    private String tsdCount;
     private String tsdPrice;
 
     @ManyToOne

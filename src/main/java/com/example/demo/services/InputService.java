@@ -7,8 +7,6 @@ import java.util.List;
 
 public interface InputService {
 
-    Long createInputHeader(InputHeader header);
-
     Long saveInputHeader(InputHeader header, String username);
 
     InputHeader getInputHeaderById(Long id);

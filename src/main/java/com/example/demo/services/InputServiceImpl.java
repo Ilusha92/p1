@@ -21,21 +21,12 @@ public class InputServiceImpl implements InputService {
     //private final BCryptPasswordEncoder bCryptPasswordEncoder;
 
     @Override
-    public Long createInputHeader(InputHeader header) {
-        // Вызываем метод сохранения объекта в репозитории
-        //bCryptPasswordEncoder.encode(password)
-        header.setWorkDays(countWorkDays(header.getEventStartDate(), header.getEventEndDate()));
-        InputHeader savedHeader = inputHeaderRepository.save(header);
-        //excelService.createNewFile(input);
-        return savedHeader.getId();
-    }
-
-    @Override
     public Long saveInputHeader(InputHeader header, String username) {
         // Вызываем метод создания InputHeader, так как в данной реализации нет разделения на create и edit
         header.setAuthor(username);
-        createInputHeader(header);
-        return header.getId();
+        header.setWorkDays(countWorkDays(header.getEventStartDate(), header.getEventEndDate()));
+        InputHeader savedHeader = inputHeaderRepository.save(header);
+        return savedHeader.getId();
     }
 
     @Override

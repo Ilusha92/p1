@@ -1,8 +1,10 @@
 package com.example.demo.controllers;
 
+import com.example.demo.entities.HeaderBodies;
 import com.example.demo.entities.InputHeader;
 import com.example.demo.entities.InputBody;
 import com.example.demo.services.InputService;
+import com.example.demo.services.InputServiceImpl;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
@@ -15,15 +17,17 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 @Controller
 public class InputController {
 
-    private final InputService inputService;
+    private final InputServiceImpl inputService;
 
     @Autowired
-    public InputController(InputService inputService) {
+    public InputController(InputServiceImpl inputService) {
         this.inputService = inputService;
     }
 
@@ -50,35 +54,44 @@ public class InputController {
         if (header == null) {
             return "errorPageHeader"; // Здесь errorPage - название вашего представления с сообщением об ошибке
         }
-        model.addAttribute("headerId", headerId); // Добавляем inputId в контекст модели
+
+        // Создаем список пустых объектов InputBody в количестве workDays
+        List<InputBody> inputBodies = new ArrayList<>();
+        for (int i = 0; i < header.getWorkDays(); i++) {
+            inputBodies.add(new InputBody());
+        }
+
+        HeaderBodies headerBodies = new HeaderBodies(inputBodies);
+        model.addAttribute("headerId", headerId); // Добавляем headerId в контекст модели
         model.addAttribute("workDays", header.getWorkDays());
-        model.addAttribute("inputBody", new InputBody());
+        model.addAttribute("headerBodies", headerBodies);
 
         return "inputBody";
     }
 
+
     @PostMapping("/input/saveBodyInput")
-    public String saveInputBody(@Valid @ModelAttribute("inputBody") List<InputBody> bodies,
+    public String saveInputBody(@Valid @ModelAttribute HeaderBodies bodies,
                                 @RequestParam("headerId") Long headerId,
-                                BindingResult bindingResult) {
+                                BindingResult bindingResult, Model model) {
         if (bindingResult.hasErrors()) {
             System.out.println("Binding result has errors:");
             bindingResult.getAllErrors().forEach(error -> System.out.println(error));
             return "errorBodyPage";
         }
 
-        // Получаем InputHeader по его идентификатору
         InputHeader header = inputService.getInputHeaderById(headerId);
         if (header == null) {
-            return "errorPageHeader"; // Обработка случая, когда header не найден
+            return "errorPageHeader";
         }
 
-        // Привязываем каждый InputBody к InputHeader
-        for (InputBody body : bodies) {
+        for (InputBody body : bodies.getBodies()) {
             body.setHeader(header);
         }
+        model.addAttribute("bodies", bodies);
+        inputService.saveInputBody(bodies.getBodies());
 
-        inputService.saveInputBody(bodies);
         return "redirect:/somepage?inputBodyId=" + headerId;
     }
+
 }

@@ -1,31 +1,174 @@
+<!--<!DOCTYPE html>-->
+<!--<html lang="en" xmlns:th="http://www.thymeleaf.org">-->
+<!--<head>-->
+<!--    <meta charset="UTF-8"/>-->
+<!--    <title>Input Form</title>-->
+<!--</head>-->
+<!--<body>-->
+<!--<h2>Input Form</h2>-->
+<!--<form action="/input/saveHeaderInput" method="post">-->
+<!--    <label for="customer">Customer:</label><br/>-->
+<!--    <input type="text" id="customer" name="customer"/><br/>-->
+<!--    <label for="eventName">Event Name:</label><br/>-->
+<!--    <input type="text" id="eventName" name="eventName"/><br/>-->
+<!--    <label for="eventLocation">Event Location:</label><br/>-->
+<!--    <input type="text" id="eventLocation" name="eventLocation"/><br/>-->
+<!--    <label for="eventStartDate">Event Start Date:</label><br/>-->
+<!--    <input type="date" id="eventStartDate" name="eventStartDate"/><br/>-->
+<!--    <label for="eventEndDate">Event End Date:</label><br/>-->
+<!--    <input type="date" id="eventEndDate" name="eventEndDate"/><br/>-->
+<!--    <label for="eventWorkStartTime">Event Work Start Time:</label><br/>-->
+<!--    <input type="time" id="eventWorkStartTime" name="eventWorkStartTime"/><br/>-->
+<!--    <label for="eventWorkEndTime">Event Work End Time:</label><br/>-->
+<!--    <input type="time" id="eventWorkEndTime" name="eventWorkEndTime"/><br/>-->
+<!--    <label for="visitorsCount">Visitors Count:</label><br/>-->
+<!--    <input type="number" id="visitorsCount" name="visitorsCount"/><br/>-->
+<!--    <input type="checkbox" id="sameEquipmentForAllDays" name="sameEquipmentForAllDays"/>-->
+<!--    <label for="sameEquipmentForAllDays">Same Equipment For All Days</label><br/>-->
+<!--    <input type="submit" value="Далее"/>-->
+<!--</form>-->
+<!--</body>-->
+<!--</html>-->
+
+<!--<!DOCTYPE html>-->
+<!--<html lang="en" xmlns:th="http://www.thymeleaf.org">-->
+<!--<head>-->
+<!--    <meta charset="UTF-8"/>-->
+<!--    <title>О мероприятии</title>-->
+<!--    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">-->
+<!--    <style>-->
+<!--        .short-input {-->
+<!--            width: 25%;-->
+<!--        }-->
+<!--    </style>-->
+<!--    <style>-->
+<!--        .sshort-input {-->
+<!--            width: 15%;-->
+<!--        }-->
+<!--    </style>-->
+<!--    <style>-->
+<!--        .ssshort-input {-->
+<!--            width: 50%;-->
+<!--        }-->
+<!--    </style>-->
+<!--</head>-->
+<!--<body>-->
+<!--<div class="container">-->
+<!--    <h1>Информация о мероприятии</h1>-->
+<!--    <form th:action="@{/input/saveHeaderInput}" method="post">-->
+<!--        <div class="form-group">-->
+<!--            <label for="customer">Заказчик</label>-->
+<!--            <input type="text" id="customer" name="customer" class="form-control short-input"/>-->
+<!--        </div>-->
+<!--        <div class="form-group">-->
+<!--            <label for="eventName">Название мероприятия</label>-->
+<!--            <input type="text" id="eventName" name="eventName" class="form-control ssshort-input"/>-->
+<!--        </div>-->
+<!--        <div class="form-group">-->
+<!--            <label for="eventLocation">Место проведения</label>-->
+<!--            <input type="text" id="eventLocation" name="eventLocation" class="form-control ssshort-input"/>-->
+<!--        </div>-->
+<!--        <div class="form-group">-->
+<!--            <label for="eventStartDate">Дата начала</label>-->
+<!--            <input type="date" id="eventStartDate" name="eventStartDate" class="form-control sshort-input"/>-->
+<!--        </div>-->
+<!--        <div class="form-group">-->
+<!--            <label for="eventEndDate">Дата окончания</label>-->
+<!--            <input type="date" id="eventEndDate" name="eventEndDate" class="form-control sshort-input"/>-->
+<!--        </div>-->
+<!--        <div class="form-group">-->
+<!--            <label for="eventWorkStartTime">Начало работы аккредитации</label>-->
+<!--            <input type="time" id="eventWorkStartTime" name="eventWorkStartTime" class="form-control sshort-input"/>-->
+<!--        </div>-->
+<!--        <div class="form-group">-->
+<!--            <label for="eventWorkEndTime">Окончание работы аккредитации</label>-->
+<!--            <input type="time" id="eventWorkEndTime" name="eventWorkEndTime" class="form-control sshort-input"/>-->
+<!--        </div>-->
+<!--        <div class="form-group">-->
+<!--            <label for="visitorsCount">Количество участников</label>-->
+<!--            <input type="number" id="visitorsCount" name="visitorsCount" class="form-control sshort-input"/>-->
+<!--        </div>-->
+<!--        <div class="form-check">-->
+<!--            <input type="checkbox" class="form-check-input" id="sameEquipmentForAllDays" name="sameEquipmentForAllDays"/>-->
+<!--            <label class="form-check-label" for="sameEquipmentForAllDays">Оборудование на все дни одинаковое</label>-->
+<!--        </div>-->
+<!--        <button type="submit" class="btn btn-primary">Далее</button>-->
+<!--    </form>-->
+<!--</div>-->
+<!--</body>-->
+<!--</html>-->
+
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8"/>
-    <title>Input Form</title>
+    <title>О мероприятии</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
+    <style>
+        .short-input {
+            width: 25%;
+        }
+        .sshort-input {
+            width: 45%;
+        }
+        .ssshort-input {
+            width: 50%;
+        }
+        .centered-form {
+            max-width: 600px;
+            margin: auto;
+        }
+        .form-row .form-group {
+            flex: 1;
+        }
+    </style>
 </head>
 <body>
-<h2>Input Form</h2>
-<form action="/input/saveHeaderInput" method="post">
-    <label for="customer">Customer:</label><br/>
-    <input type="text" id="customer" name="customer"/><br/>
-    <label for="eventName">Event Name:</label><br/>
-    <input type="text" id="eventName" name="eventName"/><br/>
-    <label for="eventLocation">Event Location:</label><br/>
-    <input type="text" id="eventLocation" name="eventLocation"/><br/>
-    <label for="eventStartDate">Event Start Date:</label><br/>
-    <input type="date" id="eventStartDate" name="eventStartDate"/><br/>
-    <label for="eventEndDate">Event End Date:</label><br/>
-    <input type="date" id="eventEndDate" name="eventEndDate"/><br/>
-    <label for="eventWorkStartTime">Event Work Start Time:</label><br/>
-    <input type="time" id="eventWorkStartTime" name="eventWorkStartTime"/><br/>
-    <label for="eventWorkEndTime">Event Work End Time:</label><br/>
-    <input type="time" id="eventWorkEndTime" name="eventWorkEndTime"/><br/>
-    <label for="visitorsCount">Visitors Count:</label><br/>
-    <input type="number" id="visitorsCount" name="visitorsCount"/><br/>
-    <input type="checkbox" id="sameEquipmentForAllDays" name="sameEquipmentForAllDays"/>
-    <label for="sameEquipmentForAllDays">Same Equipment For All Days</label><br/>
-    <input type="submit" value="Далее"/>
-</form>
+<div class="container">
+    <h1 class="text-center">Информация о мероприятии</h1>
+    <form th:action="@{/input/saveHeaderInput}" method="post" class="centered-form">
+        <div class="form-group">
+            <label for="customer">Заказчик</label>
+            <input type="text" id="customer" name="customer" class="form-control short-input"/>
+        </div>
+        <div class="form-group">
+            <label for="eventName">Название мероприятия</label>
+            <input type="text" id="eventName" name="eventName" class="form-control ssshort-input"/>
+        </div>
+        <div class="form-group">
+            <label for="eventLocation">Место проведения</label>
+            <input type="text" id="eventLocation" name="eventLocation" class="form-control ssshort-input"/>
+        </div>
+        <div class="form-row">
+            <div class="form-group">
+                <label for="eventStartDate">Дата начала</label>
+                <input type="date" id="eventStartDate" name="eventStartDate" class="form-control sshort-input"/>
+            </div>
+            <div class="form-group">
+                <label for="eventEndDate">Дата окончания</label>
+                <input type="date" id="eventEndDate" name="eventEndDate" class="form-control sshort-input"/>
+            </div>
+        </div>
+        <div class="form-row">
+            <div class="form-group">
+                <label for="eventWorkStartTime">Начало работы аккредитации</label>
+                <input type="time" id="eventWorkStartTime" name="eventWorkStartTime" class="form-control sshort-input"/>
+            </div>
+            <div class="form-group">
+                <label for="eventWorkEndTime">Окончание работы аккредитации</label>
+                <input type="time" id="eventWorkEndTime" name="eventWorkEndTime" class="form-control sshort-input"/>
+            </div>
+        </div>
+        <div class="form-group">
+            <label for="visitorsCount">Количество участников</label>
+            <input type="number" id="visitorsCount" name="visitorsCount" class="form-control sshort-input"/>
+        </div>
+        <div class="form-check">
+            <input type="checkbox" class="form-check-input" id="sameEquipmentForAllDays" name="sameEquipmentForAllDays"/>
+            <label class="form-check-label" for="sameEquipmentForAllDays">Оборудование на все дни одинаковое</label>
+        </div>
+        <button type="submit" class="btn btn-primary">Далее</button>
+    </form>
+</div>
 </body>
 </html>

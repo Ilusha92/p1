@@ -2,6 +2,8 @@ package com.example.demo.services;
 
 import com.example.demo.entities.InputBody;
 import com.example.demo.entities.InputHeader;
+import com.example.demo.entities.Supplies;
+import com.example.demo.entities.forSupplies.Badge;
 
 import java.util.List;
 
@@ -15,11 +17,16 @@ public interface InputService {
 
     InputBody getInputBodyById(Long id);
 
+    void saveInputSupplies(Supplies sup);
+
+    void saveInputSuppliesBadges(List<Badge> badges);
+
+    Badge saveBadge(Badge badge);
 
 
 
 
-    // Редактирование существующей записи InputHeader в базе данных
+
     void editInput(InputHeader header);
 
 

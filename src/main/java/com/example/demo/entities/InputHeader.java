@@ -30,5 +30,7 @@ public class InputHeader {
     private boolean sameEquipmentForAllDays;
     @OneToMany(mappedBy = "header")
     private List<InputBody> inputBodies;
+    @OneToOne(mappedBy = "header")
+    private Supplies sup;
 
 }

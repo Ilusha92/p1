@@ -1,3 +1,240 @@
+<!--<!DOCTYPE html>-->
+<!--<html xmlns:th="http://www.thymeleaf.org">-->
+<!--<head>-->
+<!--  <title>Input Body</title>-->
+<!--  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">-->
+<!--</head>-->
+<!--<body>-->
+<!--<div class="container">-->
+<!--  <h1>Input Body</h1>-->
+<!--  <form th:action="@{/input/saveBodyInput}" th:object="${headerBodies}" method="post">-->
+<!--    <input type="hidden" name="headerId" th:value="${headerId}" />-->
+
+<!--    <div th:each="body, iterStat : ${headerBodies.bodies}">-->
+<!--      <h2>Input Body <span th:text="${iterStat.index + 1}">Body Number</span></h2>-->
+
+<!--      <div class="form-group">-->
+<!--        <label>Soft Device Count</label>-->
+<!--        <input type="text" th:field="*{bodies[__${iterStat.index}__].sDeviceCount}" class="form-control" />-->
+<!--      </div>-->
+<!--      <div class="form-group">-->
+<!--        <label>Soft Device Price</label>-->
+<!--        <input type="text" th:field="*{bodies[__${iterStat.index}__].sDevicePrice}" class="form-control" />-->
+<!--      </div>-->
+<!--      <div class="form-group">-->
+<!--        <label>Printer Device Count</label>-->
+<!--        <input type="text" th:field="*{bodies[__${iterStat.index}__].pDeviceCount}" class="form-control" />-->
+<!--      </div>-->
+<!--      <div class="form-group">-->
+<!--        <label>Printer Device Price</label>-->
+<!--        <input type="text" th:field="*{bodies[__${iterStat.index}__].pDevicePrice}" class="form-control" />-->
+<!--      </div>-->
+<!--      <div class="form-group">-->
+<!--        <label>Camera Device Count</label>-->
+<!--        <input type="text" th:field="*{bodies[__${iterStat.index}__].cameraDeviceCount}" class="form-control" />-->
+<!--      </div>-->
+<!--      <div class="form-group">-->
+<!--        <label>Camera Device Price</label>-->
+<!--        <input type="text" th:field="*{bodies[__${iterStat.index}__].cameraDevicePrice}" class="form-control" />-->
+<!--      </div>-->
+<!--      &lt;!&ndash; Add other fields similarly &ndash;&gt;-->
+<!--      <hr>-->
+<!--    </div>-->
+
+<!--    <button type="submit" class="btn btn-primary">Save</button>-->
+<!--  </form>-->
+<!--</div>-->
+<!--</body>-->
+<!--</html>-->
+
+
+<!--<!DOCTYPE html>-->
+<!--<html xmlns:th="http://www.thymeleaf.org">-->
+<!--<head>-->
+<!--  <title>Input Body</title>-->
+<!--  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">-->
+<!--</head>-->
+<!--<body>-->
+<!--<div class="container">-->
+<!--  <h1>Input Body</h1>-->
+<!--  <form th:action="@{/input/saveBodyInput}" th:object="${headerBodies}" method="post">-->
+<!--    <input type="hidden" name="headerId" th:value="${headerId}" />-->
+
+<!--    <div th:each="body, iterStat : ${headerBodies.bodies}">-->
+<!--      <h2>Input Body <span th:text="${iterStat.index + 1}">Body Number</span></h2>-->
+
+<!--      &lt;!&ndash; Soft Device Dropdown &ndash;&gt;-->
+<!--      <div class="form-group">-->
+<!--        <label>Soft Device</label>-->
+<!--        <select th:field="*{bodies[__${iterStat.index}__].softDevice}" class="form-control">-->
+<!--          <option value="" selected>&#45;&#45; Select Soft Device &#45;&#45;</option>-->
+<!--          <option th:each="device : ${softDevices}" th:value="${device.id}" th:text="${device.name}"></option>-->
+<!--        </select>-->
+<!--      </div>-->
+
+<!--      &lt;!&ndash; Printer Device Dropdown &ndash;&gt;-->
+<!--      <div class="form-group">-->
+<!--        <label>Printer Device</label>-->
+<!--        <select th:field="*{bodies[__${iterStat.index}__].printerDevice}" class="form-control">-->
+<!--          <option value="" selected>&#45;&#45; Select Printer Device &#45;&#45;</option>-->
+<!--          <option th:each="device : ${printerDevices}" th:value="${device.id}" th:text="${device.name}"></option>-->
+<!--        </select>-->
+<!--      </div>-->
+
+<!--      <div class="form-group">-->
+<!--        <label>Soft Device Count</label>-->
+<!--        <input type="text" th:field="*{bodies[__${iterStat.index}__].sDeviceCount}" class="form-control" />-->
+<!--      </div>-->
+<!--      <div class="form-group">-->
+<!--        <label>Soft Device Price</label>-->
+<!--        <input type="text" th:field="*{bodies[__${iterStat.index}__].sDevicePrice}" class="form-control" />-->
+<!--      </div>-->
+<!--      <div class="form-group">-->
+<!--        <label>Printer Device Count</label>-->
+<!--        <input type="text" th:field="*{bodies[__${iterStat.index}__].pDeviceCount}" class="form-control" />-->
+<!--      </div>-->
+<!--      <div class="form-group">-->
+<!--        <label>Printer Device Price</label>-->
+<!--        <input type="text" th:field="*{bodies[__${iterStat.index}__].pDevicePrice}" class="form-control" />-->
+<!--      </div>-->
+<!--      <div class="form-group">-->
+<!--        <label>Camera Device Count</label>-->
+<!--        <input type="text" th:field="*{bodies[__${iterStat.index}__].cameraDeviceCount}" class="form-control" />-->
+<!--      </div>-->
+<!--      <div class="form-group">-->
+<!--        <label>Camera Device Price</label>-->
+<!--        <input type="text" th:field="*{bodies[__${iterStat.index}__].cameraDevicePrice}" class="form-control" />-->
+<!--      </div>-->
+<!--      &lt;!&ndash; Add other fields similarly &ndash;&gt;-->
+<!--      <hr>-->
+<!--    </div>-->
+
+<!--    <button type="submit" class="btn btn-primary">Save</button>-->
+<!--  </form>-->
+<!--</div>-->
+<!--</body>-->
+<!--</html>-->
+
+
+<!--<!DOCTYPE html>-->
+<!--<html xmlns:th="http://www.thymeleaf.org">-->
+<!--<head>-->
+<!--  <title>Input Body</title>-->
+<!--  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">-->
+<!--</head>-->
+<!--<body>-->
+<!--<div class="container">-->
+<!--  <h1>Input Body</h1>-->
+<!--  <form th:action="@{/input/saveBodyInput}" th:object="${headerBodies}" method="post">-->
+<!--    <input type="hidden" name="headerId" th:value="${headerId}" />-->
+<!--    <input type="hidden" name="sameEquipmentForAllDays" th:value="${sameEquipmentForAllDays}" />-->
+
+<!--    <div th:if="${sameEquipmentForAllDays}">-->
+<!--      <h2>Input Body for All Days</h2>-->
+
+<!--      &lt;!&ndash; Soft Device Dropdown &ndash;&gt;-->
+<!--      <div class="form-group">-->
+<!--        <label>Soft Device</label>-->
+<!--        <select th:field="*{bodies[0].softDevice}" class="form-control">-->
+<!--          <option value="" selected>&#45;&#45; Select Soft Device &#45;&#45;</option>-->
+<!--          <option th:each="device : ${softDevices}" th:value="${device.id}" th:text="${device.name}"></option>-->
+<!--        </select>-->
+<!--      </div>-->
+
+<!--      &lt;!&ndash; Printer Device Dropdown &ndash;&gt;-->
+<!--      <div class="form-group">-->
+<!--        <label>Printer Device</label>-->
+<!--        <select th:field="*{bodies[0].printerDevice}" class="form-control">-->
+<!--          <option value="" selected>&#45;&#45; Select Printer Device &#45;&#45;</option>-->
+<!--          <option th:each="device : ${printerDevices}" th:value="${device.id}" th:text="${device.name}"></option>-->
+<!--        </select>-->
+<!--      </div>-->
+
+<!--      <div class="form-group">-->
+<!--        <label>Soft Device Count</label>-->
+<!--        <input type="text" th:field="*{bodies[0].sDeviceCount}" class="form-control" />-->
+<!--      </div>-->
+<!--      <div class="form-group">-->
+<!--        <label>Soft Device Price</label>-->
+<!--        <input type="text" th:field="*{bodies[0].sDevicePrice}" class="form-control" />-->
+<!--      </div>-->
+<!--      <div class="form-group">-->
+<!--        <label>Printer Device Count</label>-->
+<!--        <input type="text" th:field="*{bodies[0].pDeviceCount}" class="form-control" />-->
+<!--      </div>-->
+<!--      <div class="form-group">-->
+<!--        <label>Printer Device Price</label>-->
+<!--        <input type="text" th:field="*{bodies[0].pDevicePrice}" class="form-control" />-->
+<!--      </div>-->
+<!--      <div class="form-group">-->
+<!--        <label>Camera Device Count</label>-->
+<!--        <input type="text" th:field="*{bodies[0].cameraDeviceCount}" class="form-control" />-->
+<!--      </div>-->
+<!--      <div class="form-group">-->
+<!--        <label>Camera Device Price</label>-->
+<!--        <input type="text" th:field="*{bodies[0].cameraDevicePrice}" class="form-control" />-->
+<!--      </div>-->
+<!--      &lt;!&ndash; Add other fields similarly &ndash;&gt;-->
+<!--      <hr>-->
+<!--    </div>-->
+
+<!--    <div th:if="${!sameEquipmentForAllDays}">-->
+<!--      <div th:each="body, iterStat : ${headerBodies.bodies}">-->
+<!--        <h2>Input Body <span th:text="${iterStat.index + 1}">Body Number</span></h2>-->
+
+<!--        &lt;!&ndash; Soft Device Dropdown &ndash;&gt;-->
+<!--        <div class="form-group">-->
+<!--          <label>Soft Device</label>-->
+<!--          <select th:field="*{bodies[__${iterStat.index}__].softDevice}" class="form-control">-->
+<!--            <option value="" selected>&#45;&#45; Select Soft Device &#45;&#45;</option>-->
+<!--            <option th:each="device : ${softDevices}" th:value="${device.id}" th:text="${device.name}"></option>-->
+<!--          </select>-->
+<!--        </div>-->
+
+<!--        &lt;!&ndash; Printer Device Dropdown &ndash;&gt;-->
+<!--        <div class="form-group">-->
+<!--          <label>Printer Device</label>-->
+<!--          <select th:field="*{bodies[__${iterStat.index}__].printerDevice}" class="form-control">-->
+<!--            <option value="" selected>&#45;&#45; Select Printer Device &#45;&#45;</option>-->
+<!--            <option th:each="device : ${printerDevices}" th:value="${device.id}" th:text="${device.name}"></option>-->
+<!--          </select>-->
+<!--        </div>-->
+
+<!--        <div class="form-group">-->
+<!--          <label>Soft Device Count</label>-->
+<!--          <input type="text" th:field="*{bodies[__${iterStat.index}__].sDeviceCount}" class="form-control" />-->
+<!--        </div>-->
+<!--        <div class="form-group">-->
+<!--          <label>Soft Device Price</label>-->
+<!--          <input type="text" th:field="*{bodies[__${iterStat.index}__].sDevicePrice}" class="form-control" />-->
+<!--        </div>-->
+<!--        <div class="form-group">-->
+<!--          <label>Printer Device Count</label>-->
+<!--          <input type="text" th:field="*{bodies[__${iterStat.index}__].pDeviceCount}" class="form-control" />-->
+<!--        </div>-->
+<!--        <div class="form-group">-->
+<!--          <label>Printer Device Price</label>-->
+<!--          <input type="text" th:field="*{bodies[__${iterStat.index}__].pDevicePrice}" class="form-control" />-->
+<!--        </div>-->
+<!--        <div class="form-group">-->
+<!--          <label>Camera Device Count</label>-->
+<!--          <input type="text" th:field="*{bodies[__${iterStat.index}__].cameraDeviceCount}" class="form-control" />-->
+<!--        </div>-->
+<!--        <div class="form-group">-->
+<!--          <label>Camera Device Price</label>-->
+<!--          <input type="text" th:field="*{bodies[__${iterStat.index}__].cameraDevicePrice}" class="form-control" />-->
+<!--        </div>-->
+<!--        &lt;!&ndash; Add other fields similarly &ndash;&gt;-->
+<!--        <hr>-->
+<!--      </div>-->
+<!--    </div>-->
+
+<!--    <button type="submit" class="btn btn-primary">Save</button>-->
+<!--  </form>-->
+<!--</div>-->
+<!--</body>-->
+<!--</html>-->
+
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
@@ -9,36 +246,106 @@
   <h1>Input Body</h1>
   <form th:action="@{/input/saveBodyInput}" th:object="${headerBodies}" method="post">
     <input type="hidden" name="headerId" th:value="${headerId}" />
+    <input type="hidden" name="sameEquipmentForAllDays" th:value="${sameEquipmentForAllDays}" />
 
-    <div th:each="body, iterStat : ${headerBodies.bodies}">
-      <h2>Input Body <span th:text="${iterStat.index + 1}">Body Number</span></h2>
+    <div th:if="${sameEquipmentForAllDays}">
+      <h2>Input Body for All Days</h2>
+
+      <!-- Soft Device Dropdown -->
+      <div class="form-group">
+        <label>Soft Device</label>
+        <select th:field="*{bodies[0].softDevice}" class="form-control">
+          <option value="" selected>-- Select Soft Device --</option>
+          <option th:each="device : ${softDevices}" th:value="${device.id}" th:text="${device.name}"></option>
+        </select>
+      </div>
+
+      <!-- Printer Device Dropdown -->
+      <div class="form-group">
+        <label>Printer Device</label>
+        <select th:field="*{bodies[0].printerDevice}" class="form-control">
+          <option value="" selected>-- Select Printer Device --</option>
+          <option th:each="device : ${printerDevices}" th:value="${device.id}" th:text="${device.name}"></option>
+        </select>
+      </div>
 
       <div class="form-group">
         <label>Soft Device Count</label>
-        <input type="text" th:field="*{bodies[__${iterStat.index}__].sDeviceCount}" class="form-control" />
+        <input type="text" th:field="*{bodies[0].sDeviceCount}" class="form-control" />
       </div>
       <div class="form-group">
         <label>Soft Device Price</label>
-        <input type="text" th:field="*{bodies[__${iterStat.index}__].sDevicePrice}" class="form-control" />
+        <input type="text" th:field="*{bodies[0].sDevicePrice}" class="form-control" />
       </div>
       <div class="form-group">
         <label>Printer Device Count</label>
-        <input type="text" th:field="*{bodies[__${iterStat.index}__].pDeviceCount}" class="form-control" />
+        <input type="text" th:field="*{bodies[0].pDeviceCount}" class="form-control" />
       </div>
       <div class="form-group">
         <label>Printer Device Price</label>
-        <input type="text" th:field="*{bodies[__${iterStat.index}__].pDevicePrice}" class="form-control" />
+        <input type="text" th:field="*{bodies[0].pDevicePrice}" class="form-control" />
       </div>
       <div class="form-group">
         <label>Camera Device Count</label>
-        <input type="text" th:field="*{bodies[__${iterStat.index}__].cameraDeviceCount}" class="form-control" />
+        <input type="text" th:field="*{bodies[0].cameraDeviceCount}" class="form-control" />
       </div>
       <div class="form-group">
         <label>Camera Device Price</label>
-        <input type="text" th:field="*{bodies[__${iterStat.index}__].cameraDevicePrice}" class="form-control" />
+        <input type="text" th:field="*{bodies[0].cameraDevicePrice}" class="form-control" />
       </div>
       <!-- Add other fields similarly -->
       <hr>
+    </div>
+
+    <div th:if="${!sameEquipmentForAllDays}">
+      <div th:each="body, iterStat : ${headerBodies.bodies}">
+        <h2>Input Body <span th:text="${iterStat.index + 1}">Body Number</span></h2>
+
+        <!-- Soft Device Dropdown -->
+        <div class="form-group">
+          <label>Soft Device</label>
+          <select th:field="*{bodies[__${iterStat.index}__].softDevice}" class="form-control">
+            <option value="" selected>-- Select Soft Device --</option>
+            <option th:each="device : ${softDevices}" th:value="${device.id}" th:text="${device.name}"></option>
+          </select>
+        </div>
+
+        <!-- Printer Device Dropdown -->
+        <div class="form-group">
+          <label>Printer Device</label>
+          <select th:field="*{bodies[__${iterStat.index}__].printerDevice}" class="form-control">
+            <option value="" selected>-- Select Printer Device --</option>
+            <option th:each="device : ${printerDevices}" th:value="${device.id}" th:text="${device.name}"></option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>Soft Device Count</label>
+          <input type="text" th:field="*{bodies[__${iterStat.index}__].sDeviceCount}" class="form-control" />
+        </div>
+        <div class="form-group">
+          <label>Soft Device Price</label>
+          <input type="text" th:field="*{bodies[__${iterStat.index}__].sDevicePrice}" class="form-control" />
+        </div>
+        <div class="form-group">
+          <label>Printer Device Count</label>
+          <input type="text" th:field="*{bodies[__${iterStat.index}__].pDeviceCount}" class="form-control" />
+        </div>
+        <div class="form-group">
+          <label>Printer Device Price</label>
+          <input type="text" th:field="*{bodies[__${iterStat.index}__].pDevicePrice}" class="form-control" />
+        </div>
+        <div class="form-group">
+          <label>Camera Device Count</label>
+          <input type="text" th:field="*{bodies[__${iterStat.index}__].cameraDeviceCount}" class="form-control" />
+        </div>
+        <div class="form-group">
+          <label>Camera Device Price</label>
+          <input type="text" th:field="*{bodies[__${iterStat.index}__].cameraDevicePrice}" class="form-control" />
+        </div>
+        <!-- Add other fields similarly -->
+        <hr>
+      </div>
     </div>
 
     <button type="submit" class="btn btn-primary">Save</button>

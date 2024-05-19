@@ -1,0 +1,302 @@
+<!--<!DOCTYPE html>-->
+<!--<html xmlns:th="http://www.thymeleaf.org">-->
+<!--<head>-->
+<!--    <meta charset="UTF-8"/>-->
+<!--    <title>Input Supplies</title>-->
+<!--    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">-->
+<!--    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"></script>-->
+<!--    <script>-->
+<!--        $(document).ready(function(){-->
+<!--            $("#addBadgeButton").click(function(){-->
+<!--                $("#badge2Fields").show();-->
+<!--                $(this).hide();-->
+<!--            });-->
+<!--        });-->
+<!--    </script>-->
+<!--</head>-->
+<!--<body>-->
+<!--<div class="container">-->
+<!--    <h1>Input Supplies</h1>-->
+<!--    <form th:action="@{/input/saveSupplies}" th:object="${supplies}" method="post">-->
+<!--        <input type="hidden" name="headerId" th:value="${headerId}" />-->
+
+<!--        <div class="badge-fields">-->
+<!--            <h2>Badge 1</h2>-->
+<!--            <div class="form-group">-->
+<!--                <label>Badge Material</label>-->
+<!--                <select th:field="*{badges[0].badgeMaterial}" class="form-control">-->
+<!--                    <option value="" selected>&#45;&#45; Select Material &#45;&#45;</option>-->
+<!--                    <option value="PRINTED">Печатный</option>-->
+<!--                    <option value="PLASTIC">Пластиковый</option>-->
+<!--                </select>-->
+<!--            </div>-->
+<!--            <div class="form-group">-->
+<!--                <label>Size</label>-->
+<!--                <input type="text" th:field="*{badges[0].size}" class="form-control" />-->
+<!--            </div>-->
+<!--            <div class="form-group">-->
+<!--                <label>Chroma</label>-->
+<!--                <input type="text" th:field="*{badges[0].chroma}" class="form-control" />-->
+<!--            </div>-->
+<!--            <div class="form-group">-->
+<!--                <label>Density</label>-->
+<!--                <input type="text" th:field="*{badges[0].density}" class="form-control" />-->
+<!--            </div>-->
+<!--            <div class="form-group">-->
+<!--                <label>Lamination</label>-->
+<!--                <input type="text" th:field="*{badges[0].lamination}" class="form-control" />-->
+<!--            </div>-->
+<!--            <div class="form-group">-->
+<!--                <label>Lamination Kind</label>-->
+<!--                <select th:field="*{badges[0].laminationKind}" class="form-control">-->
+<!--                    <option value="" selected>&#45;&#45; Select Lamination Kind &#45;&#45;</option>-->
+<!--                    <option value="MATTE">Матовый</option>-->
+<!--                    <option value="GLOSSY">Глянцевый</option>-->
+<!--                </select>-->
+<!--            </div>-->
+<!--        </div>-->
+
+<!--        <div id="badge2Fields" class="badge-fields" style="display:none;">-->
+<!--            <h2>Badge 2</h2>-->
+<!--            <div class="form-group">-->
+<!--                <label>Badge Material</label>-->
+<!--                <select th:field="*{badges[1].badgeMaterial}" class="form-control">-->
+<!--                    <option value="" selected>&#45;&#45; Select Material &#45;&#45;</option>-->
+<!--                    <option value="PRINTED">Печатный</option>-->
+<!--                    <option value="PLASTIC">Пластиковый</option>-->
+<!--                </select>-->
+<!--            </div>-->
+<!--            <div class="form-group">-->
+<!--                <label>Size</label>-->
+<!--                <input type="text" th:field="*{badges[1].size}" class="form-control" />-->
+<!--            </div>-->
+<!--            <div class="form-group">-->
+<!--                <label>Chroma</label>-->
+<!--                <input type="text" th:field="*{badges[1].chroma}" class="form-control" />-->
+<!--            </div>-->
+<!--            <div class="form-group">-->
+<!--                <label>Density</label>-->
+<!--                <input type="text" th:field="*{badges[1].density}" class="form-control" />-->
+<!--            </div>-->
+<!--            <div class="form-group">-->
+<!--                <label>Lamination</label>-->
+<!--                <input type="text" th:field="*{badges[1].lamination}" class="form-control" />-->
+<!--            </div>-->
+<!--            <div class="form-group">-->
+<!--                <label>Lamination Kind</label>-->
+<!--                <select th:field="*{badges[1].laminationKind}" class="form-control">-->
+<!--                    <option value="" selected>&#45;&#45; Select Lamination Kind &#45;&#45;</option>-->
+<!--                    <option value="MATTE">Матовый</option>-->
+<!--                    <option value="GLOSSY">Глянцевый</option>-->
+<!--                </select>-->
+<!--            </div>-->
+<!--        </div>-->
+
+<!--        <button type="button" id="addBadgeButton" class="btn btn-secondary">Добавить бейдж</button>-->
+<!--        <button type="submit" class="btn btn-primary">Save</button>-->
+<!--    </form>-->
+<!--</div>-->
+<!--</body>-->
+<!--</html>-->
+
+<!--<!DOCTYPE html>-->
+<!--<html xmlns:th="http://www.thymeleaf.org">-->
+<!--<head>-->
+<!--    <meta charset="UTF-8"/>-->
+<!--    <title>Input Supplies</title>-->
+<!--    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">-->
+<!--    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"></script>-->
+<!--    <script>-->
+<!--        $(document).ready(function(){-->
+<!--            $("#addBadgeButton").click(function(){-->
+<!--                $("#badge2Fields").show();-->
+<!--                $(this).hide();-->
+<!--            });-->
+<!--        });-->
+<!--    </script>-->
+<!--</head>-->
+<!--<body>-->
+<!--<div class="container">-->
+<!--    <h1>Input Supplies</h1>-->
+<!--    <form th:action="@{/input/saveSupplies}" th:object="${supplies}" method="post">-->
+<!--        <input type="hidden" name="headerId" th:value="${headerId}" />-->
+
+<!--        <div class="badge-fields">-->
+<!--            <h2>Badge 1</h2>-->
+<!--            <div class="form-group">-->
+<!--                <label>Badge Material</label>-->
+<!--                <select th:field="*{badges[0].badgeMaterial}" class="form-control">-->
+<!--                    <option value="" selected>&#45;&#45; Select Material &#45;&#45;</option>-->
+<!--                    <option value="PRINTED">Печатный</option>-->
+<!--                    <option value="PLASTIC">Пластиковый</option>-->
+<!--                </select>-->
+<!--            </div>-->
+<!--            <div class="form-group">-->
+<!--                <label>Size</label>-->
+<!--                <input type="text" th:field="*{badges[0].size}" class="form-control" />-->
+<!--            </div>-->
+<!--            <div class="form-group">-->
+<!--                <label>Chroma</label>-->
+<!--                <input type="text" th:field="*{badges[0].chroma}" class="form-control" />-->
+<!--            </div>-->
+<!--            <div class="form-group">-->
+<!--                <label>Density</label>-->
+<!--                <input type="text" th:field="*{badges[0].density}" class="form-control" />-->
+<!--            </div>-->
+<!--            <div class="form-group">-->
+<!--                <label>Lamination</label>-->
+<!--                <input type="text" th:field="*{badges[0].lamination}" class="form-control" />-->
+<!--            </div>-->
+<!--            <div class="form-group">-->
+<!--                <label>Lamination Kind</label>-->
+<!--                <select th:field="*{badges[1].laminationKind}" class="form-control">-->
+<!--                    <option value="" selected>&#45;&#45; Select Lamination Kind &#45;&#45;</option>-->
+<!--                    <option value="MATTE">Матовый</option>-->
+<!--                    <option value="GLOSSY">Глянцевый</option>-->
+<!--                </select>-->
+<!--            </div>-->
+<!--        </div>-->
+
+<!--        <div id="badge2Fields" class="badge-fields" style="display:none;">-->
+<!--            <h2>Badge 2</h2>-->
+<!--            <div class="form-group">-->
+<!--                <label>Badge Material</label>-->
+<!--                <select th:field="*{badges[1].badgeMaterial}" class="form-control">-->
+<!--                    <option value="" selected>&#45;&#45; Select Material &#45;&#45;</option>-->
+<!--                    <option value="PRINTED">Печатный</option>-->
+<!--                    <option value="PLASTIC">Пластиковый</option>-->
+<!--                </select>-->
+<!--            </div>-->
+<!--            <div class="form-group">-->
+<!--                <label>Size</label>-->
+<!--                <input type="text" th:field="*{badges[1].size}" class="form-control" />-->
+<!--            </div>-->
+<!--            <div class="form-group">-->
+<!--                <label>Chroma</label>-->
+<!--                <input type="text" th:field="*{badges[1].chroma}" class="form-control" />-->
+<!--            </div>-->
+<!--            <div class="form-group">-->
+<!--                <label>Density</label>-->
+<!--                <input type="text" th:field="*{badges[1].density}" class="form-control" />-->
+<!--            </div>-->
+<!--            <div class="form-group">-->
+<!--                <label>Lamination</label>-->
+<!--                <input type="text" th:field="*{badges[1].lamination}" class="form-control" />-->
+<!--            </div>-->
+<!--            <div class="form-group">-->
+<!--                <label>Lamination Kind</label>-->
+<!--                <select th:field="*{badges[1].laminationKind}" class="form-control">-->
+<!--                    <option value="" selected>&#45;&#45; Select Lamination Kind &#45;&#45;</option>-->
+<!--                    <option value="MATTE">Матовый</option>-->
+<!--                    <option value="GLOSSY">Глянцевый</option>-->
+<!--                </select>-->
+<!--            </div>-->
+<!--        </div>-->
+
+<!--        <button type="button" id="addBadgeButton" class="btn btn-secondary">Добавить бейдж</button>-->
+<!--        <button type="submit" class="btn btn-primary">Save</button>-->
+<!--    </form>-->
+<!--</div>-->
+<!--</body>-->
+<!--</html>-->
+
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <title>Input Supplies</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"></script>
+    <script>
+        $(document).ready(function(){
+            $("#addBadgeButton").click(function(){
+                $("#badge2Fields").show();
+                $(this).hide();
+            });
+        });
+    </script>
+</head>
+<body>
+<div class="container">
+    <h1>Input Supplies</h1>
+    <form th:action="@{/input/saveSupplies}" th:object="${supplies}" method="post">
+        <input type="hidden" name="headerId" th:value="${headerId}" />
+
+        <div class="badge-fields">
+            <h2>Badge 1</h2>
+            <div class="form-group">
+                <label>Badge Material</label>
+                <select th:field="*{badges[0].badgeMaterial}" class="form-control">
+                    <option value="" selected>-- Select Material --</option>
+                    <option value="PRINTED">Печатный</option>
+                    <option value="PLASTIC">Пластиковый</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Size</label>
+                <input type="text" th:field="*{badges[0].size}" class="form-control" />
+            </div>
+            <div class="form-group">
+                <label>Chroma</label>
+                <input type="text" th:field="*{badges[0].chroma}" class="form-control" />
+            </div>
+            <div class="form-group">
+                <label>Density</label>
+                <input type="text" th:field="*{badges[0].density}" class="form-control" />
+            </div>
+            <div class="form-group">
+                <label>Lamination</label>
+                <input type="text" th:field="*{badges[0].lamination}" class="form-control" />
+            </div>
+            <div class="form-group">
+                <label>Lamination Kind</label>
+                <select th:field="*{badges[0].laminationKind}" class="form-control">
+                    <option value="" selected>-- Select Lamination Kind --</option>
+                    <option value="MATTE">Матовый</option>
+                    <option value="GLOSSY">Глянцевый</option>
+                </select>
+            </div>
+        </div>
+
+        <div id="badge2Fields" class="badge-fields" style="display:none;">
+            <h2>Badge 2</h2>
+            <div class="form-group">
+                <label>Badge Material</label>
+                <select th:field="*{badges[1].badgeMaterial}" class="form-control">
+                    <option value="" selected>-- Select Material --</option>
+                    <option value="PRINTED">Печатный</option>
+                    <option value="PLASTIC">Пластиковый</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Size</label>
+                <input type="text" th:field="*{badges[1].size}" class="form-control" />
+            </div>
+            <div class="form-group">
+                <label>Chroma</label>
+                <input type="text" th:field="*{badges[1].chroma}" class="form-control" />
+            </div>
+            <div class="form-group">
+                <label>Density</label>
+                <input type="text" th:field="*{badges[1].density}" class="form-control" />
+            </div>
+            <div class="form-group">
+                <label>Lamination</label>
+                <input type="text" th:field="*{badges[1].lamination}" class="form-control" />
+            </div>
+            <div class="form-group">
+                <label>Lamination Kind</label>
+                <select th:field="*{badges[1].laminationKind}" class="form-control">
+                    <option value="" selected>-- Select Lamination Kind --</option>
+                    <option value="MATTE">Матовый</option>
+                    <option value="GLOSSY">Глянцевый</option>
+                </select>
+            </div>
+        </div>
+
+        <button type="button" id="addBadgeButton" class="btn btn-secondary">Добавить бейдж</button>
+        <button type="submit" class="btn btn-primary">Save</button>
+    </form>
+</div>
+</body>
+</html>

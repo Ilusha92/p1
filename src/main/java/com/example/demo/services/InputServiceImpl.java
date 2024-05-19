@@ -2,8 +2,13 @@ package com.example.demo.services;
 
 import com.example.demo.entities.InputBody;
 import com.example.demo.entities.InputHeader;
+import com.example.demo.entities.Supplies;
+import com.example.demo.entities.forSupplies.Badge;
 import com.example.demo.repository.InputBodyRepository;
 import com.example.demo.repository.InputHeaderRepository;
+import com.example.demo.repository.SuppliesRepository;
+import com.example.demo.repository.forSupplies.BadgeRepository;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -17,12 +22,14 @@ public class InputServiceImpl implements InputService {
 
     private final InputHeaderRepository inputHeaderRepository;
     private final InputBodyRepository inputBodyRepository;
+    private final SuppliesRepository suppliesRepository;
+    private final BadgeRepository badgeRepository;
     private final ExcelServiceImpl excelService;
     //private final BCryptPasswordEncoder bCryptPasswordEncoder;
 
     @Override
     public Long saveInputHeader(InputHeader header, String username) {
-        // Вызываем метод создания InputHeader, так как в данной реализации нет разделения на create и edit
+
         header.setAuthor(username);
         header.setWorkDays(countWorkDays(header.getEventStartDate(), header.getEventEndDate()));
         InputHeader savedHeader = inputHeaderRepository.save(header);
@@ -34,29 +41,39 @@ public class InputServiceImpl implements InputService {
         inputBodyRepository.saveAll(bodies);
     }
 
+    @Override
+    @Transactional
+    public void saveInputSupplies(Supplies sup) {
+        suppliesRepository.save(sup);
+    }
+
+    @Override
+
+    public void saveInputSuppliesBadges(List<Badge> badges) {
+        badgeRepository.saveAll(badges);
+    }
 
     @Override
     public InputHeader getInputHeaderById(Long id) {
-        // Ищем объект InputHeader по его ID в репозитории и возвращаем его
         return inputHeaderRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("InputHeader с указанным ID не найден"));
     }
 
     @Override
     public InputBody getInputBodyById(Long id) {
-        // Ищем объект InputHeader по его ID в репозитории и возвращаем его
         return inputBodyRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("InputBody с указанным ID не найден"));
     }
 
-
-
+    @Override
+    @Transactional
+    public Badge saveBadge(Badge badge) {
+        return badgeRepository.save(badge);
+    }
 
 
     @Override
     public void editInput(InputHeader header) {
-        // Проверяем, существует ли объект InputHeader с таким ID в репозитории
-        // и сохраняем отредактированный объект
         if (inputHeaderRepository.existsById(header.getId())) {
             inputHeaderRepository.save(header);
         } else {

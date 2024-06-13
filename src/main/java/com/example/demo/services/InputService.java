@@ -1,9 +1,7 @@
 package com.example.demo.services;
 
-import com.example.demo.entities.InputBody;
-import com.example.demo.entities.InputHeader;
-import com.example.demo.entities.Supplies;
-import com.example.demo.entities.forSupplies.Badge;
+import com.example.demo.entities.*;
+import com.example.demo.entities.forSupplies.*;
 
 import java.util.List;
 
@@ -11,26 +9,41 @@ public interface InputService {
 
     Long saveInputHeader(InputHeader header, String username);
 
-    InputHeader getInputHeaderById(Long id);
-
     void saveInputBody(List<InputBody> bodies);
-
-    InputBody getInputBodyById(Long id);
 
     void saveInputSupplies(Supplies sup);
 
-    void saveInputSuppliesBadges(List<Badge> badges);
-
     Badge saveBadge(Badge badge);
 
+    Lanyard saveLanyard(Lanyard lanyard);
 
+    Bracer saveBracer(Bracer bracer);
+
+    Insert saveInsert(Insert insert);
+
+    Pocket savePocket(Pocket pocket);
+
+    Ribbon saveRibbon(Ribbon ribbon);
+
+    Sticker saveSticker(Sticker sticker);
+
+    Staff saveStaff(Staff staff);
+
+    Logistic saveLogistic(Logistic logistic);
 
 
 
     void editInput(InputHeader header);
 
-
-
     List<InputHeader> getUserInputs();
+
+    InputBody getInputBodyById(Long id);
+
+    Supplies getSuppliesById(Long id);
+
+    void saveInputSuppliesBadges(List<Badge> badges);
+
+
+    InputHeader getInputHeaderById(Long id);
 
 }

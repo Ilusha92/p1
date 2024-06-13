@@ -1,5 +1,6 @@
-package com.example.demo.entities;
+package com.example.demo.entities.forInputTemplate;
 
+import com.example.demo.entities.InputBody;
 import lombok.*;
 
 import java.util.List;

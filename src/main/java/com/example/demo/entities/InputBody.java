@@ -43,6 +43,5 @@ public class InputBody {
     private String tsdPrice;
 
     @ManyToOne
-    @JoinColumn(name = "header_id", nullable = false)
     private InputHeader header;
 }

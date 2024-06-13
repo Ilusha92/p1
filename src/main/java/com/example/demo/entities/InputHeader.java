@@ -32,5 +32,10 @@ public class InputHeader {
     private List<InputBody> inputBodies;
     @OneToOne(mappedBy = "header")
     private Supplies sup;
+    @OneToOne(mappedBy = "header")
+    private Staff staff;
+    @OneToOne(mappedBy = "header")
+    private Logistic logistic;
+
 
 }

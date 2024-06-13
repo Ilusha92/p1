@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <title>Input Logistic</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
+    <style>
+        .short-input {
+            width: 40%;
+            margin-left: 10px;
+        }
+        .hidden {
+            display: none;
+        }
+        .centered-form {
+            max-width: 1000px;
+            margin: auto;
+        }
+        .form-inline .form-group {
+            margin-right: 10px;
+        }
+        .form-section {
+            margin-bottom: 20px;
+        }
+        .btn-container {
+            margin-top: 10px;
+        }
+        .row {
+            display: flex;
+            justify-content: center;
+            text-align: center;
+        }
+    </style>
+    <script>
+        function toggleFields(fieldId) {
+            document.getElementById(fieldId).classList.toggle('hidden');
+        }
+    </script>
+</head>
+<body>
+<div class="container centered-form">
+    <h1 class="text-center">Информация о логистике</h1>
+    <form th:action="@{/input/saveLogisticInput}" method="post" th:object="${logistic}">
+        <input type="hidden" name="headerId" th:value="${headerId}"/>
+
+        <div class="row">
+            <div class="col-md-4">
+                <div class="form-section">
+                    <h2>Логистика местная</h2>
+                    <div class="form-inline">
+                        <div class="form-group">
+                            <label for="localCount1">Количество</label>
+                            <input type="number" id="localCount1" th:field="*{localCount1}" class="form-control short-input" />
+                        </div>
+                        <div class="form-group">
+                            <label for="localPrice1">Стоимость</label>
+                            <input type="number" id="localPrice1" th:field="*{localPrice1}" class="form-control short-input" />
+                        </div>
+                    </div>
+                    <div class="btn-container">
+                        <button type="button" class="btn btn-secondary" onclick="toggleFields('localLogistic2')">Добавить местную логистику</button>
+                    </div>
+                </div>
+
+                <div id="localLogistic2" class="form-section hidden">
+                    <h2>Дополнительная логистика местная</h2>
+                    <div class="form-inline">
+                        <div class="form-group">
+                            <label for="localCount2">Количество</label>
+                            <input type="number" id="localCount2" th:field="*{localCount2}" class="form-control short-input" />
+                        </div>
+                        <div class="form-group">
+                            <label for="localPrice2">Стоимость</label>
+                            <input type="number" id="localPrice2" th:field="*{localPrice2}" class="form-control short-input" />
+                        </div>
+                    </div>
+                    <div class="btn-container">
+                        <button type="button" class="btn btn-secondary" onclick="toggleFields('localLogistic3')">Добавить еще местную логистику</button>
+                        <button type="button" class="btn btn-danger" onclick="toggleFields('localLogistic2')">Скрыть</button>
+                    </div>
+                </div>
+
+                <div id="localLogistic3" class="form-section hidden">
+                    <h2>Дополнительная логистика местная</h2>
+                    <div class="form-inline">
+                        <div class="form-group">
+                            <label for="localCount3">Количество</label>
+                            <input type="number" id="localCount3" th:field="*{localCount3}" class="form-control short-input" />
+                        </div>
+                        <div class="form-group">
+                            <label for="localPrice3">Стоимость</label>
+                            <input type="number" id="localPrice3" th:field="*{localPrice3}" class="form-control short-input" />
+                        </div>
+                    </div>
+                    <div class="btn-container">
+                        <button type="button" class="btn btn-danger" onclick="toggleFields('localLogistic3')">Скрыть</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="form-section">
+                    <h2>Логистика междугородняя</h2>
+                    <div class="form-inline">
+                        <div class="form-group">
+                            <label for="intercityCount1">Количество</label>
+                            <input type="number" id="intercityCount1" th:field="*{intercityCount1}" class="form-control short-input" />
+                        </div>
+                        <div class="form-group">
+                            <label for="intercityPrice1">Стоимость</label>
+                            <input type="number" id="intercityPrice1" th:field="*{intercityPrice1}" class="form-control short-input" />
+                        </div>
+                    </div>
+                    <div class="btn-container">
+                        <button type="button" class="btn btn-secondary" onclick="toggleFields('intercityLogistic2')">Добавить междугороднюю логистику</button>
+                    </div>
+                </div>
+
+                <div id="intercityLogistic2" class="form-section hidden">
+                    <h2>Дополнительная логистика междугородняя</h2>
+                    <div class="form-inline">
+                        <div class="form-group">
+                            <label for="intercityCount2">Количество</label>
+                            <input type="number" id="intercityCount2" th:field="*{intercityCount2}" class="form-control short-input" />
+                        </div>
+                        <div class="form-group">
+                            <label for="intercityPrice2">Стоимость</label>
+                            <input type="number" id="intercityPrice2" th:field="*{intercityPrice2}" class="form-control short-input" />
+                        </div>
+                    </div>
+                    <div class="btn-container">
+                        <button type="button" class="btn btn-secondary" onclick="toggleFields('intercityLogistic3')">Добавить еще междугороднюю логистику</button>
+                        <button type="button" class="btn btn-danger" onclick="toggleFields('intercityLogistic2')">Скрыть</button>
+                    </div>
+                </div>
+
+                <div id="intercityLogistic3" class="form-section hidden">
+                    <h2>Дополнительная логистика междугородняя</h2>
+                    <div class="form-inline">
+                        <div class="form-group">
+                            <label for="intercityCount3">Количество</label>
+                            <input type="number" id="intercityCount3" th:field="*{intercityCount3}" class="form-control short-input" />
+                        </div>
+                        <div class="form-group">
+                            <label for="intercityPrice3">Стоимость</label>
+                            <input type="number" id="intercityPrice3" th:field="*{intercityPrice3}" class="form-control short-input" />
+                        </div>
+                    </div>
+                    <div class="btn-container">
+                        <button type="button" class="btn btn-danger" onclick="toggleFields('intercityLogistic3')">Скрыть</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="form-section">
+                    <h2>Проживание</h2>
+                    <div class="form-inline">
+                        <div class="form-group">
+                            <label for="habitationCount">Количество</label>
+                            <input type="number" id="habitationCount" th:field="*{habitationCount}" class="form-control short-input" />
+                        </div>
+                        <div class="form-group">
+                            <label for="habitationPrice">Стоимость</label>
+                            <input type="number" id="habitationPrice" th:field="*{habitationPrice}" class="form-control short-input" />
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="text-center">
+            <button type="submit" class="btn btn-primary">Сохранить</button>
+        </div>
+    </form>
+</div>
+</body>
+</html>

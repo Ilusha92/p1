@@ -8,5 +8,5 @@ import java.util.List;
 
 @Repository
 public interface BadgeRepository extends JpaRepository<Badge, Long> {
-    List<Badge> findByIdIn(List<Long> ids);
+
 }

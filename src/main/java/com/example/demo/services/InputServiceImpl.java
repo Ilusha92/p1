@@ -1,13 +1,9 @@
 package com.example.demo.services;
 
-import com.example.demo.entities.InputBody;
-import com.example.demo.entities.InputHeader;
-import com.example.demo.entities.Supplies;
-import com.example.demo.entities.forSupplies.Badge;
-import com.example.demo.repository.InputBodyRepository;
-import com.example.demo.repository.InputHeaderRepository;
-import com.example.demo.repository.SuppliesRepository;
-import com.example.demo.repository.forSupplies.BadgeRepository;
+import com.example.demo.entities.*;
+import com.example.demo.entities.forSupplies.*;
+import com.example.demo.repository.*;
+import com.example.demo.repository.forSupplies.*;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -24,7 +20,16 @@ public class InputServiceImpl implements InputService {
     private final InputBodyRepository inputBodyRepository;
     private final SuppliesRepository suppliesRepository;
     private final BadgeRepository badgeRepository;
+    private final LanyardRepository lanyardRepository;
+    private final BracerRepository bracerRepository;
+    private final InsertRepository insertRepository;
+    private final PocketRepository pocketRepository;
+    private final RibbonRepository ribbonRepository;
+    private final StickerRepository stickerRepository;
+    private final StaffRepository staffRepository;
+    private final LogisticRepository logisticRepository;
     private final ExcelServiceImpl excelService;
+
     //private final BCryptPasswordEncoder bCryptPasswordEncoder;
 
     @Override
@@ -42,15 +47,18 @@ public class InputServiceImpl implements InputService {
     }
 
     @Override
-    @Transactional
     public void saveInputSupplies(Supplies sup) {
         suppliesRepository.save(sup);
     }
 
     @Override
-
     public void saveInputSuppliesBadges(List<Badge> badges) {
         badgeRepository.saveAll(badges);
+    }
+
+    @Override
+    public Logistic saveLogistic(Logistic logistic){
+        return logisticRepository.save(logistic);
     }
 
     @Override
@@ -66,11 +74,45 @@ public class InputServiceImpl implements InputService {
     }
 
     @Override
-    @Transactional
+    public Supplies getSuppliesById(Long id) {
+        return suppliesRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("InputBody с указанным ID не найден"));
+    }
+
+    @Override
     public Badge saveBadge(Badge badge) {
         return badgeRepository.save(badge);
     }
 
+    @Override
+    public Lanyard saveLanyard(Lanyard lanyard) {
+        return lanyardRepository.save(lanyard);
+    }
+
+    @Override
+    public Insert saveInsert(Insert insert) {
+        return insertRepository.save(insert);
+    }
+
+    @Override
+    public Pocket savePocket(Pocket pocket) {
+        return pocketRepository.save(pocket);
+    }
+
+    @Override
+    public Ribbon saveRibbon(Ribbon ribbon){
+        return ribbonRepository.save(ribbon);
+    }
+
+    @Override
+    public Sticker saveSticker(Sticker sticker) {
+        return stickerRepository.save(sticker);
+    }
+
+    @Override
+    public Staff saveStaff(Staff staff) {
+        return staffRepository.save(staff);
+    }
 
     @Override
     public void editInput(InputHeader header) {
@@ -81,8 +123,6 @@ public class InputServiceImpl implements InputService {
         }
     }
 
-
-
     @Override
     public List<InputHeader> getUserInputs() {
         return null;
@@ -90,5 +130,10 @@ public class InputServiceImpl implements InputService {
 
     private int countWorkDays(LocalDate start, LocalDate end) {
         return (int) (ChronoUnit.DAYS.between(start, end) + 1);
+    }
+
+    @Override
+    public Bracer saveBracer(Bracer bracer){
+        return bracerRepository.save(bracer);
     }
 }

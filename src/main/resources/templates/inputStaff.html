@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <title>Input Staff</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
+    <style>
+        .short-input {
+            width: 25%;
+        }
+        .sshort-input {
+            width: 45%;
+        }
+        .ssshort-input {
+            width: 50%;
+        }
+        .centered-form {
+            max-width: 600px;
+            margin: auto;
+        }
+        .form-row .form-group {
+            flex: 1;
+        }
+    </style>
+    <script>
+        function addStaffFieldset() {
+            let nextIndex = document.querySelectorAll('.staff-group').length + 1;
+            if (nextIndex > 5) return; // Max 5 staff groups
+
+            let newStaffGroup = document.createElement('div');
+            newStaffGroup.className = 'staff-group';
+            newStaffGroup.innerHTML = `
+                <h2>Персонал ${nextIndex}</h2>
+                <div class="form-group">
+                    <label for="staffCount${nextIndex}">Количество</label>
+                    <input type="number" id="staffCount${nextIndex}" name="staffCount${nextIndex}" class="form-control sshort-input" />
+                </div>
+                <div class="form-group">
+                    <label for="staffKind${nextIndex}">Вид персонала</label>
+                    <select id="staffKind${nextIndex}" name="staffKind${nextIndex}" class="form-control sshort-input">
+                        <option value="Оператор регистрации" selected>Оператор регистрации</option>
+                        <option value="Хостес">Хостес</option>
+                        <option value="Хелпер">Хелпер</option>
+                        <option value="Гардеробщик">Гардеробщик</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="staffWorkTime${nextIndex}Start">Время работы (начало)</label>
+                    <input type="time" id="staffWorkTime${nextIndex}Start" name="staffWorkTime${nextIndex}Start" class="form-control sshort-input" />
+                </div>
+                <div class="form-group">
+                    <label for="staffWorkTime${nextIndex}End">Время работы (конец)</label>
+                    <input type="time" id="staffWorkTime${nextIndex}End" name="staffWorkTime${nextIndex}End" class="form-control sshort-input" />
+                </div>
+                <div class="form-group">
+                    <label for="staffHourPrice${nextIndex}">Стоимость часа</label>
+                    <input type="number" id="staffHourPrice${nextIndex}" name="staffHourPrice${nextIndex}" class="form-control sshort-input" value="800" step="50" />
+                </div>
+            `;
+            document.getElementById('staffFields').appendChild(newStaffGroup);
+        }
+    </script>
+</head>
+<body>
+<div class="container">
+    <h1 class="text-center">Информация о персонале</h1>
+    <form th:action="@{/input/saveStaffInput}" method="post" th:object="${staff}" class="centered-form">
+        <input type="hidden" name="headerId" th:value="${headerId}"/>
+
+        <h2>Администраторы</h2>
+        <div class="form-group">
+            <label for="adminsCount">Количество администраторов</label>
+            <input type="number" id="adminsCount" th:field="*{adminsCount}" class="form-control short-input" value="1"/>
+        </div>
+        <div class="form-group">
+            <label for="adminWorkTimeStart">Время работы (начало)</label>
+            <input type="time" id="adminWorkTimeStart" th:field="*{adminWorkTimeStart}" class="form-control sshort-input"/>
+        </div>
+        <div class="form-group">
+            <label for="adminWorkTimeEnd">Время работы (конец)</label>
+            <input type="time" id="adminWorkTimeEnd" th:field="*{adminWorkTimeEnd}" class="form-control sshort-input"/>
+        </div>
+        <div class="form-group">
+            <label for="adminHourPrice">Стоимость часа</label>
+            <input type="number" id="adminHourPrice" th:field="*{adminHourPrice}" class="form-control short-input" value="1000" step="50"/>
+        </div>
+        <div class="form-check">
+            <input type="checkbox" class="form-check-input" id="montage" th:field="*{montage}" checked/>
+            <label class="form-check-label" for="montage">Монтаж</label>
+        </div>
+
+        <h2>Персонал 1</h2>
+        <div id="staffFields">
+            <div class="staff-group">
+                <div class="form-group">
+                    <label for="staffCount1">Количество</label>
+                    <input type="number" id="staffCount1" th:field="*{staffCount1}" class="form-control sshort-input"/>
+                </div>
+                <div class="form-group">
+                    <label for="staffKind1">Вид персонала</label>
+                    <select id="staffKind1" th:field="*{staffKind1}" class="form-control sshort-input">
+                        <option value="Оператор регистрации" selected>Оператор регистрации</option>
+                        <option value="Хостес">Хостес</option>
+                        <option value="Хелпер">Хелпер</option>
+                        <option value="Гардеробщик">Гардеробщик</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="staffWorkTime1Start">Время работы (начало)</label>
+                    <input type="time" id="staffWorkTime1Start" th:field="*{staffWorkTime1Start}" class="form-control sshort-input"/>
+                </div>
+                <div class="form-group">
+                    <label for="staffWorkTime1End">Время работы (конец)</label>
+                    <input type="time" id="staffWorkTime1End" th:field="*{staffWorkTime1End}" class="form-control sshort-input"/>
+                </div>
+                <div class="form-group">
+                    <label for="staffHourPrice1">Стоимость часа</label>
+                    <input type="number" id="staffHourPrice1" th:field="*{staffHourPrice1}" class="form-control sshort-input" value="800" step="50"/>
+                </div>
+            </div>
+        </div>
+
+        <button type="button" class="btn btn-secondary" onclick="addStaffFieldset()">Добавить персонал</button>
+        <button type="submit" class="btn btn-primary">Сохранить</button>
+    </form>
+</div>
+</body>
+</html>

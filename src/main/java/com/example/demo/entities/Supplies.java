@@ -4,55 +4,52 @@ import com.example.demo.entities.forSupplies.*;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.ArrayList;
 import java.util.List;
 @Getter
 @Setter
 @Builder
 @AllArgsConstructor
-@NoArgsConstructor(access = AccessLevel.PUBLIC)
 @Entity(name = "supplies")
 public class Supplies {
 
-    public Supplies(List<Badge> badges, InputHeader header) {
-        this.badges = badges;
-        this.header = header;
+    public Supplies() {
+        this.badges = new ArrayList<>();
+        this.lanyards = new ArrayList<>();
+        this.bracers = new ArrayList<>();
+        this.inserts = new ArrayList<>();
+        this.pockets = new ArrayList<>();
+        this.ribbons = new ArrayList<>();
+        this.stickers = new ArrayList<>();
     }
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @OneToMany(mappedBy = "sup", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "supplies", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Badge> badges;
+
+    @OneToMany(mappedBy = "supplies", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Lanyard> lanyards;
+
+    @OneToMany(mappedBy = "supplies",cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Bracer> bracers;
+
+    @OneToMany(mappedBy = "supplies",cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Insert> inserts;
+
+    @OneToMany(mappedBy = "supplies",cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Pocket> pockets;
+
+    @OneToMany(mappedBy = "supplies",cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Ribbon> ribbons;
+
+    @OneToMany(mappedBy = "supplies",cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Sticker> stickers;
 
     @OneToOne
     @JoinColumn(name = "header_id", nullable = false)
     private InputHeader header;
 
-    @Override
-    public String toString() {
-        return "Supplies{" +
-                "id=" + id +
-                ", badges=" + badges +
-                ", header=" + header +
-                '}';
-    }
-
-    //    @OneToMany(mappedBy = "sup")
-//    private List<Bracer> bracers;
-//
-//    @OneToMany(mappedBy = "sup")
-//    private List<Insert> inserts;
-//
-//    @OneToMany(mappedBy = "sup")
-//    private List<Lanyard> lanyards;
-//
-//    @OneToMany(mappedBy = "sup")
-//    private List<Pocket> pockets;
-//
-//    @OneToMany(mappedBy = "sup")
-//    private List<Sticker> stickers;
-//
-//    @OneToMany(mappedBy = "sup")
-//    private List<Ribbon> ribbons;
 }

@@ -20,22 +20,12 @@ public class Badge {
     private String density; //плотность - варианты для списка или вписываем вручную(можно оставлять пустым)
     private String lamination; //показател ламинации - варианты для списка или вписываем вручную(можно оставлять пустым)
     private String laminationKind; //тип ламинации - тут всего два варианта МАТОВЫЙ ГЛЯНЦЕВЫЙ
+    private boolean rfid = false;
+    private String price;
+    private String count;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "supplies_id", nullable = false)
-    private Supplies sup;
+    private Supplies supplies;
 
-    @Override
-    public String toString() {
-        return "Badge{" +
-                "id=" + id +
-                ", badgeMaterial='" + badgeMaterial + '\'' +
-                ", size='" + size + '\'' +
-                ", chroma='" + chroma + '\'' +
-                ", density='" + density + '\'' +
-                ", lamination='" + lamination + '\'' +
-                ", laminationKind='" + laminationKind + '\'' +
-                ", sup=" + sup +
-                '}';
-    }
 }

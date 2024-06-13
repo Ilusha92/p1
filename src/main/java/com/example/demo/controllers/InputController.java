@@ -1,9 +1,10 @@
 package com.example.demo.controllers;
 
 import com.example.demo.entities.*;
-import com.example.demo.entities.forSupplies.Badge;
+import com.example.demo.entities.forInputTemplate.*;
+import com.example.demo.entities.forSupplies.*;
 import com.example.demo.repository.DeviceRepository;
-import com.example.demo.services.InputService;
+import com.example.demo.services.ExcelServiceImpl;
 import com.example.demo.services.InputServiceImpl;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,11 +25,14 @@ public class InputController {
 
     private final InputServiceImpl inputService;
     private final DeviceRepository deviceRepository;
+    private final ExcelServiceImpl excelService;
 
     @Autowired
-    public InputController(InputServiceImpl inputService,DeviceRepository deviceRepository) {
+    public InputController(InputServiceImpl inputService,DeviceRepository deviceRepository,
+                           ExcelServiceImpl excelService) {
         this.inputService = inputService;
         this.deviceRepository = deviceRepository;
+        this.excelService = excelService;
     }
 
     @GetMapping("/input/header")
@@ -45,6 +49,7 @@ public class InputController {
         }
         String currentUsername = authentication.getName();
         Long headerId = inputService.saveInputHeader(header, currentUsername);
+        excelService.createNewFile(header);
         return "redirect:/input/body?headerId=" + headerId;
     }
 
@@ -100,8 +105,18 @@ public class InputController {
                 body.setSDevicePrice(templateBody.getSDevicePrice());
                 body.setPDeviceCount(templateBody.getPDeviceCount());
                 body.setPDevicePrice(templateBody.getPDevicePrice());
+                body.setNetworkCount(templateBody.getNetworkCount());
+                body.setNetworkPrice(templateBody.getNetworkPrice());
+                body.setSwitchingCount(templateBody.getSwitchingCount());
+                body.setSwitchingPrice(templateBody.getSwitchingPrice());
                 body.setCameraDeviceCount(templateBody.getCameraDeviceCount());
                 body.setCameraDevicePrice(templateBody.getCameraDevicePrice());
+                body.setBarcodeDeviceCount(templateBody.getBarcodeDeviceCount());
+                body.setBarcodeDevicePrice(templateBody.getBarcodeDevicePrice());
+                body.setRfidReaderDeviceCount(templateBody.getRfidReaderDeviceCount());
+                body.setRfidReaderDevicePrice(templateBody.getRfidReaderDevicePrice());
+                body.setTsdCount(templateBody.getTsdCount());
+                body.setTsdPrice(templateBody.getTsdPrice());
                 body.setHeader(header);
                 bodiesToSave.add(body);
             }
@@ -114,173 +129,171 @@ public class InputController {
 
         model.addAttribute("bodies", bodiesToSave);
         inputService.saveInputBody(bodiesToSave);
-
+        excelService.updateFileWithBodyData(header, bodiesToSave);
         return "redirect:/input/supplies?headerId=" + headerId;
     }
 
-//    @GetMapping("/input/supplies")
-//    public String showInputSupplies(@RequestParam("headerId") Long headerId, Model model) {
-//        InputHeader header = inputService.getInputHeaderById(headerId);
-//        if (header == null) {
-//            return "errorPageHeader"; // Здесь errorPage - название вашего представления с сообщением об ошибке
-//        }
-//        List<Badge> inputBadges = new ArrayList<>();
-//        Badge badge1 = new Badge();
-//        Badge badge2 = new Badge();
-//        inputBadges.add(badge1);
-//        inputBadges.add(badge2);
-//
-//        Supplies sup = new Supplies();
-//        sup.setBadges(inputBadges);
-//        model.addAttribute("supplies", sup);
-//        model.addAttribute("badges", inputBadges);
-//        model.addAttribute("headerId", headerId);
-//        System.out.println(sup);
-//        return "inputSupplies";
-//    }
-//
-//    @PostMapping("/input/saveSupplies")
-//    public String saveInputSupplies(@Valid @ModelAttribute Supplies sup,
-//                                @RequestParam("headerId")Long headerId,
-//                                BindingResult bindingResult, Model model) {
-//        if (bindingResult.hasErrors()) {
-//            System.out.println("Binding result has errors:");
-//            bindingResult.getAllErrors().forEach(error -> System.out.println(error));
-//            return "errorBodyPage";
-//        }
-//
-//        InputHeader header = inputService.getInputHeaderById(headerId);
-//        if (header == null) {
-//            return "errorPageHeader";
-//        }
-//        List<Badge> badgesToSave = new ArrayList<>();
-//        Badge templateBadge = sup.getBadges().get(0);
-//        for (int i = 0; i < header.getWorkDays(); i++) {
-//            Badge badge = new Badge();
-//            badge.setSize(templateBadge.getSize());
-//            badge.setBadgeMaterial(templateBadge.getBadgeMaterial());
-//            badge.setChroma(templateBadge.getChroma());
-//            badge.setDensity(templateBadge.getDensity());
-//            badge.setLamination(templateBadge.getLamination());
-//            badge.setLaminationKind(templateBadge.getLaminationKind());
-//            badge.setSup(sup);
-//            badgesToSave.add(badge);
-//        }
-//
-//        sup.setHeader(header);
-//        sup.setBadges(badgesToSave);
-//        //model.addAttribute("badges", badgesToSave);
-//        System.out.println(sup);
-//        inputService.saveInputSupplies(sup);
-//
-//        return "redirect:/staff?headerId=" + headerId;
-//    }
-
-//    @GetMapping("/input/supplies")
-//    public String showInputSupplies(@RequestParam("headerId") Long headerId, Model model) {
-//        InputHeader header = inputService.getInputHeaderById(headerId);
-//        if (header == null) {
-//            return "errorPageHeader"; // Название представления с сообщением об ошибке
-//        }
-//
-//        // Создаем объект Supplies и сохраняем его
-//        Supplies sup = new Supplies();
-//        sup.setHeader(header);
-//        List<Badge> inputBadges = new ArrayList<>();
-//        sup.setBadges(inputBadges);
-//        inputService.saveInputSupplies(sup);
-//
-//        // Создаем два объекта Badge и добавляем их в список
-//
-//        Badge badge1 = new Badge();
-//        badge1.setSup(sup);
-//        inputService.saveBadge(badge1); // Сначала сохраняем Badge
-//        inputBadges.add(badge1);
-//
-//        Badge badge2 = new Badge();
-//        badge2.setSup(sup);
-//        inputService.saveBadge(badge2); // Сначала сохраняем Badge
-//        inputBadges.add(badge2);
-//
-//
-//
-//        // Добавляем объекты в модель
-//        model.addAttribute("supplies", sup);
-//        model.addAttribute("headerId", headerId);
-//        System.out.println(sup);
-//
-//        return "inputSupplies"; // Название представления
-//    }
-
-//
 
     @GetMapping("/input/supplies")
     public String showInputSupplies(@RequestParam("headerId") Long headerId, Model model) {
-        InputHeader header = inputService.getInputHeaderById(headerId);
-        if (header == null) {
-            return "errorPageHeader";
-        }
+        Supplies supplies = new Supplies();
+        supplies.setHeader(inputService.getInputHeaderById(headerId));
+        inputService.saveInputSupplies(supplies); // Здесь Supplies готов, сохранен и связан с InputHeader
+        Long suppliesId = supplies.getId();
 
-        Supplies sup = new Supplies();
-        sup.setHeader(header);
-        inputService.saveInputSupplies(sup);
+        Badge badge1 = new Badge(); //
+        Badge badge2 = new Badge(); //Здесь инициализированы два Badge, у них пока везде null
+        badge1.setSupplies(inputService.getSuppliesById(suppliesId));
+        badge2.setSupplies(inputService.getSuppliesById(suppliesId));// привязываем Supplies к Badge'ам
+        supplies.getBadges().add(badge1);
+        supplies.getBadges().add(badge2);//привязываем Badge'ы к Supplies
 
-        List<Badge> inputBadges = new ArrayList<>();
-        Badge badge1 = new Badge();
-        badge1.setSup(sup);
-        inputService.saveBadge(badge1);
-        inputBadges.add(badge1);
+        Lanyard lanyard1 = new Lanyard();
+        Lanyard lanyard2 = new Lanyard();
+        lanyard1.setSupplies(inputService.getSuppliesById(suppliesId));
+        lanyard2.setSupplies(inputService.getSuppliesById(suppliesId));
+        supplies.getLanyards().add(lanyard1);
+        supplies.getLanyards().add(lanyard2);
 
-        Badge badge2 = new Badge();
-        badge2.setSup(sup);
-        inputService.saveBadge(badge2);
-        inputBadges.add(badge2);
+        Bracer bracer1 = new Bracer();
+        Bracer bracer2 = new Bracer();
+        bracer1.setSupplies(inputService.getSuppliesById(suppliesId));
+        bracer2.setSupplies(inputService.getSuppliesById(suppliesId));
+        supplies.getBracers().add(bracer1);
+        supplies.getBracers().add(bracer2);
 
-        sup.setBadges(inputBadges);
+        Insert insert1 = new Insert();
+        Insert insert2 = new Insert();
+        insert1.setSupplies(inputService.getSuppliesById(suppliesId));
+        insert2.setSupplies(inputService.getSuppliesById(suppliesId));
+        supplies.getInserts().add(insert1);
+        supplies.getInserts().add(insert2);
 
-        model.addAttribute("supplies", sup);
+        Pocket pocket1 = new Pocket();
+        Pocket pocket2 = new Pocket();
+        pocket1.setSupplies(inputService.getSuppliesById(suppliesId));
+        pocket2.setSupplies(inputService.getSuppliesById(suppliesId));
+        supplies.getPockets().add(pocket1);
+        supplies.getPockets().add(pocket2);
+
+        Ribbon ribbon1 = new Ribbon();
+        Ribbon ribbon2 = new Ribbon();
+        ribbon2.setSupplies(inputService.getSuppliesById(suppliesId));
+        ribbon1.setSupplies(inputService.getSuppliesById(suppliesId));
+        supplies.getRibbons().add(ribbon1);
+        supplies.getRibbons().add(ribbon2);
+
+        Sticker sticker1 = new Sticker();
+        Sticker sticker2 = new Sticker();
+        sticker1.setSupplies(inputService.getSuppliesById(suppliesId));
+        sticker2.setSupplies(inputService.getSuppliesById(suppliesId));
+        supplies.getStickers().add(sticker1);
+        supplies.getStickers().add(sticker2);
+
+        BadgeList badgeList = new BadgeList(supplies.getBadges());
+        LanyardList lanyardList = new LanyardList(supplies.getLanyards());
+        BracerList bracerList = new BracerList(supplies.getBracers());
+        InsertList insertList = new InsertList(supplies.getInserts());
+        PocketList pocketList = new PocketList(supplies.getPockets());
+        RibbonList ribbonList = new RibbonList(supplies.getRibbons());
+        StickerList stickerList = new StickerList(supplies.getStickers());
         model.addAttribute("headerId", headerId);
-        System.out.println(sup);
-
+        model.addAttribute("suppliesId", suppliesId);
+        model.addAttribute("badgeList", badgeList);
+        model.addAttribute("lanyardList", lanyardList);
+        model.addAttribute("bracerList", bracerList);
+        model.addAttribute("insertList", insertList);
+        model.addAttribute("pocketList", pocketList);
+        model.addAttribute("ribbonList", ribbonList);
+        model.addAttribute("stickerList", stickerList);
         return "inputSupplies";
     }
 
-
     @PostMapping("/input/saveSupplies")
-    public String saveInputSupplies(@Valid @ModelAttribute Supplies sup,
-                                    @RequestParam("headerId") Long headerId,
-                                    BindingResult bindingResult, Model model) {
-        if (bindingResult.hasErrors()) {
-            System.out.println("Binding result has errors:");
-            bindingResult.getAllErrors().forEach(error -> System.out.println(error));
-            return "errorBodyPage"; // Название представления с сообщением об ошибке
-        }
+    public String saveSupplies(@RequestParam("headerId") Long headerId,
+                               @ModelAttribute("badgeList") BadgeList badgeList,
+                               @ModelAttribute("lanyardList") LanyardList lanyardList,
+                               @ModelAttribute("bracerList") BracerList bracerList,
+                               @ModelAttribute("insertList") InsertList insertList,
+                               @ModelAttribute("pocketList") PocketList pocketList,
+                               @ModelAttribute("ribbonList") RibbonList ribbonList,
+                               @ModelAttribute("stickerList") StickerList stickerList,
+                               @RequestParam("suppliesId") Long suppliesId,
+                               Model model) {
+        badgeList.getBadges().get(0).setSupplies(inputService.getSuppliesById(suppliesId));
+        badgeList.getBadges().get(1).setSupplies(inputService.getSuppliesById(suppliesId));
+        inputService.saveBadge(badgeList.getBadges().get(0));
+        inputService.saveBadge(badgeList.getBadges().get(1));
 
-        // Получаем InputHeader по headerId
-        InputHeader header = inputService.getInputHeaderById(headerId);
-        if (header == null) {
-            return "errorPageHeader"; // Название представления с сообщением об ошибке
-        }
+        lanyardList.getLanyards().get(0).setSupplies(inputService.getSuppliesById(suppliesId));
+        lanyardList.getLanyards().get(1).setSupplies(inputService.getSuppliesById(suppliesId));
+        inputService.saveLanyard(lanyardList.getLanyards().get(0));
+        inputService.saveLanyard(lanyardList.getLanyards().get(1));
 
-        // Создаем новый список бейджей на основе данных из формы
-        List<Badge> badgesToSave = new ArrayList<>();
-        Badge templateBadge = sup.getBadges().get(0); // Используем первый бейдж как шаблон
-        for (int i = 0; i < header.getWorkDays(); i++) {
-            Badge badge = new Badge();
-            badge.setSize(templateBadge.getSize());
-            badge.setBadgeMaterial(templateBadge.getBadgeMaterial());
-            badge.setChroma(templateBadge.getChroma());
-            badge.setDensity(templateBadge.getDensity());
-            badge.setLamination(templateBadge.getLamination());
-            badge.setLaminationKind(templateBadge.getLaminationKind());
-            badge.setSup(sup); // Устанавливаем связь с Supplies
-            inputService.saveBadge(badge);
-            badgesToSave.add(badge);
-        }
+        bracerList.getBracers().get(0).setSupplies(inputService.getSuppliesById(suppliesId));
+        bracerList.getBracers().get(1).setSupplies(inputService.getSuppliesById(suppliesId));
+        inputService.saveBracer(bracerList.getBracers().get(0));
+        inputService.saveBracer(bracerList.getBracers().get(1));
 
-        // Устанавливаем header и badges для Supplie
-        sup.setBadges(badgesToSave);
+        insertList.getInserts().get(0).setSupplies(inputService.getSuppliesById(suppliesId));
+        insertList.getInserts().get(1).setSupplies(inputService.getSuppliesById(suppliesId));
+        inputService.saveInsert(insertList.getInserts().get(0));
+        inputService.saveInsert(insertList.getInserts().get(1));
 
-        return "redirect:/staff?headerId=" + headerId; // Перенаправление после успешного сохранения
+        pocketList.getPockets().get(0).setSupplies(inputService.getSuppliesById(suppliesId));
+        pocketList.getPockets().get(1).setSupplies(inputService.getSuppliesById(suppliesId));
+        inputService.savePocket(pocketList.getPockets().get(0));
+        inputService.savePocket(pocketList.getPockets().get(1));
+
+        ribbonList.getRibbons().get(0).setSupplies(inputService.getSuppliesById(suppliesId));
+        ribbonList.getRibbons().get(1).setSupplies(inputService.getSuppliesById(suppliesId));
+        inputService.saveRibbon(ribbonList.getRibbons().get(0));
+        inputService.saveRibbon(ribbonList.getRibbons().get(1));
+
+        stickerList.getStickers().get(0).setSupplies(inputService.getSuppliesById(suppliesId));
+        stickerList.getStickers().get(1).setSupplies(inputService.getSuppliesById(suppliesId));
+        inputService.saveSticker(stickerList.getStickers().get(0));
+        inputService.saveSticker(stickerList.getStickers().get(1));
+
+        //model.addAttribute("message", "Supplies and Badges saved successfully");
+        return "redirect:/input/staff?headerId=" + headerId;
+    }
+
+    @GetMapping("/input/staff")
+    public String showInputStaff(@RequestParam("headerId") Long headerId, Model model) {
+        Staff staff = new Staff();
+        System.out.println(staff);
+        model.addAttribute("headerId", headerId);
+        model.addAttribute("staff", staff);
+        return "inputStaff";
+    }
+
+    @PostMapping("/input/saveStaffInput")
+    public String saveStaffInput(@ModelAttribute Staff staff, @RequestParam("headerId") Long headerId) {
+
+        staff.setHeader(inputService.getInputHeaderById(headerId));
+        System.out.println(staff);
+        inputService.saveStaff(staff);
+        System.out.println(staff);
+        return "redirect:/input/logistic?headerId=" + headerId; // Перенаправление на страницу успешного сохранения
+    }
+
+    @GetMapping("/input/logistic")
+    public String showInputLogistic(@RequestParam("headerId") Long headerId, Model model) {
+        Logistic logistic = new Logistic();
+        model.addAttribute("headerId", headerId);
+        model.addAttribute("logistic", logistic);
+        return "inputLogistic";
+
+    }
+
+    @PostMapping("/input/saveLogisticInput")
+    public String saveLogisticInput(@ModelAttribute Logistic logistic, @RequestParam("headerId") Long headerId) {
+
+        logistic.setHeader(inputService.getInputHeaderById(headerId));
+
+        inputService.saveLogistic(logistic);
+
+        return "redirect:/"; // Перенаправление на страницу успешного сохранения
     }
 }

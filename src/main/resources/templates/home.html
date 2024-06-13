@@ -1,31 +1,14 @@
 <!DOCTYPE html>
-<html lang="en">
+<html xmlns:th="http://www.thymeleaf.org">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Home Page</title>
+    <title>File List</title>
 </head>
 <body>
-<header>
-    <h1>Welcome to Our Website</h1>
-</header>
-<nav>
-    <ul>
-        <li><a href="/">Home</a></li>
-    </ul>
-</nav>
-<main>
-    <section>
-        <h2>Introduction</h2>
-        <p>This is a simple home page.</p>
-    </section>
-    <section>
-        <h2>Features</h2>
-        <ul>
-            <li>Easy navigation</li>
-            <li>Clean design</li>
-            <li>Responsive layout</li>
-        </ul>
-    </section>
-</main>
-<
+<h1>List of Files</h1>
+<ul>
+    <li th:each="file : ${files}">
+        <a th:href="@{|/files/${file}|}" th:text="${file}"></a>
+    </li>
+</ul>
+</body>
+</html>

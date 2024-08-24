@@ -6,22 +6,155 @@
 <!--    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">-->
 <!--    <style>-->
 <!--        .short-input {-->
-<!--            width: 25%;-->
+<!--            width: 75%;-->
+<!--            margin: auto;-->
 <!--        }-->
 <!--        .sshort-input {-->
 <!--            width: 45%;-->
+<!--            margin: auto;-->
 <!--        }-->
 <!--        .ssshort-input {-->
 <!--            width: 50%;-->
+<!--            margin: auto;-->
 <!--        }-->
 <!--        .centered-form {-->
 <!--            max-width: 600px;-->
 <!--            margin: auto;-->
+<!--            text-align: center;-->
 <!--        }-->
 <!--        .form-row .form-group {-->
 <!--            flex: 1;-->
+<!--            text-align: center;-->
+<!--        }-->
+<!--        label {-->
+<!--            text-align: center;-->
+<!--            display: block;-->
+<!--        }-->
+<!--        .form-check {-->
+<!--            display: flex;-->
+<!--            justify-content: center;-->
+<!--            align-items: center;-->
+<!--        }-->
+<!--        .form-check-input {-->
+<!--            margin-right: 290px;-->
+<!--        }-->
+<!--        .period-inputs {-->
+<!--            display: none;-->
+<!--        }-->
+<!--        .period-label {-->
+<!--            text-align: left;-->
+<!--        }-->
+<!--        .period-dates {-->
+<!--            display: flex;-->
+<!--            justify-content: space-between;-->
+<!--        }-->
+<!--        .btn-home {-->
+<!--            margin-top: 20px;-->
+<!--            display: block;-->
+<!--            margin-left: auto;-->
+<!--            margin-right: auto;-->
 <!--        }-->
 <!--    </style>-->
+<!--    <script>-->
+<!--        function validateForm() {-->
+<!--            let isValid = true;-->
+<!--            let errorMessage = '';-->
+
+<!--            const customer = document.getElementById('customer').value.trim();-->
+<!--            const eventName = document.getElementById('eventName').value.trim();-->
+<!--            const eventLocation = document.getElementById('eventLocation').value.trim();-->
+<!--            const eventWorkStartTime = document.getElementById('eventWorkStartTime').value;-->
+<!--            const eventWorkEndTime = document.getElementById('eventWorkEndTime').value;-->
+
+<!--            if (!customer) {-->
+<!--                errorMessage += 'Поле "Заказчик" обязательно для заполнения.\n';-->
+<!--                isValid = false;-->
+<!--            }-->
+<!--            if (!eventName) {-->
+<!--                errorMessage += 'Поле "Название мероприятия" обязательно для заполнения.\n';-->
+<!--                isValid = false;-->
+<!--            }-->
+<!--            if (!eventLocation) {-->
+<!--                errorMessage += 'Поле "Место проведения" обязательно для заполнения.\n';-->
+<!--                isValid = false;-->
+<!--            }-->
+<!--            if (eventWorkStartTime && eventWorkEndTime && eventWorkStartTime > eventWorkEndTime) {-->
+<!--                errorMessage += 'Начало работы аккредитации не может быть позже окончания.\n';-->
+<!--                isValid = false;-->
+<!--            }-->
+
+<!--            if (!isValid) {-->
+<!--                alert(errorMessage);-->
+<!--            }-->
+
+<!--            return isValid;-->
+<!--        }-->
+
+<!--        function validateDates() {-->
+<!--            let eventStartDate = new Date(document.getElementById('eventStartDate').value);-->
+<!--            let eventEndDate = new Date(document.getElementById('eventEndDate').value);-->
+<!--            let periods = [-->
+<!--                {start: document.getElementById('boolStart1').value, end: document.getElementById('boolEnd1').value},-->
+<!--                {start: document.getElementById('boolStart2').value, end: document.getElementById('boolEnd2').value},-->
+<!--                {start: document.getElementById('boolStart3').value, end: document.getElementById('boolEnd3').value}-->
+<!--            ];-->
+<!--            const sameEquipmentForAllDays = document.getElementById('sameEquipmentForAllDays').checked;-->
+
+<!--            if (eventStartDate > eventEndDate) {-->
+<!--                alert('Дата начала не может быть позже даты окончания.');-->
+<!--                return false;-->
+<!--            }-->
+
+<!--            if (!sameEquipmentForAllDays) {-->
+<!--                const dayDifference = (eventEndDate - eventStartDate) / (1000 * 60 * 60 * 24);-->
+<!--                if (dayDifference > 5) {-->
+<!--                    alert('Если оборудование не одинаково на все дни, то продолжительность мероприятия не может превышать 6 дней.');-->
+<!--                    return false;-->
+<!--                }-->
+<!--            }-->
+
+<!--            for (let period of periods) {-->
+<!--                if (period.start && period.end) {-->
+<!--                    if (period.start > period.end) {-->
+<!--                        alert('Начало периода не может быть позже конца периода.');-->
+<!--                        return false;-->
+<!--                    }-->
+<!--                    if (period.start < eventStartDate || period.end > eventEndDate) {-->
+<!--                        alert('Периоды не могут выходить за границы начала и конца события.');-->
+<!--                        return false;-->
+<!--                    }-->
+<!--                }-->
+<!--            }-->
+<!--            return true;-->
+<!--        }-->
+
+<!--        window.onload = function() {-->
+<!--            let year = 2024;-->
+<!--            document.getElementById('eventStartDate').addEventListener('input', function() {-->
+<!--                let value = this.value.split('-');-->
+<!--                value[0] = year;-->
+<!--                this.value = value.join('-');-->
+<!--            });-->
+<!--            document.getElementById('eventEndDate').addEventListener('input', function() {-->
+<!--                let value = this.value.split('-');-->
+<!--                value[0] = year;-->
+<!--                this.value = value.join('-');-->
+<!--            });-->
+
+<!--            document.getElementById('sameEquipmentForAllDays').addEventListener('change', function() {-->
+<!--                let periodInputs = document.querySelectorAll('.period-inputs');-->
+<!--                periodInputs.forEach(function(input) {-->
+<!--                    input.style.display = document.getElementById('sameEquipmentForAllDays').checked ? 'block' : 'none';-->
+<!--                });-->
+<!--            });-->
+
+<!--            document.querySelector('form').addEventListener('submit', function(event) {-->
+<!--                if (!validateForm() || !validateDates()) {-->
+<!--                    event.preventDefault();-->
+<!--                }-->
+<!--            });-->
+<!--        }-->
+<!--    </script>-->
 <!--</head>-->
 <!--<body>-->
 <!--<div class="container">-->
@@ -29,7 +162,7 @@
 <!--    <form th:action="@{/input/saveHeaderInput}" method="post" class="centered-form">-->
 <!--        <div class="form-group">-->
 <!--            <label for="customer">Заказчик</label>-->
-<!--            <input type="text" id="customer" name="customer" class="form-control ssshort-input"/>-->
+<!--            <input type="text" id="customer" name="customer" class="form-control short-input" placeholder="Компания, контактное лицо"/>-->
 <!--        </div>-->
 <!--        <div class="form-group">-->
 <!--            <label for="eventName">Название мероприятия</label>-->
@@ -67,8 +200,34 @@
 <!--            <input type="checkbox" class="form-check-input" id="sameEquipmentForAllDays" name="sameEquipmentForAllDays"/>-->
 <!--            <label class="form-check-label" for="sameEquipmentForAllDays">Оборудование на все дни одинаковое</label>-->
 <!--        </div>-->
+
+<!--        <div class="period-inputs">-->
+<!--            <div class="form-group">-->
+<!--                <label class="period-label">Период 1</label>-->
+<!--                <div class="period-dates">-->
+<!--                    <input type="date" id="boolStart1" name="boolStart1" class="form-control sshort-input"/>-->
+<!--                    <input type="date" id="boolEnd1" name="boolEnd1" class="form-control sshort-input"/>-->
+<!--                </div>-->
+<!--            </div>-->
+<!--            <div class="form-group">-->
+<!--                <label class="period-label">Период 2</label>-->
+<!--                <div class="period-dates">-->
+<!--                    <input type="date" id="boolStart2" name="boolStart2" class="form-control sshort-input"/>-->
+<!--                    <input type="date" id="boolEnd2" name="boolEnd2" class="form-control sshort-input"/>-->
+<!--                </div>-->
+<!--            </div>-->
+<!--            <div class="form-group">-->
+<!--                <label class="period-label">Период 3</label>-->
+<!--                <div class="period-dates">-->
+<!--                    <input type="date" id="boolStart3" name="boolStart3" class="form-control sshort-input"/>-->
+<!--                    <input type="date" id="boolEnd3" name="boolEnd3" class="form-control sshort-input"/>-->
+<!--                </div>-->
+<!--            </div>-->
+<!--        </div>-->
+
 <!--        <button type="submit" class="btn btn-primary">Далее</button>-->
 <!--    </form>-->
+<!--    <button onclick="window.location.href='/'" class="btn btn-secondary btn-home">На главную</button>-->
 <!--</div>-->
 <!--</body>-->
 <!--</html>-->
@@ -113,8 +272,140 @@
         .form-check-input {
             margin-right: 290px;
         }
+        .period-inputs {
+            display: none;
+        }
+        .period-label {
+            text-align: left;
+        }
+        .period-dates {
+            display: flex;
+            justify-content: space-between;
+        }
+        .btn-home {
+            margin-top: 20px;
+            display: block;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        .form-control {
+            border: 2px solid #007bff; /* Синий цвет по умолчанию */
+        }
+        .form-control.is-valid {
+            border-color: #28a745; /* Зеленый цвет */
+        }
+        .form-control.is-invalid {
+            border-color: #dc3545; /* Красный цвет */
+        }
     </style>
     <script>
+        function validateField(field, isValid) {
+            if (isValid) {
+                field.classList.remove('is-invalid');
+                field.classList.add('is-valid');
+            } else {
+                field.classList.remove('is-valid');
+                field.classList.add('is-invalid');
+            }
+        }
+
+        function validateForm() {
+            let isValid = true;
+            let errorMessage = '';
+
+            const customer = document.getElementById('customer').value.trim();
+            const eventName = document.getElementById('eventName').value.trim();
+            const eventLocation = document.getElementById('eventLocation').value.trim();
+            const eventWorkStartTime = document.getElementById('eventWorkStartTime').value;
+            const eventWorkEndTime = document.getElementById('eventWorkEndTime').value;
+
+            if (!customer) {
+                errorMessage += 'Поле "Заказчик" обязательно для заполнения.\n';
+                validateField(document.getElementById('customer'), false);
+                isValid = false;
+            } else {
+                validateField(document.getElementById('customer'), true);
+            }
+
+            if (!eventName) {
+                errorMessage += 'Поле "Название мероприятия" обязательно для заполнения.\n';
+                validateField(document.getElementById('eventName'), false);
+                isValid = false;
+            } else {
+                validateField(document.getElementById('eventName'), true);
+            }
+
+            if (!eventLocation) {
+                errorMessage += 'Поле "Место проведения" обязательно для заполнения.\n';
+                validateField(document.getElementById('eventLocation'), false);
+                isValid = false;
+            } else {
+                validateField(document.getElementById('eventLocation'), true);
+            }
+
+            if (eventWorkStartTime && eventWorkEndTime) {
+                if (eventWorkStartTime > eventWorkEndTime) {
+                    errorMessage += 'Начало работы аккредитации не может быть позже окончания.\n';
+                    validateField(document.getElementById('eventWorkStartTime'), false);
+                    validateField(document.getElementById('eventWorkEndTime'), false);
+                    isValid = false;
+                } else {
+                    validateField(document.getElementById('eventWorkStartTime'), true);
+                    validateField(document.getElementById('eventWorkEndTime'), true);
+                }
+            }
+
+            if (!isValid) {
+                alert(errorMessage);
+            }
+
+            return isValid;
+        }
+
+        function validateDates() {
+            let eventStartDate = new Date(document.getElementById('eventStartDate').value);
+            let eventEndDate = new Date(document.getElementById('eventEndDate').value);
+            let periods = [
+                {start: document.getElementById('boolStart1').value, end: document.getElementById('boolEnd1').value},
+                {start: document.getElementById('boolStart2').value, end: document.getElementById('boolEnd2').value},
+                {start: document.getElementById('boolStart3').value, end: document.getElementById('boolEnd3').value}
+            ];
+            const sameEquipmentForAllDays = document.getElementById('sameEquipmentForAllDays').checked;
+
+            let datesValid = true;
+
+            if (eventStartDate > eventEndDate) {
+                alert('Дата начала не может быть позже даты окончания.');
+                validateField(document.getElementById('eventStartDate'), false);
+                validateField(document.getElementById('eventEndDate'), false);
+                datesValid = false;
+            } else {
+                validateField(document.getElementById('eventStartDate'), true);
+                validateField(document.getElementById('eventEndDate'), true);
+            }
+
+            if (!sameEquipmentForAllDays) {
+                const dayDifference = (eventEndDate - eventStartDate) / (1000 * 60 * 60 * 24);
+                if (dayDifference > 5) {
+                    alert('Если оборудование не одинаково на все дни, то продолжительность мероприятия не может превышать 6 дней.');
+                    datesValid = false;
+                }
+            }
+
+            for (let period of periods) {
+                if (period.start && period.end) {
+                    let periodStart = new Date(period.start);
+                    let periodEnd = new Date(period.end);
+                    if (periodStart > periodEnd || periodStart < eventStartDate || periodEnd > eventEndDate) {
+                        alert('Периоды не могут выходить за границы начала и конца события.');
+                        datesValid = false;
+                    }
+                }
+            }
+
+            return datesValid;
+        }
+
         window.onload = function() {
             let year = 2024;
             document.getElementById('eventStartDate').addEventListener('input', function() {
@@ -126,6 +417,19 @@
                 let value = this.value.split('-');
                 value[0] = year;
                 this.value = value.join('-');
+            });
+
+            document.getElementById('sameEquipmentForAllDays').addEventListener('change', function() {
+                let periodInputs = document.querySelectorAll('.period-inputs');
+                periodInputs.forEach(function(input) {
+                    input.style.display = document.getElementById('sameEquipmentForAllDays').checked ? 'block' : 'none';
+                });
+            });
+
+            document.querySelector('form').addEventListener('submit', function(event) {
+                if (!validateForm() || !validateDates()) {
+                    event.preventDefault();
+                }
             });
         }
     </script>
@@ -174,10 +478,34 @@
             <input type="checkbox" class="form-check-input" id="sameEquipmentForAllDays" name="sameEquipmentForAllDays"/>
             <label class="form-check-label" for="sameEquipmentForAllDays">Оборудование на все дни одинаковое</label>
         </div>
+
+        <div class="period-inputs">
+            <div class="form-group">
+                <label class="period-label">Период 1</label>
+                <div class="period-dates">
+                    <input type="date" id="boolStart1" name="boolStart1" class="form-control sshort-input"/>
+                    <input type="date" id="boolEnd1" name="boolEnd1" class="form-control sshort-input"/>
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="period-label">Период 2</label>
+                <div class="period-dates">
+                    <input type="date" id="boolStart2" name="boolStart2" class="form-control sshort-input"/>
+                    <input type="date" id="boolEnd2" name="boolEnd2" class="form-control sshort-input"/>
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="period-label">Период 3</label>
+                <div class="period-dates">
+                    <input type="date" id="boolStart3" name="boolStart3" class="form-control sshort-input"/>
+                    <input type="date" id="boolEnd3" name="boolEnd3" class="form-control sshort-input"/>
+                </div>
+            </div>
+        </div>
+
         <button type="submit" class="btn btn-primary">Далее</button>
     </form>
+    <button onclick="window.location.href='/'" class="btn btn-secondary btn-home">На главную</button>
 </div>
 </body>
 </html>
-
-

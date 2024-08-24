@@ -21,8 +21,8 @@ public class Badge {
     private String lamination; //показател ламинации - варианты для списка или вписываем вручную(можно оставлять пустым)
     private String laminationKind; //тип ламинации - тут всего два варианта МАТОВЫЙ ГЛЯНЦЕВЫЙ
     private boolean rfid = false;
-    private String price;
-    private String count;
+    private Integer price;
+    private Integer count;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "supplies_id", nullable = false)

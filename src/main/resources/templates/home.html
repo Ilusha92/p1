@@ -1,14 +1,286 @@
+<!--<!DOCTYPE html>-->
+<!--<html xmlns:th="http://www.thymeleaf.org">-->
+<!--<head>-->
+<!--    <title>File List</title>-->
+<!--</head>-->
+<!--<body>-->
+<!--<h1>List of Files</h1>-->
+<!--<ul>-->
+<!--    <li th:each="file : ${files}">-->
+<!--        <a th:href="@{|/files/${file}|}" th:text="${file}"></a>-->
+<!--    </li>-->
+<!--</ul>-->
+<!--</body>-->
+<!--</html>-->
+
+
+<!--<!DOCTYPE html>-->
+<!--<html xmlns:th="http://www.thymeleaf.org">-->
+<!--<head>-->
+<!--    <meta charset="UTF-8">-->
+<!--    <meta name="viewport" content="width=device-width, initial-scale=1.0">-->
+<!--    <title>File List</title>-->
+<!--    <style>-->
+<!--        body {-->
+<!--            font-family: Arial, sans-serif;-->
+<!--            background-color: #f4f4f4;-->
+<!--            margin: 0;-->
+<!--            padding: 0;-->
+<!--        }-->
+
+<!--        .container {-->
+<!--            max-width: 1200px;-->
+<!--            margin: 0 auto;-->
+<!--            padding: 20px;-->
+<!--        }-->
+
+<!--        h1 {-->
+<!--            color: #3f51b5;-->
+<!--            font-size: 28px;-->
+<!--            margin-bottom: 20px;-->
+<!--        }-->
+
+<!--        table {-->
+<!--            width: 100%;-->
+<!--            border-collapse: collapse;-->
+<!--            margin-bottom: 20px;-->
+<!--            background-color: #ffffff;-->
+<!--            border-radius: 8px;-->
+<!--            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);-->
+<!--        }-->
+
+<!--        table thead {-->
+<!--            background-color: #f4f4f4;-->
+<!--        }-->
+
+<!--        table thead th {-->
+<!--            text-align: left;-->
+<!--            padding: 15px;-->
+<!--            font-size: 14px;-->
+<!--            color: #666;-->
+<!--            border-bottom: 2px solid #ddd;-->
+<!--        }-->
+
+<!--        table tbody tr {-->
+<!--            border-bottom: 1px solid #ddd;-->
+<!--        }-->
+
+<!--        table tbody tr:hover {-->
+<!--            background-color: #f9f9f9;-->
+<!--        }-->
+
+<!--        table tbody td {-->
+<!--            padding: 15px;-->
+<!--            font-size: 14px;-->
+<!--            color: #333;-->
+<!--        }-->
+
+<!--        .actions button {-->
+<!--            background-color: #3f51b5;-->
+<!--            color: #fff;-->
+<!--            border: none;-->
+<!--            padding: 10px 15px;-->
+<!--            margin-right: 5px;-->
+<!--            border-radius: 4px;-->
+<!--            cursor: pointer;-->
+<!--            font-size: 14px;-->
+<!--        }-->
+
+<!--        .actions button.download {-->
+<!--            background-color: #3f51b5;-->
+<!--        }-->
+
+<!--        .actions button.edit {-->
+<!--            background-color: #ff9800;-->
+<!--        }-->
+
+<!--        .actions button.delete {-->
+<!--            background-color: #f44336;-->
+<!--        }-->
+
+<!--        .actions button:hover {-->
+<!--            opacity: 0.8;-->
+<!--        }-->
+<!--    </style>-->
+<!--</head>-->
+<!--<body>-->
+<!--<div class="container">-->
+<!--    <h1>Список файлов</h1>-->
+<!--    <table>-->
+<!--        <thead>-->
+<!--        <tr>-->
+<!--            <th>Имя файла</th>-->
+<!--            <th>Действия</th>-->
+<!--        </tr>-->
+<!--        </thead>-->
+<!--        <tbody>-->
+<!--        <tr th:each="file : ${files}">-->
+<!--            <td><a th:href="@{|/files/${file}|}" th:text="${file}"></a></td>-->
+<!--            <td class="actions">-->
+<!--                <button class="download">Скачать</button>-->
+<!--                <button class="edit">Редактировать</button>-->
+<!--                <button class="delete">Удалить</button>-->
+<!--            </td>-->
+<!--        </tr>-->
+<!--        </tbody>-->
+<!--    </table>-->
+<!--</div>-->
+<!--</body>-->
+<!--</html>-->
+
+
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>File List</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Comic+Sans+MS:wght@400&display=swap');
+
+        body {
+            font-family: 'Comic Sans MS', sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        h1 {
+            color: #3f51b5;
+            font-size: 28px;
+            margin-bottom: 20px;
+        }
+
+        .actions {
+            margin-bottom: 20px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+            background-color: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        table thead {
+            background-color: #f4f4f4;
+        }
+
+        table thead th {
+            text-align: left;
+            padding: 15px;
+            font-size: 14px;
+            color: #666;
+            border-bottom: 2px solid #ddd;
+        }
+
+        table tbody tr {
+            border-bottom: 1px solid #ddd;
+        }
+
+        table tbody tr:hover {
+            background-color: #f9f9f9;
+        }
+
+        table tbody td {
+            padding: 15px;
+            font-size: 14px;
+            color: #333;
+        }
+
+        .actions button {
+            background-color: transparent;
+            color: #3f51b5;
+            border: 2px solid #3f51b5;
+            padding: 10px 15px;
+            margin-right: 5px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        .actions button.download {
+            color: #3f51b5;
+            border-color: #3f51b5;
+        }
+
+        .actions button.edit {
+            color: #3f51b5;
+            border-color: #3f51b5;
+        }
+
+        .actions button.log {
+            color: #3f51b5;
+            border-color: #3f51b5;
+        }
+
+        .actions button.delete {
+            color: #f44336;
+            border-color: #f44336;
+        }
+
+        .actions button:hover {
+            background-color: #3f51b5;
+            color: #fff;
+        }
+
+        .actions button.delete:hover {
+            background-color: #f44336;
+            color: #fff;
+        }
+
+        .create-button {
+            background-color: transparent;
+            color: #3f51b5;
+            border: 2px solid #3f51b5;
+            padding: 10px 20px;
+            margin-bottom: 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s ease, color 0.3s ease;
+            display: inline-block;
+            text-decoration: none;
+        }
+
+        .create-button:hover {
+            background-color: #3f51b5;
+            color: #fff;
+        }
+    </style>
 </head>
 <body>
-<h1>List of Files</h1>
-<ul>
-    <li th:each="file : ${files}">
-        <a th:href="@{|/files/${file}|}" th:text="${file}"></a>
-    </li>
-</ul>
+<div class="container">
+    <h1>Список файлов</h1>
+    <a href="/input/header" class="create-button">Создать смету</a>
+    <table>
+        <thead>
+        <tr>
+            <th>Имя файла</th>
+            <th>Действия</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="file : ${files}">
+            <td><a th:href="@{|/files/${file}|}" th:text="${file}"></a></td>
+            <td class="actions">
+                <button class="download">Скачать</button>
+                <button class="edit">Редактировать</button>
+                <button class="log">Лог</button>
+                <button class="delete">Удалить</button>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+</div>
 </body>
 </html>

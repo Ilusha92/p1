@@ -27,11 +27,13 @@ public interface InputService {
 
     Sticker saveSticker(Sticker sticker);
 
+    Mounting saveMounting(Mounting mounting);
+
     Staff saveStaff(Staff staff);
 
     Logistic saveLogistic(Logistic logistic);
 
-
+    Asup saveAsup(Asup asup);
 
     void editInput(InputHeader header);
 

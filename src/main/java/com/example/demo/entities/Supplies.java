@@ -1,6 +1,7 @@
 package com.example.demo.entities;
 
 import com.example.demo.entities.forSupplies.*;
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -21,6 +22,7 @@ public class Supplies {
         this.pockets = new ArrayList<>();
         this.ribbons = new ArrayList<>();
         this.stickers = new ArrayList<>();
+        this.asups = new ArrayList<>();
     }
 
     @Id
@@ -48,6 +50,10 @@ public class Supplies {
     @OneToMany(mappedBy = "supplies",cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Sticker> stickers;
 
+    @OneToMany(mappedBy = "supplies",cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Asup> asups;
+
+    @JsonBackReference
     @OneToOne
     @JoinColumn(name = "header_id", nullable = false)
     private InputHeader header;

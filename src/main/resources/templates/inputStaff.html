@@ -1,127 +1,1066 @@
+<!--<!DOCTYPE html>-->
+<!--<html xmlns:th="http://www.thymeleaf.org">-->
+<!--<head>-->
+<!--    <meta charset="UTF-8"/>-->
+<!--    <title>Информация о персонале</title>-->
+<!--    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">-->
+<!--    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>-->
+<!--    <script th:inline="javascript">-->
+<!--        // $(document).ready(function() {-->
+<!--        //     var periodsData = [[${periods}]];-->
+<!--        //     var sameEquipmentForAllDays = [[${sameEquipmentForAllDays}]];-->
+<!--        //     var staff = /*[[${staffsJson}]]*/ [];-->
+<!--        //-->
+<!--        //     console.log(periodsData);-->
+<!--        //     console.log(sameEquipmentForAllDays);-->
+<!--        //     console.log(staff);-->
+<!--        //-->
+<!--        //     $('.staff-row').hide();-->
+<!--        //     console.log("Все staff-row скрыты");-->
+<!--        //-->
+<!--        //     // Группируем staff-row по периодам-->
+<!--        //     var groupedStaffRows = {};-->
+<!--        //     $('.staff-row').each(function() {-->
+<!--        //         var period = $(this).data('period');-->
+<!--        //         console.log("Обработка staff-row с period:", period);-->
+<!--        //-->
+<!--        //         if (!period) {-->
+<!--        //             console.error("Period не определен для staff-row, проверьте data-period атрибут.");-->
+<!--        //         } else {-->
+<!--        //             console.log("Period определен для staff-row:", period);-->
+<!--        //         }-->
+<!--        //-->
+<!--        //         if (!groupedStaffRows[period]) {-->
+<!--        //             groupedStaffRows[period] = [];-->
+<!--        //         }-->
+<!--        //         groupedStaffRows[period].push($(this));-->
+<!--        //-->
+<!--        //     });-->
+<!--        //-->
+<!--        //     // Показать первый staff-row в каждом периоде-->
+<!--        //     for (var period in groupedStaffRows) {-->
+<!--        //         if (groupedStaffRows[period].length > 0) {-->
+<!--        //             console.log("Показать первый staff-row для периода:", period);-->
+<!--        //             groupedStaffRows[period][0].show();  // Показываем первый элемент для каждого периода-->
+<!--        //         }-->
+<!--        //     }-->
+<!--        //-->
+<!--        //     $('.add-staff-btn').click(function() {-->
+<!--        //         var currentPeriod = $(this).data('period');-->
+<!--        //         console.log("Нажата кнопка 'Добавить сотрудника' для периода:", currentPeriod);-->
+<!--        //-->
+<!--        //         var hiddenStaff = $('.staff-row[data-period="' + currentPeriod + '"]:hidden').first();-->
+<!--        //         if (hiddenStaff.length) {-->
+<!--        //             console.log("Показан следующий скрытый staff-row для периода:", currentPeriod);-->
+<!--        //             hiddenStaff.show();-->
+<!--        //         } else {-->
+<!--        //             console.log("Нет больше сотрудников для добавления в этом периоде:", currentPeriod);-->
+<!--        //             alert('Нет больше сотрудников для добавления в этом периоде.');-->
+<!--        //         }-->
+<!--        //     });-->
+<!--        // });-->
+<!--        $(document).ready(function() {-->
+<!--            var periodsData = [[${periods}]];-->
+<!--            var sameEquipmentForAllDays = [[${sameEquipmentForAllDays}]];-->
+<!--            var daysWithoutPeriod = [[${daysWithoutPeriod}]];-->
+
+<!--            // Если оборудование не одинаково на все дни, устанавливаем periodsData равным количеству рабочих дней-->
+<!--            if (!sameEquipmentForAllDays) {-->
+<!--                periodsData = daysWithoutPeriod;-->
+<!--                console.log("Количество периодов установлено равным количеству рабочих дней: " + periodsData);-->
+<!--            }-->
+
+<!--            var staff = /*[[${staffsJson}]]*/ [];-->
+
+<!--            console.log("Periods Data:", periodsData);-->
+<!--            console.log("Same Equipment for All Days:", sameEquipmentForAllDays);-->
+<!--            console.log("Staff:", staff);-->
+
+<!--            $('.staff-row').hide();-->
+<!--            console.log("Все staff-row скрыты");-->
+
+<!--            // Группируем staff-row по периодам-->
+<!--            var groupedStaffRows = {};-->
+<!--            $('.staff-row').each(function() {-->
+<!--                var period = $(this).data('period');-->
+<!--                console.log("Обработка staff-row с period:", period);-->
+
+<!--                if (!period) {-->
+<!--                    console.error("Period не определен для staff-row, проверьте data-period атрибут.");-->
+<!--                } else {-->
+<!--                    console.log("Period определен для staff-row:", period);-->
+<!--                }-->
+
+<!--                if (!groupedStaffRows[period]) {-->
+<!--                    groupedStaffRows[period] = [];-->
+<!--                }-->
+<!--                groupedStaffRows[period].push($(this));-->
+
+<!--            });-->
+
+<!--            // Показать первый staff-row в каждом периоде-->
+<!--            for (var period in groupedStaffRows) {-->
+<!--                if (groupedStaffRows[period].length > 0) {-->
+<!--                    console.log("Показать первый staff-row для периода:", period);-->
+<!--                    groupedStaffRows[period][0].show();  // Показываем первый элемент для каждого периода-->
+<!--                }-->
+<!--            }-->
+
+<!--            $('.add-staff-btn').click(function() {-->
+<!--                var currentPeriod = $(this).data('period');-->
+<!--                console.log("Нажата кнопка 'Добавить сотрудника' для периода:", currentPeriod);-->
+
+<!--                var hiddenStaff = $('.staff-row[data-period="' + currentPeriod + '"]:hidden').first();-->
+<!--                if (hiddenStaff.length) {-->
+<!--                    console.log("Показан следующий скрытый staff-row для периода:", currentPeriod);-->
+<!--                    hiddenStaff.show();-->
+<!--                } else {-->
+<!--                    console.log("Нет больше сотрудников для добавления в этом периоде:", currentPeriod);-->
+<!--                    alert('Нет больше сотрудников для добавления в этом периоде.');-->
+<!--                }-->
+<!--            });-->
+<!--        });-->
+<!--    </script>-->
+
+<!--    <style>-->
+<!--        .hidden {-->
+<!--            display: none;-->
+<!--        }-->
+<!--        .remove-staff-btn {-->
+<!--            color: red;-->
+<!--            cursor: pointer;-->
+<!--            font-size: 1.5em;-->
+<!--            position: absolute;-->
+<!--            right: 10px;-->
+<!--            top: 10px;-->
+<!--        }-->
+<!--        .form-group {-->
+<!--            margin-bottom: 0;-->
+<!--        }-->
+<!--        .staff-row {-->
+<!--            display: flex;-->
+<!--            align-items: center;-->
+<!--            flex-wrap: wrap;-->
+<!--        }-->
+<!--        .staff-row > div {-->
+<!--            margin-right: 2px;-->
+<!--        }-->
+<!--        .staff-row > div:last-child {-->
+<!--            margin-right: 0;-->
+<!--        }-->
+<!--        .position-relative {-->
+<!--            position: relative;-->
+<!--        }-->
+<!--    </style>-->
+<!--</head>-->
+<!--<body>-->
+<!--<div class="container">-->
+<!--    <h1>Информация о персонале и монтаже</h1>-->
+
+<!--    <form th:object="${headerStaffs}" th:action="@{/input/saveStaffInput}" method="post">-->
+<!--        <input type="hidden" name="headerId" th:value="${headerId}"/>-->
+<!--        <input type="hidden" name="sameEquipmentForAllDays" th:value="${sameEquipmentForAllDays}" />-->
+<!--        <input type="hidden" name="periods" th:value="${periods}"/>-->
+
+<!--        &lt;!&ndash; Информация о монтаже &ndash;&gt;-->
+<!--        <div th:object="${m}">-->
+<!--            <h2>Информация о монтаже</h2>-->
+<!--            <div class="form-row">-->
+<!--                <div class="form-group col-md-4">-->
+<!--                    <label for="mounting-hours">Часы работы</label>-->
+<!--                    <input type="number" th:field="*{hours}" class="form-control" id="mounting-hours"/>-->
+<!--                </div>-->
+<!--                <div class="form-group col-md-4">-->
+<!--                    <label for="mounting-qStaff">Количество представителей</label>-->
+<!--                    <input type="number" th:field="*{qStaff}" class="form-control" id="mounting-qStaff"/>-->
+<!--                </div>-->
+<!--                <div class="form-group col-md-4">-->
+<!--                    <label for="mounting-qPrice">Стоимость часа</label>-->
+<!--                    <input type="number" th:field="*{qPrice}" class="form-control" id="mounting-qPrice"/>-->
+<!--                </div>-->
+<!--            </div>-->
+<!--        </div>-->
+
+<!--        &lt;!&ndash; Информация о персонале &ndash;&gt;-->
+<!--        <div th:if="${sameEquipmentForAllDays}">-->
+<!--            <h2>Персонал на все дни</h2>-->
+<!--            <div th:if="${periods == 1}">-->
+<!--                &lt;!&ndash; Период 1 &ndash;&gt;-->
+<!--                <div th:each="staff, staffStat : ${headerStaffs.staffs}" th:if="${staffStat.index < 10}">-->
+<!--                    <div class="staff-row form-group" data-staff-index="${staffStat.index}" data-period="1">-->
+<!--                        <div class="col-md-2">-->
+<!--                            <label th:for="|kindOfStaff${staffStat.index}|">Вид персонала</label>-->
+<!--                            <select th:field="*{staffs[__${staffStat.index}__].kindOfStaff}" class="form-control" th:id="|kindOfStaff${staffStat.index}|">-->
+<!--                                <option value="">Выберите вид персонала</option>-->
+<!--                                <option value="Администратор">Администратор</option>-->
+<!--                                <option value="Супервайзер">Супервайзер</option>-->
+<!--                                <option value="Оператор регистрации">Оператор регистрации</option>-->
+<!--                                <option value="Хостес">Хостес</option>-->
+<!--                                <option value="Гардеробщик">Гардеробщик</option>-->
+<!--                                <option value="Технический специалист">Технический специалист</option>-->
+<!--                            </select>-->
+<!--                        </div>-->
+<!--                        <div class="col-md-2">-->
+<!--                            <label th:for="|startTime${staffStat.index}|">Время начала</label>-->
+<!--                            <input type="time" th:field="*{staffs[__${staffStat.index}__].startTime}" class="form-control" th:id="|startTime${staffStat.index}|"/>-->
+<!--                        </div>-->
+<!--                        <div class="col-md-2">-->
+<!--                            <label th:for="|endTime${staffStat.index}|">Время окончания</label>-->
+<!--                            <input type="time" th:field="*{staffs[__${staffStat.index}__].endTime}" class="form-control" th:id="|endTime${staffStat.index}|"/>-->
+<!--                        </div>-->
+<!--                        <div class="col-md-2">-->
+<!--                            <label th:for="|staffQuantity${staffStat.index}|">Количество</label>-->
+<!--                            <input type="number" th:field="*{staffs[__${staffStat.index}__].staffQuantity}" class="form-control" th:id="|staffQuantity${staffStat.index}|"/>-->
+<!--                        </div>-->
+<!--                        <div class="col-md-2">-->
+<!--                            <label th:for="|betPerHour${staffStat.index}|">Стоимость часа</label>-->
+<!--                            <input type="number" th:field="*{staffs[__${staffStat.index}__].betPerHour}" class="form-control" th:id="|betPerHour${staffStat.index}|"/>-->
+<!--                        </div>-->
+<!--                        <div class="remove-staff-btn hidden">&times;</div>-->
+<!--                    </div>-->
+<!--                </div>-->
+<!--                <button type="button" class="btn btn-secondary mt-2 add-staff-btn" data-period="1">Добавить сотрудника</button>-->
+<!--            </div>-->
+
+<!--            &lt;!&ndash; Перераспределение по периодам &ndash;&gt;-->
+<!--            <div th:if="${periods > 1}">-->
+<!--                <div th:each="period, iterStat : ${#numbers.sequence(0, periods - 1)}">-->
+<!--                    <h3 th:text="${periodDates[iterStat.index * 2]} + ' - ' + ${periodDates[iterStat.index * 2 + 1]}" style="text-align: center;">Период</h3>-->
+
+<!--                    &lt;!&ndash; Начало логики распределения сотрудников по периодам &ndash;&gt;-->
+<!--                    <div th:each="staff, staffStat : ${headerStaffs.staffs}">-->
+<!--                        <div th:if="${staffStat.index >= iterStat.index * 7 && staffStat.index < (iterStat.index + 1) * 7}"-->
+<!--                             class="position-relative staff-row form-group"-->
+<!--                             th:data-staff-index="${staffStat.index}"-->
+<!--                             th:attr="data-period=${iterStat.index + 1}">-->
+
+<!--                            &lt;!&ndash; Отладочная информация &ndash;&gt;-->
+<!--                            <p>Staff index: <span th:text="${staffStat.index}"></span></p>-->
+<!--                            <p>Period index: <span th:text="${iterStat.index + 1}"></span></p>-->
+
+<!--                            &lt;!&ndash; Поля формы для ввода данных о сотруднике &ndash;&gt;-->
+<!--                            <h3>Сотрудник <span th:text="${staffStat.index + 1}"></span></h3>-->
+<!--                            <div class="col-md-2">-->
+<!--                                <label th:for="|kindOfStaff${staffStat.index}|">Вид персонала</label>-->
+<!--                                <select th:field="*{staffs[__${staffStat.index}__].kindOfStaff}" class="form-control" th:id="|kindOfStaff${staffStat.index}|">-->
+<!--                                    <option value="">Выберите вид персонала</option>-->
+<!--                                    <option value="Администратор">Администратор</option>-->
+<!--                                    <option value="Супервайзер">Супервайзер</option>-->
+<!--                                    <option value="Оператор регистрации">Оператор регистрации</option>-->
+<!--                                    <option value="Хостес">Хостес</option>-->
+<!--                                    <option value="Гардеробщик">Гардеробщик</option>-->
+<!--                                    <option value="Технический специалист">Технический специалист</option>-->
+<!--                                </select>-->
+<!--                            </div>-->
+<!--                            <div class="col-md-2">-->
+<!--                                <label th:for="|startTime${staffStat.index}|">Время начала</label>-->
+<!--                                <input type="time" th:field="*{staffs[__${staffStat.index}__].startTime}" class="form-control" th:id="|startTime${staffStat.index}|"/>-->
+<!--                            </div>-->
+<!--                            <div class="col-md-2">-->
+<!--                                <label th:for="|endTime${staffStat.index}|">Время окончания</label>-->
+<!--                                <input type="time" th:field="*{staffs[__${staffStat.index}__].endTime}" class="form-control" th:id="|endTime${staffStat.index}|"/>-->
+<!--                            </div>-->
+<!--                            <div class="col-md-2">-->
+<!--                                <label th:for="|staffQuantity${staffStat.index}|">Количество</label>-->
+<!--                                <input type="number" th:field="*{staffs[__${staffStat.index}__].staffQuantity}" class="form-control" th:id="|staffQuantity${staffStat.index}|"/>-->
+<!--                            </div>-->
+<!--                            <div class="col-md-2">-->
+<!--                                <label th:for="|betPerHour${staffStat.index}|">Стоимость часа</label>-->
+<!--                                <input type="number" th:field="*{staffs[__${staffStat.index}__].betPerHour}" class="form-control" th:id="|betPerHour${staffStat.index}|"/>-->
+<!--                            </div>-->
+<!--                        </div>-->
+<!--                    </div>-->
+<!--                    &lt;!&ndash; Конец логики распределения сотрудников по периодам &ndash;&gt;-->
+
+<!--                    <button type="button" class="btn btn-secondary mt-2 add-staff-btn" th:attr="data-period=${iterStat.index + 1}">Добавить сотрудника</button>-->
+<!--                </div>-->
+<!--            </div>-->
+<!--        </div>-->
+
+
+<!--            <div th:if="${!sameEquipmentForAllDays}">-->
+<!--                <h2>Персонал на разные дни</h2>-->
+
+<!--                <div th:each="day, iterStat : ${#numbers.sequence(0, daysWithoutPeriod-1)}">-->
+<!--                    <h3>День <span th:text="${iterStat.index + 1}"></span> из <span th:text="${daysWithoutPeriod}"></span></h3> &lt;!&ndash; Отображение текущего дня и общего количества дней &ndash;&gt;-->
+
+<!--                    &lt;!&ndash; Начало логики распределения сотрудников по дням &ndash;&gt;-->
+<!--                    <div th:each="staff, staffStat : ${headerStaffs.staffs}">-->
+<!--                        <div th:if="${staffStat.index >= iterStat.index * (36 / daysWithoutPeriod) &&-->
+<!--                    staffStat.index < (iterStat.index + 1) * (36 / daysWithoutPeriod)}"-->
+<!--                             class="position-relative staff-row form-group hidden"-->
+<!--                             th:data-staff-index="${staffStat.index}"-->
+<!--                             th:attr="data-period=${iterStat.index + 1}">-->
+
+<!--                            &lt;!&ndash; Отладочная информация &ndash;&gt;-->
+<!--                            <p>Staff index: <span th:text="${staffStat.index}"></span></p>-->
+<!--                            <p>Day index: <span th:text="${iterStat.index + 1}"></span></p>-->
+
+<!--                            &lt;!&ndash; Поля формы для ввода данных о сотруднике &ndash;&gt;-->
+<!--                            <h3>Сотрудник <span th:text="${staffStat.index + 1}"></span></h3>-->
+<!--                            <div class="staff-row">-->
+<!--                                <div class="col-md-2">-->
+<!--                                    <label th:for="|kindOfStaff${staffStat.index}|">Вид персонала</label>-->
+<!--                                    <select th:field="*{staffs[__${staffStat.index}__].kindOfStaff}" class="form-control" th:id="|kindOfStaff${staffStat.index}|">-->
+<!--                                        <option value="">Выберите вид персонала</option>-->
+<!--                                        <option value="Администратор">Администратор</option>-->
+<!--                                        <option value="Супервайзер">Супервайзер</option>-->
+<!--                                        <option value="Оператор регистрации">Оператор регистрации</option>-->
+<!--                                        <option value="Хостес">Хостес</option>-->
+<!--                                        <option value="Гардеробщик">Гардеробщик</option>-->
+<!--                                        <option value="Технический специалист">Технический специалист</option>-->
+<!--                                    </select>-->
+<!--                                </div>-->
+<!--                                <div class="col-md-2">-->
+<!--                                    <label th:for="|startTime${staffStat.index}|">Время начала</label>-->
+<!--                                    <input type="time" th:field="*{staffs[__${staffStat.index}__].startTime}" class="form-control" th:id="|startTime${staffStat.index}|"/>-->
+<!--                                </div>-->
+<!--                                <div class="col-md-2">-->
+<!--                                    <label th:for="|endTime${staffStat.index}|">Время окончания</label>-->
+<!--                                    <input type="time" th:field="*{staffs[__${staffStat.index}__].endTime}" class="form-control" th:id="|endTime${staffStat.index}|"/>-->
+<!--                                </div>-->
+<!--                                <div class="col-md-2">-->
+<!--                                    <label th:for="|staffQuantity${staffStat.index}|">Количество</label>-->
+<!--                                    <input type="number" th:field="*{staffs[__${staffStat.index}__].staffQuantity}" class="form-control" th:id="|staffQuantity${staffStat.index}|"/>-->
+<!--                                </div>-->
+<!--                                <div class="col-md-2">-->
+<!--                                    <label th:for="|betPerHour${staffStat.index}|">Стоимость часа</label>-->
+<!--                                    <input type="number" th:field="*{staffs[__${staffStat.index}__].betPerHour}" class="form-control" th:id="|betPerHour${staffStat.index}|"/>-->
+<!--                                </div>-->
+<!--                            </div>-->
+<!--                        </div>-->
+<!--                    </div>-->
+<!--                    &lt;!&ndash; Конец логики распределения сотрудников по дням &ndash;&gt;-->
+
+<!--                    <button type="button" class="btn btn-secondary mt-2 add-staff-btn" th:attr="data-period=${iterStat.index + 1}">Добавить сотрудника</button>-->
+<!--                </div>-->
+<!--            </div>-->
+
+<!--        <button type="submit" class="btn btn-primary mt-3">Сохранить</button>-->
+<!--    </form>-->
+
+<!--</div>-->
+<!--</body>-->
+<!--</html>-->
+
+
+<!--<!DOCTYPE html>-->
+<!--<html xmlns:th="http://www.thymeleaf.org">-->
+<!--<head>-->
+<!--    <meta charset="UTF-8"/>-->
+<!--    <title>Информация о персонале</title>-->
+<!--    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">-->
+<!--    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>-->
+<!--    <script th:inline="javascript">-->
+<!--        // $(document).ready(function() {-->
+<!--        //     var periodsData = [[${periods}]];-->
+<!--        //     var sameEquipmentForAllDays = [[${sameEquipmentForAllDays}]];-->
+<!--        //     var daysWithoutPeriod = [[${daysWithoutPeriod}]];-->
+<!--        //-->
+<!--        //     //Если оборудование не одинаково на все дни, устанавливаем periodsData равным количеству рабочих дней-->
+<!--        //     if (!sameEquipmentForAllDays) {-->
+<!--        //         periodsData = daysWithoutPeriod;-->
+<!--        //         period = daysWithoutPeriod;-->
+<!--        //         console.log("Количество периодов установлено равным количеству рабочих дней: " + periodsData);-->
+<!--        //     }-->
+<!--        //-->
+<!--        //     var staff = /*[[${staffsJson}]]*/ [];-->
+<!--        //-->
+<!--        //     console.log("Periods Data:", periodsData);-->
+<!--        //     console.log("Same Equipment for All Days:", sameEquipmentForAllDays);-->
+<!--        //     console.log("Days Without Period:", daysWithoutPeriod);-->
+<!--        //     //console.log("Staff:", staff);-->
+<!--        //-->
+<!--        //     $('.staff-row').hide();-->
+<!--        //     console.log("Все staff-row скрыты");-->
+<!--        //-->
+<!--        //     // Группируем staff-row по периодам-->
+<!--        //     var groupedStaffRows = {};-->
+<!--        //     $('.staff-row').each(function() {-->
+<!--        //         var period = $(this).data('period');-->
+<!--        //         console.log("Обработка staff-row с period:", period);-->
+<!--        //-->
+<!--        //         if (!period) {-->
+<!--        //             console.error("Period не определен для staff-row, проверьте data-period атрибут.");-->
+<!--        //         } else {-->
+<!--        //             console.log("Period определен для staff-row:", period);-->
+<!--        //         }-->
+<!--        //-->
+<!--        //         if (!groupedStaffRows[period]) {-->
+<!--        //             groupedStaffRows[period] = [];-->
+<!--        //         }-->
+<!--        //         groupedStaffRows[period].push($(this));-->
+<!--        //     });-->
+<!--        //-->
+<!--        //     // Показать первый staff-row в каждом периоде-->
+<!--        //     for (var period in groupedStaffRows) {-->
+<!--        //         if (groupedStaffRows[period].length > 0) {-->
+<!--        //             console.log("Показать первый staff-row для периода:", period);-->
+<!--        //             groupedStaffRows[period][0].show();  // Показываем первый элемент для каждого периода-->
+<!--        //         }-->
+<!--        //     }-->
+<!--        //-->
+<!--        //     $('.add-staff-btn').click(function() {-->
+<!--        //         var currentPeriod = $(this).data('period');-->
+<!--        //         console.log("Нажата кнопка 'Добавить сотрудника' для периода:", currentPeriod);-->
+<!--        //-->
+<!--        //         var hiddenStaff = $('.staff-row[data-period="' + currentPeriod + '"]:hidden').first();-->
+<!--        //         if (hiddenStaff.length) {-->
+<!--        //             console.log("Показан следующий скрытый staff-row для периода:", currentPeriod);-->
+<!--        //             hiddenStaff.show();-->
+<!--        //         } else {-->
+<!--        //             console.log("Нет больше сотрудников для добавления в этом периоде:", currentPeriod);-->
+<!--        //             alert('Нет больше сотрудников для добавления в этом периоде.');-->
+<!--        //         }-->
+<!--        //     });-->
+<!--        // });-->
+
+
+<!--            $(document).ready(function() {-->
+<!--            var periodsData = [[${periods}]];-->
+<!--            var sameEquipmentForAllDays = [[${sameEquipmentForAllDays}]];-->
+<!--            var daysWithoutPeriod = [[${daysWithoutPeriod}]];-->
+
+<!--            if (!sameEquipmentForAllDays) {-->
+<!--            handleStaffForDifferentDays(periodsData, daysWithoutPeriod);-->
+<!--        } else {-->
+<!--            handleStaffForSameDays(periodsData);-->
+<!--        }-->
+<!--        });-->
+
+<!--            function handleStaffForSameDays(periodsData) {-->
+<!--            console.log("Обработка сотрудников для одинакового оборудования на все дни.");-->
+<!--            console.log("Periods Data:", periodsData);-->
+
+<!--            $('.staff-row').hide();-->
+<!--            console.log("Все staff-row скрыты");-->
+
+<!--            // Группируем staff-row по периодам-->
+<!--            var groupedStaffRows = {};-->
+<!--            $('.staff-row').each(function() {-->
+<!--            var period = $(this).data('period');-->
+<!--            console.log("Обработка staff-row с period:", period);-->
+
+<!--            if (!period) {-->
+<!--            console.error("Period не определен для staff-row, проверьте data-period атрибут.");-->
+<!--        } else {-->
+<!--            console.log("Period определен для staff-row:", period);-->
+<!--        }-->
+
+<!--            if (!groupedStaffRows[period]) {-->
+<!--            groupedStaffRows[period] = [];-->
+<!--        }-->
+<!--            groupedStaffRows[period].push($(this));-->
+<!--        });-->
+
+<!--            // Показать первый staff-row в каждом периоде-->
+<!--            for (var period in groupedStaffRows) {-->
+<!--            if (groupedStaffRows[period].length > 0) {-->
+<!--            console.log("Показать первый staff-row для периода:", period);-->
+<!--            groupedStaffRows[period][0].show();  // Показываем первый элемент для каждого периода-->
+<!--        }-->
+<!--        }-->
+
+<!--            $('.add-staff-btn').click(function() {-->
+<!--            var currentPeriod = $(this).data('period');-->
+<!--            console.log("Нажата кнопка 'Добавить сотрудника' для периода:", currentPeriod);-->
+
+<!--            var hiddenStaff = $('.staff-row[data-period="' + currentPeriod + '"]:hidden').first();-->
+<!--            if (hiddenStaff.length) {-->
+<!--            console.log("Показан следующий скрытый staff-row для периода:", currentPeriod);-->
+<!--            hiddenStaff.show();-->
+<!--        } else {-->
+<!--            console.log("Нет больше сотрудников для добавления в этом периоде:", currentPeriod);-->
+<!--            alert('Нет больше сотрудников для добавления в этом периоде.');-->
+<!--        }-->
+<!--        });-->
+<!--        }-->
+
+<!--            function handleStaffForDifferentDays(periodsData, daysWithoutPeriod) {-->
+<!--            console.log("Обработка сотрудников для разного оборудования на разные дни.");-->
+<!--            periodsData = daysWithoutPeriod;-->
+<!--            console.log("Количество периодов установлено равным количеству рабочих дней: " + periodsData);-->
+
+<!--            $('.staff-row').hide();-->
+<!--            console.log("Все staff-row скрыты");-->
+
+<!--            // Группируем staff-row по периодам-->
+<!--            var groupedStaffRows = {};-->
+<!--            $('.staff-row').each(function() {-->
+<!--            var period = $(this).data('period');-->
+<!--            console.log("Обработка staff-row с period:", period);-->
+
+<!--            if (!period) {-->
+<!--            console.error("Period не определен для staff-row, проверьте data-period атрибут.");-->
+<!--        } else {-->
+<!--            console.log("Period определен для staff-row:", period);-->
+<!--        }-->
+
+<!--            if (!groupedStaffRows[period]) {-->
+<!--            groupedStaffRows[period] = [];-->
+<!--        }-->
+<!--            groupedStaffRows[period].push($(this));-->
+<!--        });-->
+
+<!--            // Показать первый staff-row в каждом периоде-->
+<!--            for (var period in groupedStaffRows) {-->
+<!--            if (groupedStaffRows[period].length > 0) {-->
+<!--            console.log("Показать первый staff-row для периода:", period);-->
+<!--            groupedStaffRows[period][0].show();  // Показываем первый элемент для каждого периода-->
+<!--        }-->
+<!--        }-->
+
+<!--            $('.add-staff-btn').click(function() {-->
+<!--            var currentPeriod = $(this).data('period');-->
+<!--            console.log("Нажата кнопка 'Добавить сотрудника' для периода:", currentPeriod);-->
+
+<!--            var hiddenStaff = $('.staff-row[data-period="' + currentPeriod + '"]:hidden').first();-->
+<!--            if (hiddenStaff.length) {-->
+<!--            console.log("Показан следующий скрытый staff-row для периода:", currentPeriod);-->
+<!--            hiddenStaff.show();-->
+<!--        } else {-->
+<!--            console.log("Нет больше сотрудников для добавления в этом периоде:", currentPeriod);-->
+<!--            alert('Нет больше сотрудников для добавления в этом периоде.');-->
+<!--        }-->
+<!--        });-->
+<!--        }-->
+
+<!--    </script>-->
+
+<!--    <style>-->
+<!--        .hidden {-->
+<!--            display: none;-->
+<!--        }-->
+<!--        .remove-staff-btn {-->
+<!--            color: red;-->
+<!--            cursor: pointer;-->
+<!--            font-size: 1.5em;-->
+<!--            position: absolute;-->
+<!--            right: 10px;-->
+<!--            top: 10px;-->
+<!--        }-->
+<!--        .form-group {-->
+<!--            margin-bottom: 0;-->
+<!--        }-->
+<!--        .staff-row {-->
+<!--            display: flex;-->
+<!--            align-items: center;-->
+<!--            flex-wrap: wrap;-->
+<!--        }-->
+<!--        .staff-row > div {-->
+<!--            margin-right: 2px;-->
+<!--        }-->
+<!--        .staff-row > div:last-child {-->
+<!--            margin-right: 0;-->
+<!--        }-->
+<!--        .position-relative {-->
+<!--            position: relative;-->
+<!--        }-->
+<!--    </style>-->
+<!--</head>-->
+<!--<body>-->
+<!--<div class="container">-->
+<!--    <h1>Информация о персонале и монтаже</h1>-->
+
+<!--    <form th:object="${headerStaffs}" th:action="@{/input/saveStaffInput}" method="post">-->
+<!--        <input type="hidden" name="headerId" th:value="${headerId}"/>-->
+<!--        <input type="hidden" name="sameEquipmentForAllDays" th:value="${sameEquipmentForAllDays}" />-->
+<!--        <input type="hidden" name="periods" th:value="${periods}"/>-->
+<!--        <input type="hidden" name="daysWithoutPeriod" th:value="${daysWithoutPeriod}"/>-->
+
+<!--        &lt;!&ndash; Информация о монтаже &ndash;&gt;-->
+<!--        <div th:object="${m}">-->
+<!--            <h2>Информация о монтаже</h2>-->
+<!--            <div class="form-row">-->
+<!--                <div class="form-group col-md-4">-->
+<!--                    <label for="mounting-hours">Часы работы</label>-->
+<!--                    <input type="number" th:field="*{hours}" class="form-control" id="mounting-hours"/>-->
+<!--                </div>-->
+<!--                <div class="form-group col-md-4">-->
+<!--                    <label for="mounting-qStaff">Количество представителей</label>-->
+<!--                    <input type="number" th:field="*{qStaff}" class="form-control" id="mounting-qStaff"/>-->
+<!--                </div>-->
+<!--                <div class="form-group col-md-4">-->
+<!--                    <label for="mounting-qPrice">Стоимость часа</label>-->
+<!--                    <input type="number" th:field="*{qPrice}" class="form-control" id="mounting-qPrice"/>-->
+<!--                </div>-->
+<!--            </div>-->
+<!--        </div>-->
+
+<!--        &lt;!&ndash; Информация о персонале &ndash;&gt;-->
+<!--        <div th:if="${sameEquipmentForAllDays}">-->
+<!--            <h2>Персонал на все дни</h2>-->
+<!--              <div th:if="${periods == 1}">-->
+<!--                &lt;!&ndash; Период 1 &ndash;&gt;-->
+<!--                <div th:each="staff, staffStat : ${headerStaffs.staffs}" th:if="${staffStat.index < 10}">-->
+<!--                    <div class="staff-row form-group" data-staff-index="${staffStat.index}" data-period="1">-->
+<!--                        <div class="col-md-2">-->
+<!--                            <label th:for="|kindOfStaff${staffStat.index}|">Вид персонала</label>-->
+<!--                            <select th:field="*{staffs[__${staffStat.index}__].kindOfStaff}" class="form-control" th:id="|kindOfStaff${staffStat.index}|">-->
+<!--                                <option value="">Выберите вид персонала</option>-->
+<!--                                <option value="Администратор">Администратор</option>-->
+<!--                                <option value="Супервайзер">Супервайзер</option>-->
+<!--                                <option value="Оператор регистрации">Оператор регистрации</option>-->
+<!--                                <option value="Хостес">Хостес</option>-->
+<!--                                <option value="Гардеробщик">Гардеробщик</option>-->
+<!--                                <option value="Технический специалист">Технический специалист</option>-->
+<!--                            </select>-->
+<!--                        </div>-->
+<!--                        <div class="col-md-2">-->
+<!--                            <label th:for="|startTime${staffStat.index}|">Время начала</label>-->
+<!--                            <input type="time" th:field="*{staffs[__${staffStat.index}__].startTime}" class="form-control" th:id="|startTime${staffStat.index}|"/>-->
+<!--                        </div>-->
+<!--                        <div class="col-md-2">-->
+<!--                            <label th:for="|endTime${staffStat.index}|">Время окончания</label>-->
+<!--                            <input type="time" th:field="*{staffs[__${staffStat.index}__].endTime}" class="form-control" th:id="|endTime${staffStat.index}|"/>-->
+<!--                        </div>-->
+<!--                        <div class="col-md-2">-->
+<!--                            <label th:for="|staffQuantity${staffStat.index}|">Количество</label>-->
+<!--                            <input type="number" th:field="*{staffs[__${staffStat.index}__].staffQuantity}" class="form-control" th:id="|staffQuantity${staffStat.index}|"/>-->
+<!--                        </div>-->
+<!--                        <div class="col-md-2">-->
+<!--                            <label th:for="|betPerHour${staffStat.index}|">Стоимость часа</label>-->
+<!--                            <input type="number" th:field="*{staffs[__${staffStat.index}__].betPerHour}" class="form-control" th:id="|betPerHour${staffStat.index}|"/>-->
+<!--                        </div>-->
+<!--                        <div class="remove-staff-btn hidden">&times;</div>-->
+<!--                    </div>-->
+<!--                </div>-->
+<!--                <button type="button" class="btn btn-secondary mt-2 add-staff-btn" data-period="1">Добавить сотрудника</button>-->
+<!--            </div>-->
+
+<!--            <div th:if="${sameEquipmentForAllDays}">-->
+<!--            &lt;!&ndash; Перераспределение по периодам &ndash;&gt;-->
+<!--            <div th:if="${periods > 1}">-->
+<!--                <div th:each="period, iterStat : ${#numbers.sequence(0, periods - 1)}">-->
+<!--                    <h3 th:text="${periodDates[iterStat.index * 2]} + ' - ' + ${periodDates[iterStat.index * 2 + 1]}" style="text-align: center;">Период</h3>-->
+
+<!--                    &lt;!&ndash; Начало логики распределения сотрудников по периодам &ndash;&gt;-->
+<!--                    <div th:each="staff, staffStat : ${headerStaffs.staffs}">-->
+<!--                        <div th:if="${staffStat.index >= iterStat.index * 7 && staffStat.index < (iterStat.index + 1) * 7}"-->
+<!--                             class="position-relative staff-row form-group"-->
+<!--                             th:data-staff-index="${staffStat.index}"-->
+<!--                             th:attr="data-period=${iterStat.index + 1}">-->
+
+<!--                            &lt;!&ndash; Отладочная информация &ndash;&gt;-->
+<!--                            <p>Staff index: <span th:text="${staffStat.index}"></span></p>-->
+<!--                            <p>Period index: <span th:text="${iterStat.index + 1}"></span></p>-->
+
+<!--                            &lt;!&ndash; Поля формы для ввода данных о сотруднике &ndash;&gt;-->
+<!--                            <h3>Сотрудник <span th:text="${staffStat.index + 1}"></span></h3>-->
+<!--                            <div class="col-md-2">-->
+<!--                                <label th:for="|kindOfStaff${staffStat.index}|">Вид персонала</label>-->
+<!--                                <select th:field="*{staffs[__${staffStat.index}__].kindOfStaff}" class="form-control" th:id="|kindOfStaff${staffStat.index}|">-->
+<!--                                    <option value="">Выберите вид персонала</option>-->
+<!--                                    <option value="Администратор">Администратор</option>-->
+<!--                                    <option value="Супервайзер">Супервайзер</option>-->
+<!--                                    <option value="Оператор регистрации">Оператор регистрации</option>-->
+<!--                                    <option value="Хостес">Хостес</option>-->
+<!--                                    <option value="Гардеробщик">Гардеробщик</option>-->
+<!--                                    <option value="Технический специалист">Технический специалист</option>-->
+<!--                                </select>-->
+<!--                            </div>-->
+<!--                            <div class="col-md-2">-->
+<!--                                <label th:for="|startTime${staffStat.index}|">Время начала</label>-->
+<!--                                <input type="time" th:field="*{staffs[__${staffStat.index}__].startTime}" class="form-control" th:id="|startTime${staffStat.index}|"/>-->
+<!--                            </div>-->
+<!--                            <div class="col-md-2">-->
+<!--                                <label th:for="|endTime${staffStat.index}|">Время окончания</label>-->
+<!--                                <input type="time" th:field="*{staffs[__${staffStat.index}__].endTime}" class="form-control" th:id="|endTime${staffStat.index}|"/>-->
+<!--                            </div>-->
+<!--                            <div class="col-md-2">-->
+<!--                                <label th:for="|staffQuantity${staffStat.index}|">Количество</label>-->
+<!--                                <input type="number" th:field="*{staffs[__${staffStat.index}__].staffQuantity}" class="form-control" th:id="|staffQuantity${staffStat.index}|"/>-->
+<!--                            </div>-->
+<!--                            <div class="col-md-2">-->
+<!--                                <label th:for="|betPerHour${staffStat.index}|">Стоимость часа</label>-->
+<!--                                <input type="number" th:field="*{staffs[__${staffStat.index}__].betPerHour}" class="form-control" th:id="|betPerHour${staffStat.index}|"/>-->
+<!--                            </div>-->
+<!--                        </div>-->
+<!--                    </div>-->
+<!--                    &lt;!&ndash; Конец логики распределения сотрудников по периодам &ndash;&gt;-->
+
+<!--                    <button type="button" class="btn btn-secondary mt-2 add-staff-btn" th:attr="data-period=${iterStat.index + 1}">Добавить сотрудника</button>-->
+<!--                </div>-->
+<!--            </div>-->
+<!--        </div>-->
+
+<!--        <div th:if="${!sameEquipmentForAllDays}">-->
+<!--            <h2>Персонал на разные дни</h2>-->
+<!--            <div th:if="${periods > 1}">-->
+<!--            <div th:each="day, iterStat : ${#numbers.sequence(0, daysWithoutPeriod - 1)}">-->
+<!--                <h3>День <span th:text="${iterStat.index + 1}"></span> из <span th:text="${daysWithoutPeriod}"></span></h3> &lt;!&ndash; Отображение текущего дня и общего количества дней &ndash;&gt;-->
+
+<!--                &lt;!&ndash; Начало логики распределения сотрудников по дням &ndash;&gt;-->
+<!--                <div th:each="staff, staffStat : ${headerStaffs.staffs}">-->
+<!--                    &lt;!&ndash;-->
+<!--                    Ограничиваем количество сотрудников на день до 6-->
+<!--                    &ndash;&gt;-->
+<!--                    <div th:if="${staffStat.index >= iterStat.index * 6 &&-->
+<!--                staffStat.index < (iterStat.index + 1) * 6}"-->
+<!--                         class="position-relative staff-row form-group hidden"-->
+<!--                         th:data-staff-index="${staffStat.index}"-->
+<!--                         th:attr="data-period=${iterStat.index + 1}">-->
+
+<!--                        &lt;!&ndash; Отладочная информация &ndash;&gt;-->
+<!--                        <p>Staff index: <span th:text="${staffStat.index}"></span></p>-->
+<!--                        <p>Day index: <span th:text="${iterStat.index + 1}"></span></p>-->
+<!--                        <p>Data Period: <span th:text="${iterStat.index + 1}"></span></p>-->
+
+<!--                        &lt;!&ndash; Поля формы для ввода данных о сотруднике &ndash;&gt;-->
+<!--                        <h3>Сотрудник <span th:text="${staffStat.index + 1}"></span></h3>-->
+<!--                        <div class="staff-row">-->
+<!--                            <div class="col-md-2">-->
+<!--                                <label th:for="|kindOfStaff${staffStat.index}|">Вид персонала</label>-->
+<!--                                <select th:field="*{staffs[__${staffStat.index}__].kindOfStaff}" class="form-control" th:id="|kindOfStaff${staffStat.index}|">-->
+<!--                                    <option value="">Выберите вид персонала</option>-->
+<!--                                    <option value="Администратор">Администратор</option>-->
+<!--                                    <option value="Супервайзер">Супервайзер</option>-->
+<!--                                    <option value="Оператор регистрации">Оператор регистрации</option>-->
+<!--                                    <option value="Хостес">Хостес</option>-->
+<!--                                    <option value="Гардеробщик">Гардеробщик</option>-->
+<!--                                    <option value="Технический специалист">Технический специалист</option>-->
+<!--                                </select>-->
+<!--                            </div>-->
+<!--                            <div class="col-md-2">-->
+<!--                                <label th:for="|startTime${staffStat.index}|">Время начала</label>-->
+<!--                                <input type="time" th:field="*{staffs[__${staffStat.index}__].startTime}" class="form-control" th:id="|startTime${staffStat.index}|"/>-->
+<!--                            </div>-->
+<!--                            <div class="col-md-2">-->
+<!--                                <label th:for="|endTime${staffStat.index}|">Время окончания</label>-->
+<!--                                <input type="time" th:field="*{staffs[__${staffStat.index}__].endTime}" class="form-control" th:id="|endTime${staffStat.index}|"/>-->
+<!--                            </div>-->
+<!--                            <div class="col-md-2">-->
+<!--                                <label th:for="|staffQuantity${staffStat.index}|">Количество</label>-->
+<!--                                <input type="number" th:field="*{staffs[__${staffStat.index}__].staffQuantity}" class="form-control" th:id="|staffQuantity${staffStat.index}|"/>-->
+<!--                            </div>-->
+<!--                            <div class="col-md-2">-->
+<!--                                <label th:for="|betPerHour${staffStat.index}|">Стоимость часа</label>-->
+<!--                                <input type="number" th:field="*{staffs[__${staffStat.index}__].betPerHour}" class="form-control" th:id="|betPerHour${staffStat.index}|"/>-->
+<!--                            </div>-->
+<!--                        </div>-->
+<!--                    </div>-->
+
+<!--                </div>-->
+<!--                &lt;!&ndash; Конец логики распределения сотрудников по дням &ndash;&gt;-->
+
+<!--                <button type="button" class="btn btn-secondary mt-2 add-staff-btn" th:attr="data-period=${iterStat.index + 1}">Добавить сотрудника</button>-->
+<!--            </div>-->
+<!--        </div>-->
+
+
+
+
+<!--        <button type="submit" class="btn btn-primary mt-3">Сохранить</button>-->
+<!--    </form>-->
+<!--</div>-->
+<!--</body>-->
+<!--</html>-->
+
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8"/>
-    <title>Input Staff</title>
+    <title>Информация о персонале</title>
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
-    <style>
-        .short-input {
-            width: 25%;
-        }
-        .sshort-input {
-            width: 45%;
-        }
-        .ssshort-input {
-            width: 50%;
-        }
-        .centered-form {
-            max-width: 600px;
-            margin: auto;
-        }
-        .form-row .form-group {
-            flex: 1;
-        }
-    </style>
-    <script>
-        function addStaffFieldset() {
-            let nextIndex = document.querySelectorAll('.staff-group').length + 1;
-            if (nextIndex > 5) return; // Max 5 staff groups
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script th:inline="javascript">
+        $(document).ready(function() {
+            var periodsData = [[${periods}]];
+            var sameEquipmentForAllDays = [[${sameEquipmentForAllDays}]];
+            var daysWithoutPeriod = [[${daysWithoutPeriod}]];
 
-            let newStaffGroup = document.createElement('div');
-            newStaffGroup.className = 'staff-group';
-            newStaffGroup.innerHTML = `
-                <h2>Персонал ${nextIndex}</h2>
-                <div class="form-group">
-                    <label for="staffCount${nextIndex}">Количество</label>
-                    <input type="number" id="staffCount${nextIndex}" name="staffCount${nextIndex}" class="form-control sshort-input" />
-                </div>
-                <div class="form-group">
-                    <label for="staffKind${nextIndex}">Вид персонала</label>
-                    <select id="staffKind${nextIndex}" name="staffKind${nextIndex}" class="form-control sshort-input">
-                        <option value="Оператор регистрации" selected>Оператор регистрации</option>
-                        <option value="Хостес">Хостес</option>
-                        <option value="Хелпер">Хелпер</option>
-                        <option value="Гардеробщик">Гардеробщик</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label for="staffWorkTime${nextIndex}Start">Время работы (начало)</label>
-                    <input type="time" id="staffWorkTime${nextIndex}Start" name="staffWorkTime${nextIndex}Start" class="form-control sshort-input" />
-                </div>
-                <div class="form-group">
-                    <label for="staffWorkTime${nextIndex}End">Время работы (конец)</label>
-                    <input type="time" id="staffWorkTime${nextIndex}End" name="staffWorkTime${nextIndex}End" class="form-control sshort-input" />
-                </div>
-                <div class="form-group">
-                    <label for="staffHourPrice${nextIndex}">Стоимость часа</label>
-                    <input type="number" id="staffHourPrice${nextIndex}" name="staffHourPrice${nextIndex}" class="form-control sshort-input" value="800" step="50" />
-                </div>
-            `;
-            document.getElementById('staffFields').appendChild(newStaffGroup);
+            if (!sameEquipmentForAllDays) {
+                handleStaffForDifferentDays(periodsData, daysWithoutPeriod);
+            } else {
+                handleStaffForSameDays(periodsData);
+            }
+        });
+
+        function handleStaffForSameDays(periodsData) {
+            console.log("Обработка сотрудников для одинакового оборудования на все дни.");
+            console.log("Periods Data:", periodsData);
+
+            $('.staff-row').hide();
+            console.log("Все staff-row скрыты");
+
+            var groupedStaffRows = {};
+            $('.staff-row').each(function() {
+                var period = $(this).data('period');
+                console.log("Обработка staff-row с period:", period);
+
+                if (!period) {
+                    console.error("Period не определен для staff-row, проверьте data-period атрибут.");
+                } else {
+                    console.log("Period определен для staff-row:", period);
+                }
+
+                if (!groupedStaffRows[period]) {
+                    groupedStaffRows[period] = [];
+                }
+                groupedStaffRows[period].push($(this));
+            });
+
+            for (var period in groupedStaffRows) {
+                if (groupedStaffRows[period].length > 0) {
+                    console.log("Показать первый staff-row для периода:", period);
+                    groupedStaffRows[period][0].show();
+                }
+            }
+
+            $('.add-staff-btn').click(function() {
+                var currentPeriod = $(this).data('period');
+                console.log("Нажата кнопка 'Добавить сотрудника' для периода:", currentPeriod);
+
+                var hiddenStaff = $('.staff-row[data-period="' + currentPeriod + '"]:hidden').first();
+                if (hiddenStaff.length) {
+                    console.log("Показан следующий скрытый staff-row для периода:", currentPeriod);
+                    hiddenStaff.show();
+                } else {
+                    console.log("Нет больше сотрудников для добавления в этом периоде:", currentPeriod);
+                    alert('Нет больше сотрудников для добавления в этом периоде.');
+                }
+            });
+        }
+
+        function handleStaffForDifferentDays(periodsData, daysWithoutPeriod) {
+            console.log("Обработка сотрудников для разного оборудования на разные дни.");
+            console.log("Количество периодов установлено равным количеству рабочих дней: " + periodsData);
+
+            $('.staff-row').hide();
+            console.log("Все staff-row скрыты");
+
+            var groupedStaffRows = {};
+            $('.staff-row').each(function() {
+                var period = $(this).data('period');
+                console.log("Обработка staff-row с period:", period);
+
+                if (!period) {
+                    console.error("Period не определен для staff-row, проверьте data-period атрибут.");
+                } else {
+                    console.log("Period определен для staff-row:", period);
+                }
+
+                if (!groupedStaffRows[period]) {
+                    groupedStaffRows[period] = [];
+                }
+                groupedStaffRows[period].push($(this));
+            });
+
+            for (var period in groupedStaffRows) {
+                if (groupedStaffRows[period].length > 0) {
+                    console.log("Показать первый staff-row для периода:", period);
+                    groupedStaffRows[period][0].show();
+                }
+            }
+
+            $('.add-staff-btn').click(function() {
+                var currentPeriod = $(this).data('period');
+                console.log("Нажата кнопка 'Добавить сотрудника' для периода:", currentPeriod);
+
+                var hiddenStaff = $('.staff-row[data-period="' + currentPeriod + '"]:hidden').first();
+                if (hiddenStaff.length) {
+                    console.log("Показан следующий скрытый staff-row для периода:", currentPeriod);
+                    hiddenStaff.show();
+                } else {
+                    console.log("Нет больше сотрудников для добавления в этом периоде:", currentPeriod);
+                    alert('Нет больше сотрудников для добавления в этом периоде.');
+                }
+            });
         }
     </script>
+
+    <style>
+        .hidden {
+            display: none;
+        }
+        .remove-staff-btn {
+            color: red;
+            cursor: pointer;
+            font-size: 1.5em;
+            position: absolute;
+            right: 10px;
+            top: 10px;
+        }
+        .form-group {
+            margin-bottom: 0;
+        }
+        .staff-row {
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        .staff-row > div {
+            margin-right: 2px;
+        }
+        .staff-row > div:last-child {
+            margin-right: 0;
+        }
+        .position-relative {
+            position: relative;
+        }
+    </style>
 </head>
 <body>
 <div class="container">
-    <h1 class="text-center">Информация о персонале</h1>
-    <form th:action="@{/input/saveStaffInput}" method="post" th:object="${staff}" class="centered-form">
+    <h1>Прочие услуги</h1>
+
+    <form th:object="${headerStaffs}" th:action="@{/input/saveStaffInput}" method="post">
         <input type="hidden" name="headerId" th:value="${headerId}"/>
+        <input type="hidden" name="sameEquipmentForAllDays" th:value="${sameEquipmentForAllDays}" />
+        <input type="hidden" name="periods" th:value="${periods}"/>
+        <input type="hidden" name="daysWithoutPeriod" th:value="${daysWithoutPeriod}"/>
 
-        <h2>Администраторы</h2>
-        <div class="form-group">
-            <label for="adminsCount">Количество администраторов</label>
-            <input type="number" id="adminsCount" th:field="*{adminsCount}" class="form-control short-input" value="1"/>
-        </div>
-        <div class="form-group">
-            <label for="adminWorkTimeStart">Время работы (начало)</label>
-            <input type="time" id="adminWorkTimeStart" th:field="*{adminWorkTimeStart}" class="form-control sshort-input"/>
-        </div>
-        <div class="form-group">
-            <label for="adminWorkTimeEnd">Время работы (конец)</label>
-            <input type="time" id="adminWorkTimeEnd" th:field="*{adminWorkTimeEnd}" class="form-control sshort-input"/>
-        </div>
-        <div class="form-group">
-            <label for="adminHourPrice">Стоимость часа</label>
-            <input type="number" id="adminHourPrice" th:field="*{adminHourPrice}" class="form-control short-input" value="1000" step="50"/>
-        </div>
-        <div class="form-check">
-            <input type="checkbox" class="form-check-input" id="montage" th:field="*{montage}" checked/>
-            <label class="form-check-label" for="montage">Монтаж</label>
-        </div>
-
-        <h2>Персонал 1</h2>
-        <div id="staffFields">
-            <div class="staff-group">
-                <div class="form-group">
-                    <label for="staffCount1">Количество</label>
-                    <input type="number" id="staffCount1" th:field="*{staffCount1}" class="form-control sshort-input"/>
+        <div th:object="${m}">
+            <h2>Информация о монтаже</h2>
+            <div class="form-row">
+                <div class="form-group col-md-4">
+                    <label for="mounting-hours">Часы работы</label>
+                    <input type="number" th:field="*{hours}" class="form-control" id="mounting-hours"/>
                 </div>
-                <div class="form-group">
-                    <label for="staffKind1">Вид персонала</label>
-                    <select id="staffKind1" th:field="*{staffKind1}" class="form-control sshort-input">
-                        <option value="Оператор регистрации" selected>Оператор регистрации</option>
-                        <option value="Хостес">Хостес</option>
-                        <option value="Хелпер">Хелпер</option>
-                        <option value="Гардеробщик">Гардеробщик</option>
-                    </select>
+                <div class="form-group col-md-4">
+                    <label for="mounting-qStaff">Количество представителей</label>
+                    <input type="number" th:field="*{qStaff}" class="form-control" id="mounting-qStaff"/>
                 </div>
-                <div class="form-group">
-                    <label for="staffWorkTime1Start">Время работы (начало)</label>
-                    <input type="time" id="staffWorkTime1Start" th:field="*{staffWorkTime1Start}" class="form-control sshort-input"/>
-                </div>
-                <div class="form-group">
-                    <label for="staffWorkTime1End">Время работы (конец)</label>
-                    <input type="time" id="staffWorkTime1End" th:field="*{staffWorkTime1End}" class="form-control sshort-input"/>
-                </div>
-                <div class="form-group">
-                    <label for="staffHourPrice1">Стоимость часа</label>
-                    <input type="number" id="staffHourPrice1" th:field="*{staffHourPrice1}" class="form-control sshort-input" value="800" step="50"/>
+                <div class="form-group col-md-4">
+                    <label for="mounting-qPrice">Стоимость часа</label>
+                    <input type="number" th:field="*{qPrice}" class="form-control" id="mounting-qPrice"/>
                 </div>
             </div>
         </div>
 
-        <button type="button" class="btn btn-secondary" onclick="addStaffFieldset()">Добавить персонал</button>
-        <button type="submit" class="btn btn-primary">Сохранить</button>
+
+        <!-- Информация о персонале для всех дней -->
+        <div th:if="${sameEquipmentForAllDays}">
+            <h2>Персонал на все дни</h2>
+            <div th:if="${periods == 1}">
+                <!-- Период 1 -->
+                <div th:each="staff, staffStat : ${headerStaffs.staffs}" th:if="${staffStat.index < 10}">
+                    <div class="staff-row form-group" data-staff-index="${staffStat.index}" data-period="1">
+                        <div class="col-md-2">
+                            <label th:for="|kindOfStaff${staffStat.index}|">Вид персонала</label>
+                            <select th:field="*{staffs[__${staffStat.index}__].kindOfStaff}" class="form-control" th:id="|kindOfStaff${staffStat.index}|">
+                                <option value="">Выберите вид персонала</option>
+                                <option value="Администратор">Администратор</option>
+                                <option value="Супервайзер">Супервайзер</option>
+                                <option value="Оператор регистрации">Оператор регистрации</option>
+                                <option value="Хостес">Хостес</option>
+                                <option value="Гардеробщик">Гардеробщик</option>
+                                <option value="Технический специалист">Технический специалист</option>
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <label th:for="|startTime${staffStat.index}|">Время начала</label>
+                            <input type="time" th:field="*{staffs[__${staffStat.index}__].startTime}" class="form-control" th:id="|startTime${staffStat.index}|"/>
+                        </div>
+                        <div class="col-md-2">
+                            <label th:for="|endTime${staffStat.index}|">Время окончания</label>
+                            <input type="time" th:field="*{staffs[__${staffStat.index}__].endTime}" class="form-control" th:id="|endTime${staffStat.index}|"/>
+                        </div>
+                        <div class="col-md-2">
+                            <label th:for="|staffQuantity${staffStat.index}|">Количество</label>
+                            <input type="number" th:field="*{staffs[__${staffStat.index}__].staffQuantity}" class="form-control" th:id="|staffQuantity${staffStat.index}|"/>
+                        </div>
+                        <div class="col-md-2">
+                            <label th:for="|betPerHour${staffStat.index}|">Стоимость часа</label>
+                            <input type="number" th:field="*{staffs[__${staffStat.index}__].betPerHour}" class="form-control" th:id="|betPerHour${staffStat.index}|"/>
+                        </div>
+                        <div class="remove-staff-btn hidden">&times;</div>
+                    </div>
+                </div>
+                <button type="button" class="btn btn-secondary mt-2 add-staff-btn" data-period="1">Добавить сотрудника</button>
+            </div>
+
+            <!-- Перераспределение по периодам -->
+            <div th:if="${periods > 1}">
+                <div th:each="period, iterStat : ${#numbers.sequence(0, periods - 1)}">
+                    <h3 th:text="${periodDates[iterStat.index * 2]} + ' - ' + ${periodDates[iterStat.index * 2 + 1]}" style="text-align: center;">Период</h3>
+                    <div th:each="staff, staffStat : ${headerStaffs.staffs}">
+                        <div th:if="${staffStat.index >= iterStat.index * 7 && staffStat.index < (iterStat.index + 1) * 7}"
+                             class="position-relative staff-row form-group"
+                             th:data-staff-index="${staffStat.index}"
+                             th:attr="data-period=${iterStat.index + 1}">
+                            <h3>Сотрудник <span th:text="${staffStat.index + 1}"></span></h3>
+                            <div class="col-md-2">
+                                <label th:for="|kindOfStaff${staffStat.index}|">Вид персонала</label>
+                                <select th:field="*{staffs[__${staffStat.index}__].kindOfStaff}" class="form-control" th:id="|kindOfStaff${staffStat.index}|">
+                                    <option value="">Выберите вид персонала</option>
+                                    <option value="Администратор">Администратор</option>
+                                    <option value="Супервайзер">Супервайзер</option>
+                                    <option value="Оператор регистрации">Оператор регистрации</option>
+                                    <option value="Хостес">Хостес</option>
+                                    <option value="Гардеробщик">Гардеробщик</option>
+                                    <option value="Технический специалист">Технический специалист</option>
+                                </select>
+                            </div>
+                            <div class="col-md-2">
+                                <label th:for="|startTime${staffStat.index}|">Время начала</label>
+                                <input type="time" th:field="*{staffs[__${staffStat.index}__].startTime}" class="form-control" th:id="|startTime${staffStat.index}|"/>
+                            </div>
+                            <div class="col-md-2">
+                                <label th:for="|endTime${staffStat.index}|">Время окончания</label>
+                                <input type="time" th:field="*{staffs[__${staffStat.index}__].endTime}" class="form-control" th:id="|endTime${staffStat.index}|"/>
+                            </div>
+                            <div class="col-md-2">
+                                <label th:for="|staffQuantity${staffStat.index}|">Количество</label>
+                                <input type="number" th:field="*{staffs[__${staffStat.index}__].staffQuantity}" class="form-control" th:id="|staffQuantity${staffStat.index}|"/>
+                            </div>
+                            <div class="col-md-2">
+                                <label th:for="|betPerHour${staffStat.index}|">Стоимость часа</label>
+                                <input type="number" th:field="*{staffs[__${staffStat.index}__].betPerHour}" class="form-control" th:id="|betPerHour${staffStat.index}|"/>
+                            </div>
+                        </div>
+                    </div>
+                    <button type="button" class="btn btn-secondary mt-2 add-staff-btn" th:attr="data-period=${iterStat.index + 1}">Добавить сотрудника</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Информация о персонале для разных дней -->
+        <div th:if="${!sameEquipmentForAllDays}">
+            <h2>Персонал на разные дни</h2>
+            <div th:each="day, iterStat : ${#numbers.sequence(0, daysWithoutPeriod - 1)}">
+                <h3>День <span th:text="${iterStat.index + 1}"></span> из <span th:text="${daysWithoutPeriod}"></span></h3>
+                <div th:each="staff, staffStat : ${headerStaffs.staffs}">
+                    <div th:if="${staffStat.index >= iterStat.index * 6 && staffStat.index < (iterStat.index + 1) * 6}"
+                         class="position-relative staff-row form-group hidden"
+                         th:data-staff-index="${staffStat.index}"
+                         th:attr="data-period=${iterStat.index + 1}">
+                        <h3>Сотрудник <span th:text="${staffStat.index + 1}"></span></h3>
+                        <div class="col-md-2">
+                            <label th:for="|kindOfStaff${staffStat.index}|">Вид персонала</label>
+                            <select th:field="*{staffs[__${staffStat.index}__].kindOfStaff}" class="form-control" th:id="|kindOfStaff${staffStat.index}|">
+                                <option value="">Выберите вид персонала</option>
+                                <option value="Администратор">Администратор</option>
+                                <option value="Супервайзер">Супервайзер</option>
+                                <option value="Оператор регистрации">Оператор регистрации</option>
+                                <option value="Хостес">Хостес</option>
+                                <option value="Гардеробщик">Гардеробщик</option>
+                                <option value="Технический специалист">Технический специалист</option>
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <label th:for="|startTime${staffStat.index}|">Время начала</label>
+                            <input type="time" th:field="*{staffs[__${staffStat.index}__].startTime}" class="form-control" th:id="|startTime${staffStat.index}|"/>
+                        </div>
+                        <div class="col-md-2">
+                            <label th:for="|endTime${staffStat.index}|">Время окончания</label>
+                            <input type="time" th:field="*{staffs[__${staffStat.index}__].endTime}" class="form-control" th:id="|endTime${staffStat.index}|"/>
+                        </div>
+                        <div class="col-md-2">
+                            <label th:for="|staffQuantity${staffStat.index}|">Количество</label>
+                            <input type="number" th:field="*{staffs[__${staffStat.index}__].staffQuantity}" class="form-control" th:id="|staffQuantity${staffStat.index}|"/>
+                        </div>
+                        <div class="col-md-2">
+                            <label th:for="|betPerHour${staffStat.index}|">Стоимость часа</label>
+                            <input type="number" th:field="*{staffs[__${staffStat.index}__].betPerHour}" class="form-control" th:id="|betPerHour${staffStat.index}|"/>
+                        </div>
+                    </div>
+                </div>
+                <button type="button" class="btn btn-secondary mt-2 add-staff-btn" th:attr="data-period=${iterStat.index + 1}">Добавить сотрудника</button>
+            </div>
+        </div>
+
+        <button type="submit" class="btn btn-primary mt-3">Сохранить</button>
     </form>
 </div>
 </body>

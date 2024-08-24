@@ -15,8 +15,8 @@ public class Pocket {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String size;
-    private String price;
-    private String count;
+    private Integer price;
+    private Integer count;
 
     @ManyToOne
     @JoinColumn(name = "supplies_id", nullable = false)

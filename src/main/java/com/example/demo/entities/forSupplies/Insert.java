@@ -17,8 +17,8 @@ public class Insert {
     private String size; //размер
     private String chroma; //цветность
     private String density; //плотность
-    private String price;
-    private String count;
+    private Integer price;
+    private Integer count;
 
     @ManyToOne
     @JoinColumn(name = "supplies_id", nullable = false)

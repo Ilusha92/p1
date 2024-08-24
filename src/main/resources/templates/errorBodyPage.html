@@ -1,13 +1,473 @@
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
-  <meta charset="UTF-8">
-  <title>Error Page</title>
+  <meta charset="UTF-8"/>
+  <title>Input Staff</title>
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
+  <style>
+    .short-input {
+      width: 100%;
+    }
+    .centered-form {
+      max-width: 1200px;
+      margin: auto;
+    }
+    .form-row .form-group {
+      flex: 1;
+      text-align: center;
+    }
+    .form-check {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+    .hidden {
+      display: none;
+    }
+    .form-group label, .form-group input, .form-group select {
+      text-align: center;
+      margin: auto;
+    }
+  </style>
+  <script>
+    function toggleVisibility(id) {
+      var element = document.getElementById(id);
+      if (element.classList.contains('hidden')) {
+        element.classList.remove('hidden');
+      } else {
+        element.classList.add('hidden');
+      }
+    }
+  </script>
 </head>
 <body>
-<div th:fragment="errorBodyPage">
-  <h1>Error</h1>
-  <p>Произошла ошибка. Пожалуйста, вернитесь на <a href="/">главную страницу</a> и попробуйте снова.</p>
+<div class="container">
+  <h1 class="text-center">Информация о персонале</h1>
+  <form th:action="@{/input/saveStaffInput}" method="post" th:object="${staff}" class="centered-form">
+    <input type="hidden" name="headerId" th:value="${headerId}"/>
+
+    <h2 class="text-center">Администраторы</h2>
+    <div>
+      <h3 class="text-center">Администратор 1</h3>
+      <div class="form-row justify-content-center">
+        <div class="form-group col-md-3">
+          <label for="adminWorkTimeStart1">Время начала</label>
+          <input type="time" id="adminWorkTimeStart1" th:field="*{adminWorkTimeStart1}" class="form-control short-input"/>
+        </div>
+        <div class="form-group col-md-3">
+          <label for="adminWorkTimeEnd1">Время окончания</label>
+          <input type="time" id="adminWorkTimeEnd1" th:field="*{adminWorkTimeEnd1}" class="form-control short-input"/>
+        </div>
+      </div>
+      <div class="form-row justify-content-center">
+        <div class="form-group col-md-3">
+          <label for="adminsCount1">Количество</label>
+          <input type="number" id="adminsCount1" th:field="*{adminsCount1}" class="form-control short-input" value="1"/>
+        </div>
+        <div class="form-group col-md-3">
+          <label for="adminHourPrice1">Стоимость часа</label>
+          <input type="number" id="adminHourPrice1" th:field="*{adminHourPrice1}" class="form-control short-input" value="1000" step="50"/>
+        </div>
+      </div>
+      <div class="form-row justify-content-center">
+        <div class="form-check col-md-3">
+          <input type="checkbox" class="form-check-input" id="montage1" th:field="*{montage1}"/>
+          <label class="form-check-label" for="montage1">Монтаж</label>
+        </div>
+      </div>
+      <div class="text-center">
+        <button type="button" class="btn btn-secondary" onclick="toggleVisibility('admin2')">Добавить Администратора 2</button>
+      </div>
+    </div>
+
+    <div id="admin2" class="hidden">
+      <h3 class="text-center">Администратор 2</h3>
+      <div class="form-row justify-content-center">
+        <div class="form-group col-md-3">
+          <label for="adminWorkTimeStart2">Время начала</label>
+          <input type="time" id="adminWorkTimeStart2" th:field="*{adminWorkTimeStart2}" class="form-control short-input"/>
+        </div>
+        <div class="form-group col-md-3">
+          <label for="adminWorkTimeEnd2">Время окончания</label>
+          <input type="time" id="adminWorkTimeEnd2" th:field="*{adminWorkTimeEnd2}" class="form-control short-input"/>
+        </div>
+      </div>
+      <div class="form-row justify-content-center">
+        <div class="form-group col-md-3">
+          <label for="adminsCount2">Количество</label>
+          <input type="number" id="adminsCount2" th:field="*{adminsCount2}" class="form-control short-input" value="1"/>
+        </div>
+        <div class="form-group col-md-3">
+          <label for="adminHourPrice2">Стоимость часа</label>
+          <input type="number" id="adminHourPrice2" th:field="*{adminHourPrice2}" class="form-control short-input" value="1000" step="50"/>
+        </div>
+      </div>
+      <div class="form-row justify-content-center">
+        <div class="form-check col-md-3">
+          <input type="checkbox" class="form-check-input" id="montage2" th:field="*{montage2}"/>
+          <label class="form-check-label" for="montage2">Монтаж</label>
+        </div>
+      </div>
+      <div class="text-center">
+        <button type="button" class="btn btn-secondary" onclick="toggleVisibility('admin3')">Добавить Администратора 3</button>
+      </div>
+    </div>
+
+    <div id="admin3" class="hidden">
+      <h3 class="text-center">Администратор 3</h3>
+      <div class="form-row justify-content-center">
+        <div class="form-group col-md-3">
+          <label for="adminWorkTimeStart3">Время начала</label>
+          <input type="time" id="adminWorkTimeStart3" th:field="*{adminWorkTimeStart3}" class="form-control short-input"/>
+        </div>
+        <div class="form-group col-md-3">
+          <label for="adminWorkTimeEnd3">Время окончания</label>
+          <input type="time" id="adminWorkTimeEnd3" th:field="*{adminWorkTimeEnd3}" class="form-control short-input"/>
+        </div>
+      </div>
+      <div class="form-row justify-content-center">
+        <div class="form-group col-md-3">
+          <label for="adminsCount3">Количество</label>
+          <input type="number" id="adminsCount3" th:field="*{adminsCount3}" class="form-control short-input" value="1"/>
+        </div>
+        <div class="form-group col-md-3">
+          <label for="adminHourPrice3">Стоимость часа</label>
+          <input type="number" id="adminHourPrice3" th:field="*{adminHourPrice3}" class="form-control short-input" value="1000" step="50"/>
+        </div>
+      </div>
+      <div class="form-row justify-content-center">
+        <div class="form-check col-md-3">
+          <input type="checkbox" class="form-check-input" id="montage3" th:field="*{montage3}"/>
+          <label class="form-check-label" for="montage3">Монтаж</label>
+        </div>
+      </div>
+      <div class="text-center">
+        <button type="button" class="btn btn-secondary" onclick="toggleVisibility('admin4')">Добавить Администратора 4</button>
+      </div>
+    </div>
+
+    <div id="admin4" class="hidden">
+      <h3 class="text-center">Администратор 4</h3>
+      <div class="form-row justify-content-center">
+        <div class="form-group col-md-3">
+          <label for="adminWorkTimeStart4">Время начала</label>
+          <input type="time" id="adminWorkTimeStart4" th:field="*{adminWorkTimeStart4}" class="form-control short-input"/>
+        </div>
+        <div class="form-group col-md-3">
+          <label for="adminWorkTimeEnd4">Время окончания</label>
+          <input type="time" id="adminWorkTimeEnd4" th:field="*{adminWorkTimeEnd4}" class="form-control short-input"/>
+        </div>
+      </div>
+      <div class="form-row justify-content-center">
+        <div class="form-group col-md-3">
+          <label for="adminsCount4">Количество</label>
+          <input type="number" id="adminsCount4" th:field="*{adminsCount4}" class="form-control short-input" value="1"/>
+        </div>
+        <div class="form-group col-md-3">
+          <label for="adminHourPrice4">Стоимость часа</label>
+          <input type="number" id="adminHourPrice4" th:field="*{adminHourPrice4}" class="form-control short-input" value="1000" step="50"/>
+        </div>
+      </div>
+      <div class="form-row justify-content-center">
+        <div class="form-check col-md-3">
+          <input type="checkbox" class="form-check-input" id="montage4" th:field="*{montage4}"/>
+          <label class="form-check-label" for="montage4">Монтаж</label>
+        </div>
+      </div>
+      <div class="text-center">
+        <button type="button" class="btn btn-secondary" onclick="toggleVisibility('admin5')">Добавить Администратора 5</button>
+      </div>
+    </div>
+
+    <div id="admin5" class="hidden">
+      <h3 class="text-center">Администратор 5</h3>
+      <div class="form-row justify-content-center">
+        <div class="form-group col-md-3">
+          <label for="adminWorkTimeStart5">Время начала</label>
+          <input type="time" id="adminWorkTimeStart5" th:field="*{adminWorkTimeStart5}" class="form-control short-input"/>
+        </div>
+        <div class="form-group col-md-3">
+          <label for="adminWorkTimeEnd5">Время окончания</label>
+          <input type="time" id="adminWorkTimeEnd5" th:field="*{adminWorkTimeEnd5}" class="form-control short-input"/>
+        </div>
+      </div>
+      <div class="form-row justify-content-center">
+        <div class="form-group col-md-3">
+          <label for="adminsCount5">Количество</label>
+          <input type="number" id="adminsCount5" th:field="*{adminsCount5}" class="form-control short-input" value="1"/>
+        </div>
+        <div class="form-group col-md-3">
+          <label for="adminHourPrice5">Стоимость часа</label>
+          <input type="number" id="adminHourPrice5" th:field="*{adminHourPrice5}" class="form-control short-input" value="1000" step="50"/>
+        </div>
+      </div>
+      <div class="form-row justify-content-center">
+        <div class="form-check col-md-3">
+          <input type="checkbox" class="form-check-input" id="montage5" th:field="*{montage5}"/>
+          <label class="form-check-label" for="montage5">Монтаж</label>
+        </div>
+      </div>
+    </div>
+
+    <h2 class="text-center">Персонал</h2>
+    <div>
+      <h3 class="text-center">Персонал 1</h3>
+      <div class="form-row justify-content-center">
+        <div class="form-group col-md-3">
+          <label for="staffWorkTime1Start">Время начала</label>
+          <input type="time" id="staffWorkTime1Start" th:field="*{staffWorkTime1Start}" class="form-control short-input"/>
+        </div>
+        <div class="form-group col-md-3">
+          <label for="staffWorkTime1End">Время окончания</label>
+          <input type="time" id="staffWorkTime1End" th:field="*{staffWorkTime1End}" class="form-control short-input"/>
+        </div>
+      </div>
+      <div class="form-row justify-content-center">
+        <div class="form-group col-md-3">
+          <label for="staffKind1">Вид персонала</label>
+          <select id="staffKind1" th:field="*{staffKind1}" class="form-control short-input">
+            <option value="Оператор регистрации" selected>Оператор регистрации</option>
+            <option value="Хостес">Хостес</option>
+            <option value="Хелпер">Хелпер</option>
+            <option value="Гардеробщик">Гардеробщик</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-row justify-content-center">
+        <div class="form-group col-md-3">
+          <label for="staffCount1">Количество</label>
+          <input type="number" id="staffCount1" th:field="*{staffCount1}" class="form-control short-input"/>
+        </div>
+        <div class="form-group col-md-3">
+          <label for="staffHourPrice1">Стоимость часа</label>
+          <input type="number" id="staffHourPrice1" th:field="*{staffHourPrice1}" class="form-control short-input" value="800" step="50"/>
+        </div>
+      </div>
+      <div class="text-center">
+        <button type="button" class="btn btn-secondary" onclick="toggleVisibility('staff2')">Добавить Персонал 2</button>
+      </div>
+    </div>
+
+    <div id="staff2" class="hidden">
+      <h3 class="text-center">Персонал 2</h3>
+      <div class="form-row justify-content-center">
+        <div class="form-group col-md-3">
+          <label for="staffWorkTime2Start">Время начала</label>
+          <input type="time" id="staffWorkTime2Start" th:field="*{staffWorkTime2Start}" class="form-control short-input"/>
+        </div>
+        <div class="form-group col-md-3">
+          <label for="staffWorkTime2End">Время окончания</label>
+          <input type="time" id="staffWorkTime2End" th:field="*{staffWorkTime2End}" class="form-control short-input"/>
+        </div>
+      </div>
+      <div class="form-row justify-content-center">
+        <div class="form-group col-md-3">
+          <label for="staffKind2">Вид персонала</label>
+          <select id="staffKind2" th:field="*{staffKind2}" class="form-control short-input">
+            <option value="Оператор регистрации" selected>Оператор регистрации</option>
+            <option value="Хостес">Хостес</option>
+            <option value="Хелпер">Хелпер</option>
+            <option value="Гардеробщик">Гардеробщик</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-row justify-content-center">
+        <div class="form-group col-md-3">
+          <label for="staffCount2">Количество</label>
+          <input type="number" id="staffCount2" th:field="*{staffCount2}" class="form-control short-input"/>
+        </div>
+        <div class="form-group col-md-3">
+          <label for="staffHourPrice2">Стоимость часа</label>
+          <input type="number" id="staffHourPrice2" th:field="*{staffHourPrice2}" class="form-control short-input" value="800" step="50"/>
+        </div>
+      </div>
+      <div class="text-center">
+        <button type="button" class="btn btn-secondary" onclick="toggleVisibility('staff3')">Добавить Персонал 3</button>
+      </div>
+    </div>
+
+    <div id="staff3" class="hidden">
+      <h3 class="text-center">Персонал 3</h3>
+      <div class="form-row justify-content-center">
+        <div class="form-group col-md-3">
+          <label for="staffWorkTime3Start">Время начала</label>
+          <input type="time" id="staffWorkTime3Start" th:field="*{staffWorkTime3Start}" class="form-control short-input"/>
+        </div>
+        <div class="form-group col-md-3">
+          <label for="staffWorkTime3End">Время окончания</label>
+          <input type="time" id="staffWorkTime3End" th:field="*{staffWorkTime3End}" class="form-control short-input"/>
+        </div>
+      </div>
+      <div class="form-row justify-content-center">
+        <div class="form-group col-md-3">
+          <label for="staffKind3">Вид персонала</label>
+          <select id="staffKind3" th:field="*{staffKind3}" class="form-control short-input">
+            <option value="Оператор регистрации" selected>Оператор регистрации</option>
+            <option value="Хостес">Хостес</option>
+            <option value="Хелпер">Хелпер</option>
+            <option value="Гардеробщик">Гардеробщик</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-row justify-content-center">
+        <div class="form-group col-md-3">
+          <label for="staffCount3">Количество</label>
+          <input type="number" id="staffCount3" th:field="*{staffCount3}" class="form-control short-input"/>
+        </div>
+        <div class="form-group col-md-3">
+          <label for="staffHourPrice3">Стоимость часа</label>
+          <input type="number" id="staffHourPrice3" th:field="*{staffHourPrice3}" class="form-control short-input" value="800" step="50"/>
+        </div>
+      </div>
+      <div class="text-center">
+        <button type="button" class="btn btn-secondary" onclick="toggleVisibility('staff4')">Добавить Персонал 4</button>
+      </div>
+    </div>
+
+    <div id="staff4" class="hidden">
+      <h3 class="text-center">Персонал 4</h3>
+      <div class="form-row justify-content-center">
+        <div class="form-group col-md-3">
+          <label for="staffWorkTime4Start">Время начала</label>
+          <input type="time" id="staffWorkTime4Start" th:field="*{staffWorkTime4Start}" class="form-control short-input"/>
+        </div>
+        <div class="form-group col-md-3">
+          <label for="staffWorkTime4End">Время окончания</label>
+          <input type="time" id="staffWorkTime4End" th:field="*{staffWorkTime4End}" class="form-control short-input"/>
+        </div>
+      </div>
+      <div class="form-row justify-content-center">
+        <div class="form-group col-md-3">
+          <label for="staffKind4">Вид персонала</label>
+          <select id="staffKind4" th:field="*{staffKind4}" class="form-control short-input">
+            <option value="Оператор регистрации" selected>Оператор регистрации</option>
+            <option value="Хостес">Хостес</option>
+            <option value="Хелпер">Хелпер</option>
+            <option value="Гардеробщик">Гардеробщик</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-row justify-content-center">
+        <div class="form-group col-md-3">
+          <label for="staffCount4">Количество</label>
+          <input type="number" id="staffCount4" th:field="*{staffCount4}" class="form-control short-input"/>
+        </div>
+        <div class="form-group col-md-3">
+          <label for="staffHourPrice4">Стоимость часа</label>
+          <input type="number" id="staffHourPrice4" th:field="*{staffHourPrice4}" class="form-control short-input" value="800" step="50"/>
+        </div>
+      </div>
+      <div class="text-center">
+        <button type="button" class="btn btn-secondary" onclick="toggleVisibility('staff5')">Добавить Персонал 5</button>
+      </div>
+    </div>
+
+    <div id="staff5" class="hidden">
+      <h3 class="text-center">Персонал 5</h3>
+      <div class="form-row justify-content-center">
+        <div class="form-group col-md-3">
+          <label for="staffWorkTime5Start">Время начала</label>
+          <input type="time" id="staffWorkTime5Start" th:field="*{staffWorkTime5Start}" class="form-control short-input"/>
+        </div>
+        <div class="form-group col-md-3">
+          <label for="staffWorkTime5End">Время окончания</label>
+          <input type="time" id="staffWorkTime5End" th:field="*{staffWorkTime5End}" class="form-control short-input"/>
+        </div>
+      </div>
+      <div class="form-row justify-content-center">
+        <div class="form-group col-md-3">
+          <label for="staffKind5">Вид персонала</label>
+          <select id="staffKind5" th:field="*{staffKind5}" class="form-control short-input">
+            <option value="Оператор регистрации" selected>Оператор регистрации</option>
+            <option value="Хостес">Хостес</option>
+            <option value="Хелпер">Хелпер</option>
+            <option value="Гардеробщик">Гардеробщик</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-row justify-content-center">
+        <div class="form-group col-md-3">
+          <label for="staffCount5">Количество</label>
+          <input type="number" id="staffCount5" th:field="*{staffCount5}" class="form-control short-input"/>
+        </div>
+        <div class="form-group col-md-3">
+          <label for="staffHourPrice5">Стоимость часа</label>
+          <input type="number" id="staffHourPrice5" th:field="*{staffHourPrice5}" class="form-control short-input" value="800" step="50"/>
+        </div>
+      </div>
+    </div>
+
+    <h2 class="text-center">Super Персонал</h2>
+    <div>
+      <h3 class="text-center">Super Персонал 1</h3>
+      <div class="form-row justify-content-center">
+        <div class="form-group col-md-3">
+          <label for="superWorkTime1Start">Время начала</label>
+          <input type="time" id="superWorkTime1Start" th:field="*{superWorkTime1Start}" class="form-control short-input"/>
+        </div>
+        <div class="form-group col-md-3">
+          <label for="superWorkTime1End">Время окончания</label>
+          <input type="time" id="superWorkTime1End" th:field="*{superWorkTime1End}" class="form-control short-input"/>
+        </div>
+      </div>
+      <div class="form-row justify-content-center">
+        <div class="form-group col-md-3">
+          <label for="superHourPrice1">Стоимость часа</label>
+          <input type="number" id="superHourPrice1" th:field="*{superHourPrice1}" class="form-control short-input" value="800" step="50"/>
+        </div>
+      </div>
+      <div class="text-center">
+        <button type="button" class="btn btn-secondary" onclick="toggleVisibility('super2')">Добавить Super Персонал 2</button>
+      </div>
+    </div>
+
+    <div id="super2" class="hidden">
+      <h3 class="text-center">Super Персонал 2</h3>
+      <div class="form-row justify-content-center">
+        <div class="form-group col-md-3">
+          <label for="superWorkTime2Start">Время начала</label>
+          <input type="time" id="superWorkTime2Start" th:field="*{superWorkTime2Start}" class="form-control short-input"/>
+        </div>
+        <div class="form-group col-md-3">
+          <label for="superWorkTime2End">Время окончания</label>
+          <input type="time" id="superWorkTime2End" th:field="*{superWorkTime2End}" class="form-control short-input"/>
+        </div>
+      </div>
+      <div class="form-row justify-content-center">
+        <div class="form-group col-md-3">
+          <label for="superHourPrice2">Стоимость часа</label>
+          <input type="number" id="superHourPrice2" th:field="*{superHourPrice2}" class="form-control short-input" value="800" step="50"/>
+        </div>
+      </div>
+      <div class="text-center">
+        <button type="button" class="btn btn-secondary" onclick="toggleVisibility('super3')">Добавить Super Персонал 3</button>
+      </div>
+    </div>
+
+    <div id="super3" class="hidden">
+      <h3 class="text-center">Super Персонал 3</h3>
+      <div class="form-row justify-content-center">
+        <div class="form-group col-md-3">
+          <label for="superWorkTime3Start">Время начала</label>
+          <input type="time" id="superWorkTime3Start" th:field="*{superWorkTime3Start}" class="form-control short-input"/>
+        </div>
+        <div class="form-group col-md-3">
+          <label for="superWorkTime3End">Время окончания</label>
+          <input type="time" id="superWorkTime3End" th:field="*{superWorkTime3End}" class="form-control short-input"/>
+        </div>
+      </div>
+      <div class="form-row justify-content-center">
+        <div class="form-group col-md-3">
+          <label for="superHourPrice3">Стоимость часа</label>
+          <input type="number" id="superHourPrice3" th:field="*{superHourPrice3}" class="form-control short-input" value="800" step="50"/>
+        </div>
+      </div>
+    </div>
+
+    <div class="text-center">
+      <button type="submit" class="btn btn-primary">Сохранить</button>
+    </div>
+  </form>
 </div>
 </body>
 </html>

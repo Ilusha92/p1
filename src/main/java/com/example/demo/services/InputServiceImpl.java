@@ -4,7 +4,6 @@ import com.example.demo.entities.*;
 import com.example.demo.entities.forSupplies.*;
 import com.example.demo.repository.*;
 import com.example.demo.repository.forSupplies.*;
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -28,6 +27,9 @@ public class InputServiceImpl implements InputService {
     private final StickerRepository stickerRepository;
     private final StaffRepository staffRepository;
     private final LogisticRepository logisticRepository;
+    private final AsupRepository asupRepository;
+    private final MountingRepository mountingRepository;
+
     private final ExcelServiceImpl excelService;
 
     //private final BCryptPasswordEncoder bCryptPasswordEncoder;
@@ -107,6 +109,16 @@ public class InputServiceImpl implements InputService {
     @Override
     public Sticker saveSticker(Sticker sticker) {
         return stickerRepository.save(sticker);
+    }
+
+    @Override
+    public Asup saveAsup(Asup asup) {
+        return asupRepository.save(asup);
+    }
+
+    @Override
+    public Mounting saveMounting(Mounting mounting){
+        return mountingRepository.save(mounting);
     }
 
     @Override

@@ -8,20 +8,16 @@ import lombok.*;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PUBLIC)
-@Entity(name = "lanyards")
-public class Lanyard {
-
+@Entity(name = "asups")
+public class Asup {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    private String size; //размер
-    private String application; //нанесение
-    private String bracing;//крепление
+    private String description;
     private Integer price;
     private Integer count;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "supplies_id", nullable = false)
     private Supplies supplies;
-
 }

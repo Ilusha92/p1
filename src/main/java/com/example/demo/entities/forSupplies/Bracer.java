@@ -22,8 +22,8 @@ public class Bracer {
     private String color;
     private String type;
     private boolean rfid = false; //с RFID или без
-    private String price;
-    private String count;
+    private Integer price;
+    private Integer count;
 
     @ManyToOne
     @JoinColumn(name = "supplies_id", nullable = false)

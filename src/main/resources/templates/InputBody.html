@@ -1,262 +1,3 @@
-<!--<!DOCTYPE html>-->
-<!--<html xmlns:th="http://www.thymeleaf.org">-->
-<!--<head>-->
-<!--  <meta charset="UTF-8"/>-->
-<!--  <title>Input Body</title>-->
-<!--  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">-->
-<!--  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>-->
-<!--</head>-->
-<!--<body>-->
-<!--<div class="container">-->
-<!--  <h1>Основное оборудование</h1>-->
-<!--  <form th:action="@{/input/saveBodyInput}" th:object="${headerBodies}" method="post">-->
-<!--    <input type="hidden" name="headerId" th:value="${headerId}" />-->
-<!--    <input type="hidden" name="sameEquipmentForAllDays" th:value="${sameEquipmentForAllDays}" />-->
-
-<!--    <div th:if="${sameEquipmentForAllDays}">-->
-<!--      <h2>Оборудование на все дни</h2>-->
-
-<!--      &lt;!&ndash; Equipment for all days section &ndash;&gt;-->
-<!--      <div class="form-group row">-->
-<!--        <div class="col-sm-4">-->
-<!--          <select th:field="*{bodies[0].softDevice}" class="form-control">-->
-<!--            <option value="" selected>&#45;&#45; Выбери оборудование для клиента &#45;&#45;</option>-->
-<!--            <option th:each="device : ${softDevices}" th:value="${device.id}" th:text="${device.name}"></option>-->
-<!--          </select>-->
-<!--        </div>-->
-<!--        <div class="col-sm-4">-->
-<!--          <input type="text" th:field="*{bodies[0].sDeviceCount}" class="form-control" placeholder="Количество" />-->
-<!--        </div>-->
-<!--        <div class="col-sm-4">-->
-<!--          <input type="text" th:field="*{bodies[0].sDevicePrice}" class="form-control" value="1800" />-->
-<!--        </div>-->
-<!--      </div>-->
-
-<!--      <div class="form-group row">-->
-<!--        <div class="col-sm-4">-->
-<!--          <select th:field="*{bodies[0].printerDevice}" class="form-control">-->
-<!--            <option value="" selected>&#45;&#45; Выбери принтер &#45;&#45;</option>-->
-<!--            <option th:each="device : ${printerDevices}" th:value="${device.id}" th:text="${device.name}"></option>-->
-<!--          </select>-->
-<!--        </div>-->
-<!--        <div class="col-sm-4">-->
-<!--          <input type="text" th:field="*{bodies[0].pDeviceCount}" class="form-control" placeholder="Количество" />-->
-<!--        </div>-->
-<!--        <div class="col-sm-4">-->
-<!--          <input type="text" th:field="*{bodies[0].pDevicePrice}" class="form-control" />-->
-<!--        </div>-->
-<!--      </div>-->
-
-<!--      <div class="form-group row">-->
-<!--        <label class="col-sm-4 col-form-label">Кабельная коммутация:</label>-->
-<!--        <div class="col-sm-4">-->
-<!--          <input type="text" th:field="*{bodies[0].switchingCount}" class="form-control" value="1" />-->
-<!--        </div>-->
-<!--        <div class="col-sm-4">-->
-<!--          <input type="text" th:field="*{bodies[0].switchingPrice}" class="form-control" value="750" />-->
-<!--        </div>-->
-<!--      </div>-->
-
-<!--      <div class="form-group row">-->
-<!--        <label class="col-sm-4 col-form-label">Сетевое оборудование:</label>-->
-<!--        <div class="col-sm-4">-->
-<!--          <input type="text" th:field="*{bodies[0].networkCount}" class="form-control" value="1" />-->
-<!--        </div>-->
-<!--        <div class="col-sm-4">-->
-<!--          <input type="text" th:field="*{bodies[0].networkPrice}" class="form-control" value="1200" />-->
-<!--        </div>-->
-<!--      </div>-->
-
-<!--      <div id="additionalFields_all"></div>-->
-
-<!--      <div class="form-group">-->
-<!--        <button type="button" class="btn btn-secondary add-equipment-button-all" data-type="camera">Добавить web-камеры</button>-->
-<!--        <button type="button" class="btn btn-secondary add-equipment-button-all" data-type="scanner">Добавить 2D-сканеры</button>-->
-<!--        <button type="button" class="btn btn-secondary add-equipment-button-all" data-type="rfid">Добавить RFID-считыватели</button>-->
-<!--        <button type="button" class="btn btn-secondary add-equipment-button-all" data-type="tsd">Добавить ТСД</button>-->
-<!--      </div>-->
-<!--    </div>-->
-
-<!--    <div th:if="${!sameEquipmentForAllDays}">-->
-<!--      <h2>Оборудование на разные дни</h2>-->
-<!--      &lt;!&ndash; Loop through each InputBody and create input fields for each &ndash;&gt;-->
-<!--      <div th:each="body, iterStat : ${headerBodies.bodies}">-->
-<!--        <h3>День <span th:text="${iterStat.index + 1}">1</span></h3>-->
-
-<!--        <div class="form-group row">-->
-<!--          <div class="col-sm-4">-->
-<!--            <select th:field="*{bodies[__${iterStat.index}__].softDevice}" class="form-control">-->
-<!--              <option value="" selected>&#45;&#45; Выбери оборудование для клиента &#45;&#45;</option>-->
-<!--              <option th:each="device : ${softDevices}" th:value="${device.id}" th:text="${device.name}"></option>-->
-<!--            </select>-->
-<!--          </div>-->
-<!--          <div class="col-sm-4">-->
-<!--            <input type="text" th:field="*{bodies[__${iterStat.index}__].sDeviceCount}" class="form-control" placeholder="Количество" />-->
-<!--          </div>-->
-<!--          <div class="col-sm-4">-->
-<!--            <input type="text" th:field="*{bodies[__${iterStat.index}__].sDevicePrice}" class="form-control" />-->
-<!--          </div>-->
-<!--        </div>-->
-
-<!--        <div class="form-group row">-->
-<!--          <div class="col-sm-4">-->
-<!--            <select th:field="*{bodies[__${iterStat.index}__].printerDevice}" class="form-control">-->
-<!--              <option value="" selected>&#45;&#45; Выбери принтер &#45;&#45;</option>-->
-<!--              <option th:each="device : ${printerDevices}" th:value="${device.id}" th:text="${device.name}"></option>-->
-<!--            </select>-->
-<!--          </div>-->
-<!--          <div class="col-sm-4">-->
-<!--            <input type="text" th:field="*{bodies[__${iterStat.index}__].pDeviceCount}" class="form-control" placeholder="Количество" />-->
-<!--          </div>-->
-<!--          <div class="col-sm-4">-->
-<!--            <input type="text" th:field="*{bodies[__${iterStat.index}__].pDevicePrice}" class="form-control" />-->
-<!--          </div>-->
-<!--        </div>-->
-
-<!--        <div class="form-group row">-->
-<!--          <label class="col-sm-4 col-form-label">Кабельная коммутация:</label>-->
-<!--          <div class="col-sm-4">-->
-<!--            <input type="text" th:field="*{bodies[__${iterStat.index}__].switchingCount}" class="form-control" value="1" />-->
-<!--          </div>-->
-<!--          <div class="col-sm-4">-->
-<!--            <input type="text" th:field="*{bodies[__${iterStat.index}__].switchingPrice}" class="form-control" value="750" />-->
-<!--          </div>-->
-<!--        </div>-->
-
-<!--        <div class="form-group row">-->
-<!--          <label class="col-sm-4 col-form-label">Сетевое оборудование:</label>-->
-<!--          <div class="col-sm-4">-->
-<!--            <input type="text" th:field="*{bodies[__${iterStat.index}__].networkCount}" class="form-control" value="1" />-->
-<!--          </div>-->
-<!--          <div class="col-sm-4">-->
-<!--            <input type="text" th:field="*{bodies[__${iterStat.index}__].networkPrice}" class="form-control" value="1200" />-->
-<!--          </div>-->
-<!--        </div>-->
-
-<!--        <div id="additionalFields__" th:attr="id='additionalFields__' + ${iterStat.index}"></div>-->
-
-<!--        <div class="form-group">-->
-<!--          <button type="button" class="btn btn-secondary add-equipment-button" th:data-index="${iterStat.index}" th:data-type="'camera'">Добавить web-камеры</button>-->
-<!--          <button type="button" class="btn btn-secondary add-equipment-button" th:data-index="${iterStat.index}" th:data-type="'scanner'">Добавить 2D-сканеры</button>-->
-<!--          <button type="button" class="btn btn-secondary add-equipment-button" th:data-index="${iterStat.index}" th:data-type="'rfid'">Добавить RFID-считыватели</button>-->
-<!--          <button type="button" class="btn btn-secondary add-equipment-button" th:data-index="${iterStat.index}" th:data-type="'tsd'">Добавить ТСД</button>-->
-<!--        </div>-->
-<!--      </div>-->
-<!--    </div>-->
-
-<!--    <button type="submit" class="btn btn-primary">Далее</button>-->
-<!--  </form>-->
-<!--</div>-->
-
-<!--<script>-->
-<!--  $(document).ready(function() {-->
-<!--    console.log("jQuery is loaded and document is ready.");-->
-
-<!--    $('.add-equipment-button').on('click', function() {-->
-<!--      var index = $(this).data('index');-->
-<!--      var type = $(this).data('type');-->
-<!--      addEquipment(index, type, false);-->
-<!--    });-->
-
-<!--    $('.add-equipment-button-all').on('click', function() {-->
-<!--      var type = $(this).data('type');-->
-<!--      addEquipment(0, type, true);-->
-<!--    });-->
-
-<!--    function addEquipment(index, type, isAllDays) {-->
-<!--      var label, countField, priceField, defaultPrice;-->
-
-<!--      switch(type) {-->
-<!--        case 'camera':-->
-<!--          label = 'Web-камера';-->
-<!--          countField = 'cameraDeviceCount';-->
-<!--          priceField = 'cameraDevicePrice';-->
-<!--          defaultPrice = 750;-->
-<!--          break;-->
-<!--        case 'scanner':-->
-<!--          label = '2D-Сканер';-->
-<!--          countField = 'barcodeDeviceCount';-->
-<!--          priceField = 'barcodeDevicePrice';-->
-<!--          defaultPrice = 1000;-->
-<!--          break;-->
-<!--        case 'rfid':-->
-<!--          label = 'RFID-считыватель';-->
-<!--          countField = 'rfidReaderDeviceCount';-->
-<!--          priceField = 'rfidReaderDevicePrice';-->
-<!--          defaultPrice = 1000;-->
-<!--          break;-->
-<!--        case 'tsd':-->
-<!--          label = 'ТСД';-->
-<!--          countField = 'tsdCount';-->
-<!--          priceField = 'tsdPrice';-->
-<!--          defaultPrice = 1000;-->
-<!--          break;-->
-<!--      }-->
-
-<!--      var additionalFieldsId = isAllDays ? 'additionalFields_all' : 'additionalFields__' + index;-->
-<!--      var additionalFields = document.getElementById(additionalFieldsId);-->
-
-<!--      if (additionalFields) {-->
-<!--        // Проверка на уже существующее поле-->
-<!--        if ($(additionalFields).find('[name="bodies[' + index + '].' + countField + '"]').length === 0) {-->
-<!--          addField(index, label, countField, priceField, defaultPrice, isAllDays);-->
-<!--        } else {-->
-<!--          console.log(`Field ${label} already exists for index ${index}`);-->
-<!--        }-->
-<!--      } else {-->
-<!--        console.error(`Element with ID ${additionalFieldsId} not found`);-->
-<!--      }-->
-<!--    }-->
-
-<!--    function addField(index, label, countField, priceField, defaultPrice, isAllDays) {-->
-<!--      console.log(`Adding field: ${label} for index ${index}`);-->
-<!--      const additionalFieldsId = isAllDays ? 'additionalFields_all' : 'additionalFields__' + index;-->
-<!--      const additionalFields = document.getElementById(additionalFieldsId);-->
-
-<!--      if (additionalFields) {-->
-<!--        const fieldHTML = `-->
-<!--                <div class="form-group row" data-type="${countField}">-->
-<!--                    <label class="col-sm-4 col-form-label">${label}:</label>-->
-<!--                    <div class="col-sm-3">-->
-<!--                        <input type="text" name="bodies[${index}].${countField}" class="form-control" placeholder="1" value="1" />-->
-<!--                    </div>-->
-<!--                    <div class="col-sm-3">-->
-<!--                        <input type="text" name="bodies[${index}].${priceField}" class="form-control" placeholder="${defaultPrice}" value="${defaultPrice}" />-->
-<!--                    </div>-->
-<!--                    <div class="col-sm-2">-->
-<!--                        <button type="button" class="btn btn-danger" onclick="removeField(this, '${index}', '${countField}', '${priceField}', ${isAllDays})">X</button>-->
-<!--                    </div>-->
-<!--                </div>-->
-<!--            `;-->
-<!--        additionalFields.insertAdjacentHTML('beforeend', fieldHTML);-->
-<!--      } else {-->
-<!--        console.error(`Element with ID ${additionalFieldsId} not found`);-->
-<!--      }-->
-<!--    }-->
-
-<!--    window.removeField = function(button, index, countField, priceField, isAllDays) {-->
-<!--      console.log(`Removing field: ${countField} for index ${index}`);-->
-<!--      const row = button.closest('.form-group.row');-->
-<!--      const additionalFieldsId = isAllDays ? 'additionalFields_all' : 'additionalFields__' + index;-->
-<!--      const additionalFields = document.getElementById(additionalFieldsId);-->
-
-<!--      if (additionalFields) {-->
-<!--        // Добавить скрытые поля с null значениями-->
-<!--        additionalFields.insertAdjacentHTML('beforeend', `-->
-<!--                <input type="hidden" name="bodies[${index}].${countField}" value="null"/>-->
-<!--                <input type="hidden" name="bodies[${index}].${priceField}" value="null"/>-->
-<!--            `);-->
-<!--        row.remove();-->
-<!--      } else {-->
-<!--        console.error(`Element with ID ${additionalFieldsId} not found`);-->
-<!--      }-->
-<!--    }-->
-<!--  });-->
-
-<!--</script>-->
-<!--</body>-->
-<!--</html>-->
-
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
@@ -268,133 +9,273 @@
     .hidden {
       display: none;
     }
+    .remove-staff-btn {
+      color: red;
+      cursor: pointer;
+      font-size: 1.5em;
+      position: absolute;
+      right: 10px;
+      top: 10px;
+    }
+    .form-control {
+      width: 100%;
+      max-width: 100%;
+    }
   </style>
 </head>
 <body>
 <div class="container">
   <h1>Основное оборудование</h1>
-  <form th:action="@{/input/saveBodyInput}" th:object="${headerBodies}" method="post">
+  <form id="equipmentForm" th:action="@{/input/saveBodyInput}" th:object="${headerBodies}" method="post">
     <input type="hidden" name="headerId" th:value="${headerId}" />
     <input type="hidden" name="sameEquipmentForAllDays" th:value="${sameEquipmentForAllDays}" />
+    <input type="hidden" name="periods" th:value="${periods}" />
 
     <div th:if="${sameEquipmentForAllDays}">
       <h2>Оборудование на все дни</h2>
-
-      <!-- Equipment for all days section -->
-      <div class="form-group row">
-        <div class="col-sm-4">
-          <select th:field="*{bodies[0].softDevice}" class="form-control">
-            <option value="" selected>-- Выбери оборудование для клиента --</option>
-            <option th:each="device : ${softDevices}" th:value="${device.id}" th:text="${device.name}"></option>
-          </select>
-        </div>
-        <div class="col-sm-4">
-          <input type="text" th:field="*{bodies[0].sDeviceCount}" class="form-control" placeholder="Количество" />
-        </div>
-        <div class="col-sm-4">
-          <input type="text" th:field="*{bodies[0].sDevicePrice}" class="form-control" value="1800" />
-        </div>
-      </div>
-
-      <div class="form-group row">
-        <div class="col-sm-4">
-          <select th:field="*{bodies[0].printerDevice}" class="form-control">
-            <option value="" selected>-- Выбери принтер --</option>
-            <option th:each="device : ${printerDevices}" th:value="${device.id}" th:text="${device.name}"></option>
-          </select>
-        </div>
-        <div class="col-sm-4">
-          <input type="text" th:field="*{bodies[0].pDeviceCount}" class="form-control" placeholder="Количество" />
-        </div>
-        <div class="col-sm-4">
-          <input type="text" th:field="*{bodies[0].pDevicePrice}" class="form-control" />
-        </div>
-      </div>
-
-      <div class="form-group row">
-        <label class="col-sm-4 col-form-label">Кабельная коммутация:</label>
-        <div class="col-sm-4">
-          <input type="text" th:field="*{bodies[0].switchingCount}" class="form-control" placeholder="1" />
-        </div>
-        <div class="col-sm-4">
-          <input type="text" th:field="*{bodies[0].switchingPrice}" class="form-control" placeholder="750" />
-        </div>
-      </div>
-
-      <div class="form-group row">
-        <label class="col-sm-4 col-form-label">Сетевое оборудование:</label>
-        <div class="col-sm-4">
-          <input type="text" th:field="*{bodies[0].networkCount}" class="form-control" placeholder="1" />
-        </div>
-        <div class="col-sm-4">
-          <input type="text" th:field="*{bodies[0].networkPrice}" class="form-control" placeholder="1200" />
-        </div>
-      </div>
-
-      <!-- Hidden fields for additional equipment -->
-      <div class="form-group row hidden" id="cameraFields_all">
-        <label class="col-sm-4 col-form-label">Web-камера:</label>
-        <div class="col-sm-3">
-          <input type="text" th:field="*{bodies[0].cameraDeviceCount}" class="form-control" placeholder="1" />
-        </div>
-        <div class="col-sm-3">
-          <input type="text" th:field="*{bodies[0].cameraDevicePrice}" class="form-control" placeholder="750" />
-        </div>
-      </div>
-      <div class="form-group row hidden" id="scannerFields_all">
-        <label class="col-sm-4 col-form-label">2D-Сканер:</label>
-        <div class="col-sm-3">
-          <input type="text" th:field="*{bodies[0].barcodeDeviceCount}" class="form-control" placeholder="1" />
-        </div>
-        <div class="col-sm-3">
-          <input type="text" th:field="*{bodies[0].barcodeDevicePrice}" class="form-control" placeholder="1000" />
-        </div>
-      </div>
-      <div class="form-group row hidden" id="rfidFields_all">
-        <label class="col-sm-4 col-form-label">RFID-считыватель:</label>
-        <div class="col-sm-3">
-          <input type="text" th:field="*{bodies[0].rfidReaderDeviceCount}" class="form-control" placeholder="1" />
-        </div>
-        <div class="col-sm-3">
-          <input type="text" th:field="*{bodies[0].rfidReaderDevicePrice}" class="form-control" placeholder="1000" />
-        </div>
-      </div>
-      <div class="form-group row hidden" id="tsdFields_all">
-        <label class="col-sm-4 col-form-label">ТСД:</label>
-        <div class="col-sm-3">
-          <input type="text" th:field="*{bodies[0].tsdCount}" class="form-control" placeholder="1" />
-        </div>
-        <div class="col-sm-3">
-          <input type="text" th:field="*{bodies[0].tsdPrice}" class="form-control" placeholder="1000" />
-        </div>
-      </div>
-
-      <div class="form-group">
-        <button type="button" class="btn btn-secondary add-equipment-button-all" data-type="camera">Добавить web-камеры</button>
-        <button type="button" class="btn btn-secondary add-equipment-button-all" data-type="scanner">Добавить 2D-сканеры</button>
-        <button type="button" class="btn btn-secondary add-equipment-button-all" data-type="rfid">Добавить RFID-считыватели</button>
-        <button type="button" class="btn btn-secondary add-equipment-button-all" data-type="tsd">Добавить ТСД</button>
-      </div>
-    </div>
-
-    <div th:if="${!sameEquipmentForAllDays}">
-      <h2>Оборудование на разные дни</h2>
-      <!-- Loop through each InputBody and create input fields for each -->
-      <div th:each="body, iterStat : ${headerBodies.bodies}">
-        <h3>День <span th:text="${iterStat.index + 1}">1</span></h3>
-
+      <div th:if="${periods == 0}">
         <div class="form-group row">
           <div class="col-sm-4">
-            <select th:field="*{bodies[__${iterStat.index}__].softDevice}" class="form-control">
+            <select id="softDevice" th:field="*{bodies[0].softDevice}" class="form-control">
               <option value="" selected>-- Выбери оборудование для клиента --</option>
               <option th:each="device : ${softDevices}" th:value="${device.id}" th:text="${device.name}"></option>
             </select>
           </div>
           <div class="col-sm-4">
-            <input type="text" th:field="*{bodies[__${iterStat.index}__].sDeviceCount}" class="form-control" placeholder="Количество" />
+            <input type="number" id="sDeviceCount" th:field="*{bodies[0].sDeviceCount}" class="form-control" placeholder="Количество" />
           </div>
           <div class="col-sm-4">
-            <input type="text" th:field="*{bodies[__${iterStat.index}__].sDevicePrice}" class="form-control" />
+            <input type="number" id="sDevicePrice" th:field="*{bodies[0].sDevicePrice}" class="form-control" value="1800" />
+          </div>
+        </div>
+
+        <div class="form-group row">
+          <div class="col-sm-4">
+            <select th:field="*{bodies[0].printerDevice}" class="form-control">
+              <option value="" selected>-- Выбери принтер --</option>
+              <option th:each="device : ${printerDevices}" th:value="${device.id}" th:text="${device.name}"></option>
+            </select>
+          </div>
+          <div class="col-sm-4">
+            <input type="number" th:field="*{bodies[0].pDeviceCount}" class="form-control" placeholder="Количество" />
+          </div>
+          <div class="col-sm-4">
+            <input type="number" th:field="*{bodies[0].pDevicePrice}" class="form-control" />
+          </div>
+        </div>
+
+        <div class="form-group row">
+          <label class="col-sm-4 col-form-label">Кабельная коммутация:</label>
+          <div class="col-sm-4">
+            <input type="number" th:field="*{bodies[0].switchingCount}" class="form-control" placeholder="1" />
+          </div>
+          <div class="col-sm-4">
+            <input type="number" th:field="*{bodies[0].switchingPrice}" class="form-control" placeholder="750" />
+          </div>
+        </div>
+
+        <div class="form-group row">
+          <label class="col-sm-4 col-form-label">Сетевое оборудование:</label>
+          <div class="col-sm-3">
+            <input type="number" th:field="*{bodies[0].networkCount}" class="form-control" placeholder="1" />
+          </div>
+          <div class="col-sm-3">
+            <input type="number" th:field="*{bodies[0].networkPrice}" class="form-control" placeholder="1200" />
+          </div>
+        </div>
+
+        <div class="form-group row hidden" id="cameraFields_all">
+          <label class="col-sm-4 col-form-label">Web-камера:</label>
+          <div class="col-sm-4">
+            <input type="number" th:field="*{bodies[0].cameraDeviceCount}" class="form-control" placeholder="1" />
+          </div>
+          <div class="col-sm-4">
+            <input type="number" th:field="*{bodies[0].cameraDevicePrice}" class="form-control" placeholder="750" />
+          </div>
+          <div class="col-sm-1">
+            <span class="remove-staff-btn" data-type="camera" data-index="all">&times;</span>
+          </div>
+        </div>
+
+        <div class="form-group row hidden" id="scannerFields_all">
+          <label class="col-sm-4 col-form-label">2D-Сканер:</label>
+          <div class="col-sm-3">
+            <input type="number" th:field="*{bodies[0].barcodeDeviceCount}" class="form-control" placeholder="1" />
+          </div>
+          <div class="col-sm-3">
+            <input type="number" th:field="*{bodies[0].barcodeDevicePrice}" class="form-control" placeholder="1000" />
+          </div>
+          <div class="col-sm-1">
+            <span class="remove-staff-btn" data-type="scanner" data-index="all">&times;</span>
+          </div>
+        </div>
+
+        <div class="form-group row hidden" id="rfidFields_all">
+          <label class="col-sm-4 col-form-label">RFID-считыватель:</label>
+          <div class="col-sm-3">
+            <input type="number" th:field="*{bodies[0].rfidReaderDeviceCount}" class="form-control" placeholder="1" />
+          </div>
+          <div class="col-sm-3">
+            <input type="number" th:field="*{bodies[0].rfidReaderDevicePrice}" class="form-control" placeholder="1000" />
+          </div>
+          <div class="col-sm-1">
+            <span class="remove-staff-btn" data-type="rfid" data-index="all">&times;</span>
+          </div>
+        </div>
+
+        <div class="form-group row hidden" id="tsdFields_all">
+          <label class="col-sm-4 col-form-label">ТСД:</label>
+          <div class="col-sm-3">
+            <input type="number" th:field="*{bodies[0].tsdCount}" class="form-control" placeholder="1" />
+          </div>
+          <div class="col-sm-3">
+            <input type="number" th:field="*{bodies[0].tsdPrice}" class="form-control" placeholder="1000" />
+          </div>
+          <div class="col-sm-1">
+            <span class="remove-staff-btn" data-type="tsd" data-index="all">&times;</span>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <button type="button" class="btn btn-secondary add-equipment-button-all" data-type="camera">Добавить web-камеры</button>
+          <button type="button" class="btn btn-secondary add-equipment-button-all" data-type="scanner">Добавить 2D-сканеры</button>
+          <button type="button" class="btn btn-secondary add-equipment-button-all" data-type="rfid">Добавить RFID-считыватели</button>
+          <button type="button" class="btn btn-secondary add-equipment-button-all" data-type="tsd">Добавить ТСД</button>
+        </div>
+      </div>
+
+      <div th:if="${periods > 0}">
+        <div th:each="period, iterStat : ${#numbers.sequence(0, periods - 1)}">
+          <h3 th:text="${periodDates[iterStat.index * 2]} + ' - ' + ${periodDates[iterStat.index * 2 + 1]}" style="text-align: center;">Период</h3>
+
+          <div class="form-group row">
+            <div class="col-sm-4">
+              <select id="softDevice_${iterStat.index}" th:field="*{bodies[__${iterStat.index}__].softDevice}" class="form-control">
+                <option value="" selected>-- Выбери оборудование для клиента --</option>
+                <option th:each="device : ${softDevices}" th:value="${device.id}" th:text="${device.name}"></option>
+              </select>
+            </div>
+            <div class="col-sm-4">
+              <input type="number" id="sDeviceCount_${iterStat.index}" th:field="*{bodies[__${iterStat.index}__].sDeviceCount}" class="form-control" placeholder="Количество" />
+            </div>
+            <div class="col-sm-4">
+              <input type="number" id="sDevicePrice_${iterStat.index}" th:field="*{bodies[__${iterStat.index}__].sDevicePrice}" class="form-control" value="1800" />
+            </div>
+          </div>
+
+          <div class="form-group row">
+            <div class="col-sm-4">
+              <select th:field="*{bodies[__${iterStat.index}__].printerDevice}" class="form-control">
+                <option value="" selected>-- Выбери принтер --</option>
+                <option th:each="device : ${printerDevices}" th:value="${device.id}" th:text="${device.name}"></option>
+              </select>
+            </div>
+            <div class="col-sm-4">
+              <input type="number" th:field="*{bodies[__${iterStat.index}__].pDeviceCount}" class="form-control" placeholder="Количество" />
+            </div>
+            <div class="col-sm-4">
+              <input type="number" th:field="*{bodies[__${iterStat.index}__].pDevicePrice}" class="form-control" />
+            </div>
+          </div>
+
+          <div class="form-group row">
+            <label class="col-sm-4 col-form-label">Кабельная коммутация:</label>
+            <div class="col-sm-4">
+              <input type="number" th:field="*{bodies[__${iterStat.index}__].switchingCount}" class="form-control" placeholder="1" />
+            </div>
+            <div class="col-sm-4">
+              <input type="number" th:field="*{bodies[__${iterStat.index}__].switchingPrice}" class="form-control" placeholder="750" />
+            </div>
+          </div>
+
+          <div class="form-group row">
+            <label class="col-sm-4 col-form-label">Сетевое оборудование:</label>
+            <div class="col-sm-4">
+              <input type="number" th:field="*{bodies[__${iterStat.index}__].networkCount}" class="form-control" placeholder="1" />
+            </div>
+            <div class="col-sm-4">
+              <input type="number" th:field="*{bodies[__${iterStat.index}__].networkPrice}" class="form-control" placeholder="1200" />
+            </div>
+          </div>
+
+          <div class="form-group row hidden" th:attr="id='cameraFields__' + ${iterStat.index}">
+            <label class="col-sm-4 col-form-label">Web-камера:</label>
+            <div class="col-sm-3">
+              <input type="number" th:field="*{bodies[__${iterStat.index}__].cameraDeviceCount}" class="form-control" placeholder="1" />
+            </div>
+            <div class="col-sm-3">
+              <input type="number" th:field="*{bodies[__${iterStat.index}__].cameraDevicePrice}" class="form-control" placeholder="750" />
+            </div>
+            <div class="col-sm-1">
+              <span class="remove-staff-btn" data-type="camera" th:data-index="${iterStat.index}">&times;</span>
+            </div>
+          </div>
+
+          <div class="form-group row hidden" th:attr="id='scannerFields__' + ${iterStat.index}">
+            <label class="col-sm-4 col-form-label">2D-Сканер:</label>
+            <div class="col-sm-3">
+              <input type="number" th:field="*{bodies[__${iterStat.index}__].barcodeDeviceCount}" class="form-control" placeholder="1" />
+            </div>
+            <div class="col-sm-3">
+              <input type="number" th:field="*{bodies[__${iterStat.index}__].barcodeDevicePrice}" class="form-control" placeholder="1000" />
+            </div>
+            <div class="col-sm-1">
+              <span class="remove-staff-btn" data-type="scanner" th:data-index="${iterStat.index}">&times;</span>
+            </div>
+          </div>
+
+          <div class="form-group row hidden" th:attr="id='rfidFields__' + ${iterStat.index}">
+            <label class="col-sm-4 col-form-label">RFID-считыватель:</label>
+            <div class="col-sm-3">
+              <input type="number" th:field="*{bodies[__${iterStat.index}__].rfidReaderDeviceCount}" class="form-control" placeholder="1" />
+            </div>
+            <div class="col-sm-3">
+              <input type="number" th:field="*{bodies[__${iterStat.index}__].rfidReaderDevicePrice}" class="form-control" placeholder="1000" />
+            </div>
+            <div class="col-sm-1">
+              <span class="remove-staff-btn" data-type="rfid" th:data-index="${iterStat.index}">&times;</span>
+            </div>
+          </div>
+
+          <div class="form-group row hidden" th:attr="id='tsdFields__' + ${iterStat.index}">
+            <label class="col-sm-4 col-form-label">ТСД:</label>
+            <div class="col-sm-3">
+              <input type="number" th:field="*{bodies[__${iterStat.index}__].tsdCount}" class="form-control" placeholder="1" />
+            </div>
+            <div class="col-sm-3">
+              <input type="number" th:field="*{bodies[__${iterStat.index}__].tsdPrice}" class="form-control" placeholder="1000" />
+            </div>
+            <div class="col-sm-1">
+              <span class="remove-staff-btn" data-type="tsd" th:data-index="${iterStat.index}">&times;</span>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <button type="button" class="btn btn-secondary add-equipment-button" th:data-index="${iterStat.index}" th:data-type="'camera'">Добавить web-камеры</button>
+            <button type="button" class="btn btn-secondary add-equipment-button" th:data-index="${iterStat.index}" th:data-type="'scanner'">Добавить 2D-сканеры</button>
+            <button type="button" class="btn btn-secondary add-equipment-button" th:data-index="${iterStat.index}" th:data-type="'rfid'">Добавить RFID-считыватели</button>
+            <button type="button" class="btn btn-secondary add-equipment-button" th:data-index="${iterStat.index}" th:data-type="'tsd'">Добавить ТСД</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div th:if="${!sameEquipmentForAllDays}">
+      <h2>Оборудование на разные дни</h2>
+      <div th:each="body, iterStat : ${headerBodies.bodies}">
+        <h3 th:text="${daysWithoutPeriod[iterStat.index]}">День</h3>
+        <div class="form-group row">
+          <div class="col-sm-4">
+            <select id="softDevice_${iterStat.index}" th:field="*{bodies[__${iterStat.index}__].softDevice}" class="form-control">
+              <option value="" selected>-- Выбери оборудование для клиента --</option>
+              <option th:each="device : ${softDevices}" th:value="${device.id}" th:text="${device.name}"></option>
+            </select>
+          </div>
+          <div class="col-sm-4">
+            <input type="number" id="sDeviceCount_${iterStat.index}" th:field="*{bodies[__${iterStat.index}__].sDeviceCount}" class="form-control" placeholder="Количество" />
+          </div>
+          <div class="col-sm-4">
+            <input type="number" id="sDevicePrice_${iterStat.index}" th:field="*{bodies[__${iterStat.index}__].sDevicePrice}" class="form-control" />
           </div>
         </div>
 
@@ -406,68 +287,82 @@
             </select>
           </div>
           <div class="col-sm-4">
-            <input type="text" th:field="*{bodies[__${iterStat.index}__].pDeviceCount}" class="form-control" placeholder="Количество" />
+            <input type="number" th:field="*{bodies[__${iterStat.index}__].pDeviceCount}" class="form-control" placeholder="Количество" />
           </div>
           <div class="col-sm-4">
-            <input type="text" th:field="*{bodies[__${iterStat.index}__].pDevicePrice}" class="form-control" />
+            <input type="number" th:field="*{bodies[__${iterStat.index}__].pDevicePrice}" class="form-control" />
           </div>
         </div>
 
         <div class="form-group row">
           <label class="col-sm-4 col-form-label">Кабельная коммутация:</label>
           <div class="col-sm-4">
-            <input type="text" th:field="*{bodies[__${iterStat.index}__].switchingCount}" class="form-control" placeholder="1" />
+            <input type="number" th:field="*{bodies[__${iterStat.index}__].switchingCount}" class="form-control" placeholder="1" />
           </div>
           <div class="col-sm-4">
-            <input type="text" th:field="*{bodies[__${iterStat.index}__].switchingPrice}" class="form-control" placeholder="750" />
+            <input type="number" th:field="*{bodies[__${iterStat.index}__].switchingPrice}" class="form-control" placeholder="750" />
           </div>
         </div>
 
         <div class="form-group row">
           <label class="col-sm-4 col-form-label">Сетевое оборудование:</label>
           <div class="col-sm-4">
-            <input type="text" th:field="*{bodies[__${iterStat.index}__].networkCount}" class="form-control" placeholder="1" />
+            <input type="number" th:field="*{bodies[__${iterStat.index}__].networkCount}" class="form-control" placeholder="1" />
           </div>
           <div class="col-sm-4">
-            <input type="text" th:field="*{bodies[__${iterStat.index}__].networkPrice}" class="form-control" placeholder="1200" />
+            <input type="number" th:field="*{bodies[__${iterStat.index}__].networkPrice}" class="form-control" placeholder="1200" />
           </div>
         </div>
 
-        <!-- Hidden fields for additional equipment for each day -->
-        <div class="form-group row hidden" id="cameraFields__" th:attr="id='cameraFields__' + ${iterStat.index}">
+        <div class="form-group row hidden" th:attr="id='cameraFields__' + ${iterStat.index}">
           <label class="col-sm-4 col-form-label">Web-камера:</label>
           <div class="col-sm-3">
-            <input type="text" th:field="*{bodies[__${iterStat.index}__].cameraDeviceCount}" class="form-control" placeholder="1" />
+            <input type="number" th:field="*{bodies[__${iterStat.index}__].cameraDeviceCount}" class="form-control" placeholder="1" />
           </div>
           <div class="col-sm-3">
-            <input type="text" th:field="*{bodies[__${iterStat.index}__].cameraDevicePrice}" class="form-control" placeholder="750" />
+            <input type="number" th:field="*{bodies[__${iterStat.index}__].cameraDevicePrice}" class="form-control" placeholder="750" />
+          </div>
+          <div class="col-sm-1">
+            <span class="remove-staff-btn" data-type="camera" th:data-index="${iterStat.index}">&times;</span>
           </div>
         </div>
-        <div class="form-group row hidden" id="scannerFields__" th:attr="id='scannerFields__' + ${iterStat.index}">
+
+        <div class="form-group row hidden" th:attr="id='scannerFields__' + ${iterStat.index}">
           <label class="col-sm-4 col-form-label">2D-Сканер:</label>
           <div class="col-sm-3">
-            <input type="text" th:field="*{bodies[__${iterStat.index}__].barcodeDeviceCount}" class="form-control" placeholder="1" />
+            <input type="number" th:field="*{bodies[__${iterStat.index}__].barcodeDeviceCount}" class="form-control" placeholder="1" />
           </div>
           <div class="col-sm-3">
-            <input type="text" th:field="*{bodies[__${iterStat.index}__].barcodeDevicePrice}" class="form-control" placeholder="1000" />
+            <input type="number" th:field="*{bodies[__${iterStat.index}__].barcodeDevicePrice}" class="form-control" placeholder="1000" />
+          </div>
+          <div class="col-sm-1">
+            <span class="remove-staff-btn" data-type="scanner" th:data-index="${iterStat.index}">&times;</span>
           </div>
         </div>
-        <div class="form-group row hidden" id="rfidFields__" th:attr="id='rfidFields__' + ${iterStat.index}">
+
+        <div class="form-group row hidden" th:attr="id='rfidFields__' + ${iterStat.index}">
           <label class="col-sm-4 col-form-label">RFID-считыватель:</label>
           <div class="col-sm-3">
-            <input type="text" th:field="*{bodies[__${iterStat.index}__].rfidReaderDeviceCount}" class="form-control" placeholder="1" />
+            <input type="number" th:field="*{bodies[__${iterStat.index}__].rfidReaderDeviceCount}" class="form-control" placeholder="1" />
           </div>
           <div class="col-sm-3">
-            <input type="text" th:field="*{bodies[__${iterStat.index}__].rfidReaderDevicePrice}" class="form-control" placeholder="1000" />
+            <input type="number" th:field="*{bodies[__${iterStat.index}__].rfidReaderDevicePrice}" class="form-control" placeholder="1000" />
+          </div>
+          <div class="col-sm-1">
+            <span class="remove-staff-btn" data-type="rfid" th:data-index="${iterStat.index}">&times;</span>
           </div>
         </div>
-        <div class="form-group row hidden" id="tsdFields__" th:attr="id='tsdFields__' + ${iterStat.index}">
+
+        <div class="form-group row hidden" th:attr="id='tsdFields__' + ${iterStat.index}">
           <label class="col-sm-4 col-form-label">ТСД:</label>
           <div class="col-sm-3">
-            <input type="text" th:field="*{bodies[__${iterStat.index}__].tsdCount}" class="form-control" placeholder="1" />
+            <input type="number" th:field="*{bodies[__${iterStat.index}__].tsdCount}" class="form-control" placeholder="1" />
           </div>
           <div class="col-sm-3">
-            <input type="text" th:field="*{bodies[__${iterStat.index}__].tsdPrice}" class="form-control" placeholder="1000" />
+            <input type="number" th:field="*{bodies[__${iterStat.index}__].tsdPrice}" class="form-control" placeholder="1000" />
+          </div>
+          <div class="col-sm-1">
+            <span class="remove-staff-btn" data-type="tsd" th:data-index="${iterStat.index}">&times;</span>
           </div>
         </div>
 
@@ -485,21 +380,85 @@
 </div>
 
 <script>
-  $(document).ready(function() {
-    console.log("jQuery is loaded and document is ready.");
+  function validateForm() {
+    let isValid = true;
+    let errorMessage = '';
 
+    // Проверка для общего оборудования
+    if (document.getElementById('softDevice')) {
+      const softDevice = document.getElementById('softDevice').value;
+      const sDeviceCount = document.getElementById('sDeviceCount').value;
+      const sDevicePrice = document.getElementById('sDevicePrice').value;
+
+      if (!softDevice || !sDeviceCount || !sDevicePrice) {
+        errorMessage += 'Заполните все поля для основного оборудования.\n';
+        isValid = false;
+      }
+    }
+
+    // Проверка для каждого периода
+    const periods = document.querySelectorAll('[id^="softDevice_"]');
+    periods.forEach((element) => {
+      const index = element.id.split('_')[1];
+      const softDevice = element.value;
+      const sDeviceCount = document.getElementById('sDeviceCount_' + index).value;
+      const sDevicePrice = document.getElementById('sDevicePrice_' + index).value;
+
+      if (!softDevice || !sDeviceCount || !sDevicePrice) {
+        errorMessage += `Оборудование для клиента обязательно к заполнению, проверь первую строку у всех дней или периодов.\n`;
+        isValid = false;
+      }
+    });
+
+    if (!isValid) {
+      alert(errorMessage);
+    }
+
+    return isValid;
+  }
+
+  $(document).ready(function() {
+    // Убираем обработчик submit из jQuery и передаем его в функцию validateForm
+    $('#equipmentForm').on('submit', function(event) {
+      if (!validateForm()) {
+        event.preventDefault(); // Отменить отправку формы, если валидация не пройдена
+      }
+    });
+
+    // Код для добавления полей
     $('.add-equipment-button').on('click', function() {
       var index = $(this).data('index');
       var type = $(this).data('type');
+      $(this).hide();  // Скрываем кнопку добавления
       toggleEquipmentFields(index, type, false);
     });
 
     $('.add-equipment-button-all').on('click', function() {
       var type = $(this).data('type');
+      $(this).hide();  // Скрываем кнопку добавления
       toggleEquipmentFields(0, type, true);
     });
 
+    // Код для удаления полей
+    $(document).on('click', '.remove-staff-btn', function() {
+      var index = $(this).data('index');
+      var type = $(this).data('type');
+      resetEquipmentFields(index, type);
+    });
+
     function toggleEquipmentFields(index, type, isAllDays) {
+      var fieldId = getFieldId(index, type, isAllDays);
+      $('#' + fieldId).toggleClass('hidden');
+    }
+
+    function resetEquipmentFields(index, type) {
+      var fieldId = getFieldId(index, type);
+      $('#' + fieldId).find('input').val(''); // Сбрасываем значения полей
+      $('#' + fieldId).toggleClass('hidden');
+      $('.add-equipment-button[data-index="' + index + '"][data-type="' + type + '"]').show(); // Показываем кнопку добавления
+    }
+
+    function getFieldId(index, type, isAllDays) {
       var fieldId;
 
       switch(type) {
@@ -517,10 +476,12 @@
           break;
       }
 
-      $('#' + fieldId).toggleClass('hidden');
+      return fieldId;
     }
   });
 </script>
+
 </body>
 </html>
+
 

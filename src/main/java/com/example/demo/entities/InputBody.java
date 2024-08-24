@@ -1,5 +1,6 @@
 package com.example.demo.entities;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -16,32 +17,33 @@ public class InputBody {
     private Long id;
     @ManyToOne
     private Device softDevice;
-    private String sDeviceCount;
-    private String sDevicePrice;
+    private Integer sDeviceCount;
+    private Integer sDevicePrice;
 
     @ManyToOne
     private Device printerDevice;
-    private String pDeviceCount;
-    private String pDevicePrice;
+    private Integer pDeviceCount;
+    private Integer pDevicePrice;
 
-    private String cameraDeviceCount;
-    private String cameraDevicePrice;
+    private Integer cameraDeviceCount;
+    private Integer cameraDevicePrice;
 
-    private String barcodeDeviceCount;
-    private String barcodeDevicePrice;
+    private Integer barcodeDeviceCount;
+    private Integer barcodeDevicePrice;
 
-    private String rfidReaderDeviceCount;
-    private String rfidReaderDevicePrice;
+    private Integer rfidReaderDeviceCount;
+    private Integer rfidReaderDevicePrice;
 
-    private String switchingCount;
-    private String switchingPrice;
+    private Integer switchingCount;
+    private Integer switchingPrice;
 
-    private String networkCount;
-    private String networkPrice;
+    private Integer networkCount;
+    private Integer networkPrice;
 
-    private String tsdCount;
-    private String tsdPrice;
+    private Integer tsdCount;
+    private Integer tsdPrice;
 
+    @JsonBackReference
     @ManyToOne
     private InputHeader header;
 }

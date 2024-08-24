@@ -17,8 +17,8 @@ public class Sticker {
     private String stick;
     private String tape;
     private boolean transparent = false;
-    private String price;
-    private String count;
+    private Integer price;
+    private Integer count;
 
     @ManyToOne
     @JoinColumn(name = "supplies_id", nullable = false)

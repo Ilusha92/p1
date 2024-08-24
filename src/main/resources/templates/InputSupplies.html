@@ -1,945 +1,3 @@
-<!--<!DOCTYPE html>-->
-<!--<html xmlns:th="http://www.thymeleaf.org">-->
-<!--<head>-->
-<!--    <meta charset="UTF-8"/>-->
-<!--    <title>Input Supplies</title>-->
-<!--    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">-->
-<!--    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"></script>-->
-<!--    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.11.0/umd/popper.min.js"></script>-->
-<!--    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>-->
-<!--    <style>-->
-<!--        .form-container {-->
-<!--            max-height: 80vh; /* Установите подходящую высоту */-->
-<!--            overflow-y: auto;-->
-<!--        }-->
-<!--    </style>-->
-<!--</head>-->
-<!--<body>-->
-<!--<div class="container form-container">-->
-<!--    <h1>Input Supplies</h1>-->
-<!--    <form th:action="@{/input/saveSupplies}" method="post">-->
-<!--        <input type="hidden" name="headerId" th:value="${headerId}"/>-->
-<!--        <input type="hidden" name="suppliesId" th:value="${suppliesId}"/>-->
-
-<!--        <div th:object="${badgeList}">-->
-<!--            <h2>Badge 1</h2>-->
-<!--            <div class="form-group">-->
-<!--                <label for="badge1Material">Material:</label>-->
-<!--                <select name="badge1.badgeMaterial" th:field="*{badges[0].badgeMaterial}" id="badge1Material" class="form-control">-->
-<!--                    <option value="ПЕЧАТНЫЙ">ПЕЧАТНЫЙ</option>-->
-<!--                    <option value="ПЛАСТИКОВЫЙ">ПЛАСТИКОВЫЙ</option>-->
-<!--                </select>-->
-<!--            </div>-->
-<!--            <div class="form-group">-->
-<!--                <label for="badge1Size">Size:</label>-->
-<!--                <input type="text" name="badge1.size" th:field="*{badges[0].size}" id="badge1Size" class="form-control"/>-->
-<!--            </div>-->
-<!--            <div class="form-group">-->
-<!--                <label for="badge1Chroma">Chroma:</label>-->
-<!--                <input type="text" name="badge1.chroma" th:field="*{badges[0].chroma}" id="badge1Chroma" class="form-control"/>-->
-<!--            </div>-->
-<!--            <div class="form-group">-->
-<!--                <label for="badge1Density">Density:</label>-->
-<!--                <input type="text" name="badge1.density" th:field="*{badges[0].density}" id="badge1Density" class="form-control"/>-->
-<!--            </div>-->
-<!--            <div class="form-group">-->
-<!--                <label for="badge1Lamination">Lamination:</label>-->
-<!--                <input type="text" name="badge1.lamination" th:field="*{badges[0].lamination}" id="badge1Lamination" class="form-control"/>-->
-<!--            </div>-->
-<!--            <div class="form-group">-->
-<!--                <label for="badge1LaminationKind">Lamination Kind:</label>-->
-<!--                <select name="badge1.laminationKind" th:field="*{badges[0].laminationKind}" id="badge1LaminationKind" class="form-control">-->
-<!--                    <option value="МАТОВЫЙ">МАТОВЫЙ</option>-->
-<!--                    <option value="ГЛЯНЦЕВЫЙ">ГЛЯНЦЕВЫЙ</option>-->
-<!--                </select>-->
-<!--            </div>-->
-
-<!--            <div class="form-check">-->
-<!--                &lt;!&ndash; Скрытое поле для отправки значения false, если чекбокс не отмечен &ndash;&gt;-->
-<!--                <input type="hidden" name="badge1.rfid" th:value="false"/>-->
-<!--                <input type="checkbox" class="form-check-input" id="rfid1" name="badge1.rfid" th:field="*{badges[0].rfid}"/>-->
-<!--                <label class="form-check-label" for="rfid1">RFID метка</label>-->
-<!--            </div>-->
-
-<!--            <h2>Badge 2</h2>-->
-<!--            <div class="form-group">-->
-<!--                <label for="badge2Material">Material:</label>-->
-<!--                <select name="badge2.badgeMaterial" th:field="*{badges[1].badgeMaterial}" id="badge2Material" class="form-control">-->
-<!--                    <option value="ПЕЧАТНЫЙ">ПЕЧАТНЫЙ</option>-->
-<!--                    <option value="ПЛАСТИКОВЫЙ">ПЛАСТИКОВЫЙ</option>-->
-<!--                </select>-->
-<!--            </div>-->
-<!--            <div class="form-group">-->
-<!--                <label for="badge2Size">Size:</label>-->
-<!--                <input type="text" name="badge2.size" th:field="*{badges[1].size}" id="badge2Size" class="form-control"/>-->
-<!--            </div>-->
-<!--            <div class="form-group">-->
-<!--                <label for="badge2Chroma">Chroma:</label>-->
-<!--                <input type="text" name="badge2.chroma" th:field="*{badges[1].chroma}" id="badge2Chroma" class="form-control"/>-->
-<!--            </div>-->
-<!--            <div class="form-group">-->
-<!--                <label for="badge2Density">Density:</label>-->
-<!--                <input type="text" name="badge2.density" th:field="*{badges[1].density}" id="badge2Density" class="form-control"/>-->
-<!--            </div>-->
-<!--            <div class="form-group">-->
-<!--                <label for="badge2Lamination">Lamination:</label>-->
-<!--                <input type="text" name="badge2.lamination" th:field="*{badges[1].lamination}" id="badge2Lamination" class="form-control"/>-->
-<!--            </div>-->
-<!--            <div class="form-group">-->
-<!--                <label for="badge2LaminationKind">Lamination Kind:</label>-->
-<!--                <select name="badge2.laminationKind" th:field="*{badges[1].laminationKind}" id="badge2LaminationKind" class="form-control">-->
-<!--                    <option value="МАТОВЫЙ">МАТОВЫЙ</option>-->
-<!--                    <option value="ГЛЯНЦЕВЫЙ">ГЛЯНЦЕВЫЙ</option>-->
-<!--                </select>-->
-<!--            </div>-->
-
-<!--            <div class="form-check">-->
-<!--                &lt;!&ndash; Скрытое поле для отправки значения false, если чекбокс не отмечен &ndash;&gt;-->
-<!--                <input type="hidden" name="badge2.rfid" th:value="false"/>-->
-<!--                <input type="checkbox" class="form-check-input" id="rfid2" name="badge2.rfid" th:field="*{badges[1].rfid}"/>-->
-<!--                <label class="form-check-label" for="rfid2">RFID метка</label>-->
-<!--            </div>-->
-<!--        </div>-->
-
-<!--        <div th:object="${lanyardList}">-->
-<!--            <h2>Lanyard 1</h2>-->
-<!--            <div class="form-group">-->
-<!--                <label for="lanyard1Size">Size:</label>-->
-<!--                <select name="lanyard1.lanyardSize" th:field="*{lanyards[0].size}" id="lanyard1Size" class="form-control">-->
-<!--                    <option value="10мм">10мм</option>-->
-<!--                    <option value="16мм">16мм</option>-->
-<!--                    <option value="20мм">20мм</option>-->
-<!--                </select>-->
-<!--            </div>-->
-<!--            <div class="form-group">-->
-<!--                <label for="lanyard1Application">Application:</label>-->
-<!--                <select name="lanyard1.lanyardApplication" th:field="*{lanyards[0].application}" id="lanyard1Application" class="form-control">-->
-<!--                    <option value="Однотонная">Однотонная</option>-->
-<!--                    <option value="Сублимация">Сублимация</option>-->
-<!--                    <option value="Шелкография">Шелкография</option>-->
-<!--                </select>-->
-<!--            </div>-->
-<!--            <div class="form-group">-->
-<!--                <label for="lanyard1Bracing">Bracing:</label>-->
-<!--                <select name="lanyard1.lanyardBracing" th:field="*{lanyards[0].bracing}" id="lanyard1Bracing" class="form-control">-->
-<!--                    <option value="2 карабина-люкс">2 карабина-люкс</option>-->
-<!--                    <option value="Карабин люкс">Карабин люкс</option>-->
-<!--                    <option value="Пластиковая клипса">Пластиковая клипса</option>-->
-<!--                    <option value="Клипса">Клипса</option>-->
-<!--                </select>-->
-<!--            </div>-->
-
-<!--            <h2>Lanyard 2</h2>-->
-<!--            <div class="form-group">-->
-<!--                <label for="lanyard2Size">Size:</label>-->
-<!--                <select name="lanyard2.lanyardSize" th:field="*{lanyards[1].size}" id="lanyard2Size" class="form-control">-->
-<!--                    <option value="10мм">10мм</option>-->
-<!--                    <option value="16мм">16мм</option>-->
-<!--                    <option value="20мм">20мм</option>-->
-<!--                </select>-->
-<!--            </div>-->
-<!--            <div class="form-group">-->
-<!--                <label for="lanyard2Application">Application:</label>-->
-<!--                <select name="lanyard2.lanyardApplication" th:field="*{lanyards[1].application}" id="lanyard2Application" class="form-control">-->
-<!--                    <option value="Однотонная">Однотонная</option>-->
-<!--                    <option value="Сублимация">Сублимация</option>-->
-<!--                    <option value="Шелкография">Шелкография</option>-->
-<!--                </select>-->
-<!--            </div>-->
-<!--            <div class="form-group">-->
-<!--                <label for="lanyard2Bracing">Bracing:</label>-->
-<!--                <select name="lanyard2.lanyardBracing" th:field="*{lanyards[1].bracing}" id="lanyard2Bracing" class="form-control">-->
-<!--                    <option value="2 карабина-люкс">2 карабина-люкс</option>-->
-<!--                    <option value="Карабин люкс">Карабин люкс</option>-->
-<!--                    <option value="Пластиковая клипса">Пластиковая клипса</option>-->
-<!--                    <option value="Клипса">Клипса</option>-->
-<!--                </select>-->
-<!--            </div>-->
-<!--        </div>-->
-
-<!--            <div th:object="${bracerList}">-->
-<!--                <h2>Bracer 1</h2>-->
-<!--                <div class="form-group">-->
-<!--                    <label for="bracer1material">Material:</label>-->
-<!--                    <select name="bracer1material" th:field="*{bracers[0].material}" id="bracer1material" class="form-control" onchange="updateFormFields()">-->
-<!--                        <option value="БУМАЖНЫЙ" selected>БУМАЖНЫЙ</option>-->
-<!--                        <option value="ВИНИЛОВЫЙ">ВИНИЛОВЫЙ</option>-->
-<!--                    </select>-->
-<!--                </div>-->
-
-<!--                <div class="form-group">-->
-<!--                    <label for="bracer1length">Length:</label>-->
-<!--                    <input type="text" name="bracer1length" th:field="*{bracers[0].length}" id="bracer1length" class="form-control" value="250"/>-->
-<!--                </div>-->
-
-<!--                <div class="form-group">-->
-<!--                    <label for="bracer1width">Width:</label>-->
-<!--                    <input type="text" name="bracer1width" th:field="*{bracers[0].width}" id="bracer1width" class="form-control" value="19"/>-->
-<!--                </div>-->
-
-<!--                <div class="form-group">-->
-<!--                    <label for="bracer1application">Application:</label>-->
-<!--                    <input type="text" name="bracer1application" th:field="*{bracers[0].application}" id="bracer1application" class="form-control" value="1+0"/>-->
-<!--                </div>-->
-
-<!--                <div class="form-group">-->
-<!--                    <label for="bracer1color">Color:</label>-->
-<!--                    <input type="text" name="bracer1color" th:field="*{bracers[0].color}" id="bracer1color" class="form-control" value=""/>-->
-<!--                </div>-->
-
-<!--                <div class="form-group" id="bracer1type-group" style="display: none;">-->
-<!--                    <label for="bracer1type">Type:</label>-->
-<!--                    <select name="bracer1type" th:field="*{bracers[0].type}" id="bracer1type" class="form-control">-->
-<!--                        <option value="L-тип">L-тип</option>-->
-<!--                        <option value="F-тип">F-тип</option>-->
-<!--                    </select>-->
-<!--                </div>-->
-
-<!--                <div class="form-check" id="bracer1rfid-group" style="display: none;">-->
-<!--                    <input type="hidden" name="bracer1.rfid" th:value="false"/>-->
-<!--                    <input type="checkbox" class="form-check-input" id="rfid1" name="bracer1.rfid" th:field="*{bracers[0].rfid}"/>-->
-<!--                    <label class="form-check-label" for="rfid1">RFID</label>-->
-<!--                </div>-->
-
-<!--                <h2>Bracer 2</h2>-->
-<!--                <div class="form-group">-->
-<!--                    <label for="bracer2material">Material:</label>-->
-<!--                    <select name="bracer2material" th:field="*{bracers[1].material}" id="bracer2material" class="form-control" onchange="updateFormFields()">-->
-<!--                        <option value="БУМАЖНЫЙ" selected>БУМАЖНЫЙ</option>-->
-<!--                        <option value="ВИНИЛОВЫЙ">ВИНИЛОВЫЙ</option>-->
-<!--                    </select>-->
-<!--                </div>-->
-
-<!--                <div class="form-group">-->
-<!--                    <label for="bracer2length">Length:</label>-->
-<!--                    <input type="text" name="bracer2length" th:field="*{bracers[1].length}" id="bracer2length" class="form-control" value="250"/>-->
-<!--                </div>-->
-
-<!--                <div class="form-group">-->
-<!--                    <label for="bracer2width">Width:</label>-->
-<!--                    <input type="text" name="bracer2width" th:field="*{bracers[1].width}" id="bracer2width" class="form-control" value="19"/>-->
-<!--                </div>-->
-
-<!--                <div class="form-group">-->
-<!--                    <label for="bracer2application">Application:</label>-->
-<!--                    <input type="text" name="bracer2application" th:field="*{bracers[1].application}" id="bracer2application" class="form-control" value="1+0"/>-->
-<!--                </div>-->
-
-<!--                <div class="form-group">-->
-<!--                    <label for="bracer2color">Color:</label>-->
-<!--                    <input type="text" name="bracer2color" th:field="*{bracers[1].color}" id="bracer2color" class="form-control" value=""/>-->
-<!--                </div>-->
-
-<!--                <div class="form-group" id="bracer2type-group" style="display: none;">-->
-<!--                    <label for="bracer2type">Type:</label>-->
-<!--                    <select name="bracer2type" th:field="*{bracers[1].type}" id="bracer2type" class="form-control">-->
-<!--                        <option value="L-тип">L-тип</option>-->
-<!--                        <option value="F-тип">F-тип</option>-->
-<!--                    </select>-->
-<!--                </div>-->
-
-<!--                <div class="form-check" id="bracer2rfid-group" style="display: none;">-->
-<!--                    <input type="hidden" name="bracer2.rfid" th:value="false"/>-->
-<!--                    <input type="checkbox" class="form-check-input" id="rfid2" name="bracer2.rfid" th:field="*{bracers[1].rfid}"/>-->
-<!--                    <label class="form-check-label" for="rfid2">RFID</label>-->
-<!--                </div>-->
-<!--            </div>-->
-
-<!--        <div th:object="${insertList}">-->
-<!--            <h2>Insert 1</h2>-->
-<!--            <div class="form-group">-->
-<!--                <label for="insert1size">Size:</label>-->
-<!--                <input type="text" name="insert1size" th:field="*{inserts[0].size}" id="insert1size" class="form-control" value="86x54 мм"/>-->
-<!--            </div>-->
-
-<!--            <div class="form-group">-->
-<!--                <label for="insert1chroma">Chroma:</label>-->
-<!--                <select name="insert1chroma" th:field="*{inserts[0].chroma}" id="insert1chroma" class="form-control">-->
-<!--                    <option value="4+4" selected>4+4</option>-->
-<!--                    <option value="4+0">4+0</option>-->
-<!--                </select>-->
-<!--            </div>-->
-
-<!--            <div class="form-group">-->
-<!--                <label for="insert1density">Density:</label>-->
-<!--                <input type="text" name="insert1density" th:field="*{inserts[0].density}" id="insert1density" class="form-control" value="150 гр."/>-->
-<!--            </div>-->
-
-<!--            <h2>Insert 2</h2>-->
-<!--            <div class="form-group">-->
-<!--                <label for="insert2size">Size:</label>-->
-<!--                <input type="text" name="insert2size" th:field="*{inserts[1].size}" id="insert2size" class="form-control" value="86x54 мм"/>-->
-<!--            </div>-->
-
-<!--            <div class="form-group">-->
-<!--                <label for="insert2chroma">Chroma:</label>-->
-<!--                <select name="insert2chroma" th:field="*{inserts[1].chroma}" id="insert2chroma" class="form-control">-->
-<!--                    <option value="4+4" selected>4+4</option>-->
-<!--                    <option value="4+0">4+0</option>-->
-<!--                </select>-->
-<!--            </div>-->
-
-<!--            <div class="form-group">-->
-<!--                <label for="insert2density">Density:</label>-->
-<!--                <input type="text" name="insert2density" th:field="*{inserts[1].density}" id="insert2density" class="form-control" value="150 гр."/>-->
-<!--            </div>-->
-<!--        </div>-->
-
-<!--        <div th:object="${pocketList}">-->
-<!--            <h2>Pocket 1</h2>-->
-<!--            <div class="form-group">-->
-<!--                <label for="pocket1size">Size:</label>-->
-<!--                <input type="text" name="pocket1size" th:field="*{pockets[0].size}" id="pocket1size" class="form-control" value="86x54 мм"/>-->
-<!--            </div>-->
-
-<!--            <h2>Pocket 2</h2>-->
-<!--            <div class="form-group">-->
-<!--                <label for="pocket2size">Size:</label>-->
-<!--                <input type="text" name="pocket2size" th:field="*{pockets[1].size}" id="pocket2size" class="form-control" value="86x54 мм"/>-->
-<!--            </div>-->
-<!--        </div>-->
-
-<!--        <div th:object="${ribbonList}">-->
-<!--            <h2>Ribbon 1</h2>-->
-<!--            <div class="form-group">-->
-<!--                <label for="ribbon1kind">Kind:</label>-->
-<!--                <select name="ribbon1.kind" th:field="*{ribbons[0].kind}" id="ribbon1kind" class="form-control">-->
-<!--                    <option value="Полноцветный" selected>Полноцветный</option>-->
-<!--                    <option value="Монохромный">Монохромный</option>-->
-<!--                </select>-->
-<!--            </div>-->
-
-<!--            <h2>Ribbon 2</h2>-->
-<!--            <div class="form-group">-->
-<!--                <label for="ribbon2kind">Kind:</label>-->
-<!--                <select name="ribbon2.kind" th:field="*{ribbons[1].kind}" id="ribbon2kind" class="form-control">-->
-<!--                    <option value="Полноцветный" selected>Полноцветный</option>-->
-<!--                    <option value="Монохромный">Монохромный</option>-->
-<!--                </select>-->
-<!--            </div>-->
-<!--        </div>-->
-
-<!--        <div th:object="${stickerList}">-->
-<!--            <h2>Sticker 1</h2>-->
-<!--            <div class="form-group">-->
-<!--                <label for="sticker1stick">Stick:</label>-->
-<!--                <select name="sticker1.stick" th:field="*{stickers[0].stick}" id="sticker1stick" class="form-control">-->
-<!--                    <option value="90х38" selected>90х38</option>-->
-<!--                    <option value="62х100">62х100</option>-->
-<!--                    <option value="62х29">62х29</option>-->
-<!--                </select>-->
-<!--            </div>-->
-<!--            <div class="form-group">-->
-<!--                <label for="sticker1tape">Tape:</label>-->
-<!--                <input type="text" name="sticker1.tape" th:field="*{stickers[0].tape}" id="sticker1tape" class="form-control" placeholder="Отрезная лента 62, 38мм"/>-->
-<!--            </div>-->
-<!--            <div class="form-group form-check">-->
-<!--                <input type="checkbox" name="sticker1.transparent" th:field="*{stickers[0].transparent}" id="sticker1transparent" class="form-check-input"/>-->
-<!--                <label class="form-check-label" for="sticker1transparent">Transparent</label>-->
-<!--            </div>-->
-
-<!--            <h2>Sticker 2</h2>-->
-<!--            <div class="form-group">-->
-<!--                <label for="sticker2stick">Stick:</label>-->
-<!--                <select name="sticker2.stick" th:field="*{stickers[1].stick}" id="sticker2stick" class="form-control">-->
-<!--                    <option value="90х38" selected>90х38</option>-->
-<!--                    <option value="62х100">62х100</option>-->
-<!--                    <option value="62х29">62х29</option>-->
-<!--                </select>-->
-<!--            </div>-->
-<!--            <div class="form-group">-->
-<!--                <label for="sticker2tape">Tape:</label>-->
-<!--                <input type="text" name="sticker2.tape" th:field="*{stickers[1].tape}" id="sticker2tape" class="form-control" placeholder="Отрезная лента 62, 38мм"/>-->
-<!--            </div>-->
-<!--            <div class="form-group form-check">-->
-<!--                <input type="checkbox" name="sticker2.transparent" th:field="*{stickers[1].transparent}" id="sticker2transparent" class="form-check-input"/>-->
-<!--                <label class="form-check-label" for="sticker2transparent">Transparent</label>-->
-<!--            </div>-->
-<!--        </div>-->
-
-<!--        <script>-->
-<!--                document.addEventListener('DOMContentLoaded', function() {-->
-<!--                    updateFormFields();-->
-<!--                });-->
-
-<!--                function updateFormFields() {-->
-<!--                    var materialSelect = document.getElementById('bracer1material');-->
-<!--                    var lengthInput = document.getElementById('bracer1length');-->
-<!--                    var widthInput = document.getElementById('bracer1width');-->
-<!--                    var typeGroup = document.getElementById('bracer1type-group');-->
-<!--                    var rfidGroup = document.getElementById('bracer1rfid-group');-->
-
-<!--                    if (materialSelect.value === 'БУМАЖНЫЙ') {-->
-<!--                        lengthInput.value = '250';-->
-<!--                        widthInput.value = '19';-->
-<!--                        typeGroup.style.display = 'none';-->
-<!--                        rfidGroup.style.display = 'none';-->
-<!--                    } else if (materialSelect.value === 'ВИНИЛОВЫЙ') {-->
-<!--                        lengthInput.value = '250';-->
-<!--                        widthInput.value = '32';-->
-<!--                        typeGroup.style.display = 'block';-->
-<!--                        rfidGroup.style.display = 'block';-->
-<!--                    }-->
-<!--                }-->
-<!--            </script>-->
-
-<!--        <script>-->
-<!--            document.addEventListener('DOMContentLoaded', function () {-->
-<!--                const sizeInputs = document.querySelectorAll('input[name$="size"]');-->
-<!--                const densityInputs = document.querySelectorAll('input[name$="density"]');-->
-
-<!--                sizeInputs.forEach(input => {-->
-<!--                    input.addEventListener('blur', function () {-->
-<!--                        if (!this.value.endsWith(' мм')) {-->
-<!--                            this.value += ' мм';-->
-<!--                        }-->
-<!--                    });-->
-<!--                });-->
-
-<!--                densityInputs.forEach(input => {-->
-<!--                    input.addEventListener('blur', function () {-->
-<!--                        if (!this.value.endsWith(' гр.')) {-->
-<!--                            this.value += ' гр.';-->
-<!--                        }-->
-<!--                    });-->
-<!--                });-->
-<!--            });-->
-<!--        </script>-->
-
-
-<!--        <button type="submit" class="btn btn-primary">Save Supplies</button>-->
-<!--    </form>-->
-<!--</div>-->
-<!--</body>-->
-<!--</html>-->
-
-<!--<!DOCTYPE html>-->
-<!--<html xmlns:th="http://www.thymeleaf.org">-->
-<!--<head>-->
-<!--    <meta charset="UTF-8"/>-->
-<!--    <title>Input Supplies</title>-->
-<!--    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">-->
-<!--    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"></script>-->
-<!--    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.11.0/umd/popper.min.js"></script>-->
-<!--    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>-->
-<!--    <style>-->
-<!--        .form-container {-->
-<!--            max-height: 80vh;-->
-<!--            overflow-y: auto;-->
-<!--        }-->
-<!--    </style>-->
-<!--</head>-->
-<!--<body>-->
-<!--<div class="container form-container">-->
-<!--    <h1>Input Supplies</h1>-->
-<!--    <form th:action="@{/input/saveSupplies}" method="post">-->
-<!--        <input type="hidden" name="headerId" th:value="${headerId}"/>-->
-<!--        <input type="hidden" name="suppliesId" th:value="${suppliesId}"/>-->
-
-<!--        <div th:object="${badgeList}">-->
-<!--            <h2>Badge 1</h2>-->
-<!--            <div class="form-group">-->
-<!--                <label for="badge1Material">Material:</label>-->
-<!--                <select name="badge1.badgeMaterial" th:field="*{badges[0].badgeMaterial}" id="badge1Material" class="form-control">-->
-<!--                    <option value="ПЕЧАТНЫЙ">ПЕЧАТНЫЙ</option>-->
-<!--                    <option value="ПЛАСТИКОВЫЙ">ПЛАСТИКОВЫЙ</option>-->
-<!--                </select>-->
-<!--            </div>-->
-<!--            <div class="form-group">-->
-<!--                <label for="badge1Size">Size:</label>-->
-<!--                <input type="text" name="badge1.size" th:field="*{badges[0].size}" id="badge1Size" class="form-control"/>-->
-<!--            </div>-->
-<!--            <div class="form-group">-->
-<!--                <label for="badge1Chroma">Chroma:</label>-->
-<!--                <input type="text" name="badge1.chroma" th:field="*{badges[0].chroma}" id="badge1Chroma" class="form-control"/>-->
-<!--            </div>-->
-<!--            <div class="form-group">-->
-<!--                <label for="badge1Density">Density:</label>-->
-<!--                <input type="text" name="badge1.density" th:field="*{badges[0].density}" id="badge1Density" class="form-control"/>-->
-<!--            </div>-->
-<!--            <div class="form-group">-->
-<!--                <label for="badge1Lamination">Lamination:</label>-->
-<!--                <input type="text" name="badge1.lamination" th:field="*{badges[0].lamination}" id="badge1Lamination" class="form-control"/>-->
-<!--            </div>-->
-<!--            <div class="form-group">-->
-<!--                <label for="badge1LaminationKind">Lamination Kind:</label>-->
-<!--                <select name="badge1.laminationKind" th:field="*{badges[0].laminationKind}" id="badge1LaminationKind" class="form-control">-->
-<!--                    <option value="МАТОВЫЙ">МАТОВЫЙ</option>-->
-<!--                    <option value="ГЛЯНЦЕВЫЙ">ГЛЯНЦЕВЫЙ</option>-->
-<!--                </select>-->
-<!--            </div>-->
-<!--            <div class="form-check">-->
-<!--                <input type="hidden" name="badge1.rfid" th:value="false"/>-->
-<!--                <input type="checkbox" class="form-check-input" id="rfid1" name="badge1.rfid" th:field="*{badges[0].rfid}"/>-->
-<!--                <label class="form-check-label" for="rfid1">RFID метка</label>-->
-<!--            </div>-->
-<!--            <div class="form-group">-->
-<!--                <label for="badge1Price">Price:</label>-->
-<!--                <input type="text" name="badge1.price" th:field="*{badges[0].price}" id="badge1Price" class="form-control"/>-->
-<!--            </div>-->
-<!--            <div class="form-group">-->
-<!--                <label for="badge1Count">Count:</label>-->
-<!--                <input type="text" name="badge1.count" th:field="*{badges[0].count}" id="badge1Count" class="form-control"/>-->
-<!--            </div>-->
-
-<!--            <h2>Badge 2</h2>-->
-<!--            <div class="form-group">-->
-<!--                <label for="badge2Material">Material:</label>-->
-<!--                <select name="badge2.badgeMaterial" th:field="*{badges[1].badgeMaterial}" id="badge2Material" class="form-control">-->
-<!--                    <option value="ПЕЧАТНЫЙ">ПЕЧАТНЫЙ</option>-->
-<!--                    <option value="ПЛАСТИКОВЫЙ">ПЛАСТИКОВЫЙ</option>-->
-<!--                </select>-->
-<!--            </div>-->
-<!--            <div class="form-group">-->
-<!--                <label for="badge2Size">Size:</label>-->
-<!--                <input type="text" name="badge2.size" th:field="*{badges[1].size}" id="badge2Size" class="form-control"/>-->
-<!--            </div>-->
-<!--            <div class="form-group">-->
-<!--                <label for="badge2Chroma">Chroma:</label>-->
-<!--                <input type="text" name="badge2.chroma" th:field="*{badges[1].chroma}" id="badge2Chroma" class="form-control"/>-->
-<!--            </div>-->
-<!--            <div class="form-group">-->
-<!--                <label for="badge2Density">Density:</label>-->
-<!--                <input type="text" name="badge2.density" th:field="*{badges[1].density}" id="badge2Density" class="form-control"/>-->
-<!--            </div>-->
-<!--            <div class="form-group">-->
-<!--                <label for="badge2Lamination">Lamination:</label>-->
-<!--                <input type="text" name="badge2.lamination" th:field="*{badges[1].lamination}" id="badge2Lamination" class="form-control"/>-->
-<!--            </div>-->
-<!--            <div class="form-group">-->
-<!--                <label for="badge2LaminationKind">Lamination Kind:</label>-->
-<!--                <select name="badge2.laminationKind" th:field="*{badges[1].laminationKind}" id="badge2LaminationKind" class="form-control">-->
-<!--                    <option value="МАТОВЫЙ">МАТОВЫЙ</option>-->
-<!--                    <option value="ГЛЯНЦЕВЫЙ">ГЛЯНЦЕВЫЙ</option>-->
-<!--                </select>-->
-<!--            </div>-->
-<!--            <div class="form-check">-->
-<!--                <input type="hidden" name="badge2.rfid" th:value="false"/>-->
-<!--                <input type="checkbox" class="form-check-input" id="rfid2" name="badge2.rfid" th:field="*{badges[1].rfid}"/>-->
-<!--                <label class="form-check-label" for="rfid2">RFID метка</label>-->
-<!--            </div>-->
-<!--            <div class="form-group">-->
-<!--                <label for="badge2Price">Price:</label>-->
-<!--                <input type="text" name="badge2.price" th:field="*{badges[1].price}" id="badge2Price" class="form-control"/>-->
-<!--            </div>-->
-<!--            <div class="form-group">-->
-<!--                <label for="badge2Count">Count:</label>-->
-<!--                <input type="text" name="badge2.count" th:field="*{badges[1].count}" id="badge2Count" class="form-control"/>-->
-<!--            </div>-->
-<!--        </div>-->
-
-<!--        <div th:object="${lanyardList}">-->
-<!--            <h2>Lanyard 1</h2>-->
-<!--            <div class="form-group">-->
-<!--                <label for="lanyard1Size">Size:</label>-->
-<!--                <select name="lanyard1.lanyardSize" th:field="*{lanyards[0].size}" id="lanyard1Size" class="form-control">-->
-<!--                    <option value="10мм">10мм</option>-->
-<!--                    <option value="16мм">16мм</option>-->
-<!--                    <option value="20мм">20мм</option>-->
-<!--                </select>-->
-<!--            </div>-->
-<!--            <div class="form-group">-->
-<!--                <label for="lanyard1Application">Application:</label>-->
-<!--                <select name="lanyard1.lanyardApplication" th:field="*{lanyards[0].application}" id="lanyard1Application" class="form-control">-->
-<!--                    <option value="Однотонная">Однотонная</option>-->
-<!--                    <option value="Сублимация">Сублимация</option>-->
-<!--                    <option value="Шелкография">Шелкография</option>-->
-<!--                </select>-->
-<!--            </div>-->
-<!--            <div class="form-group">-->
-<!--                <label for="lanyard1Bracing">Bracing:</label>-->
-<!--                <select name="lanyard1.lanyardBracing" th:field="*{lanyards[0].bracing}" id="lanyard1Bracing" class="form-control">-->
-<!--                    <option value="2 карабина-люкс">2 карабина-люкс</option>-->
-<!--                    <option value="Карабин люкс">Карабин люкс</option>-->
-<!--                    <option value="Пластиковая клипса">Пластиковая клипса</option>-->
-<!--                    <option value="Клипса">Клипса</option>-->
-<!--                </select>-->
-<!--            </div>-->
-<!--            <div class="form-group">-->
-<!--                <label for="lanyard1Price">Price:</label>-->
-<!--                <input type="text" name="lanyard1.price" th:field="*{lanyards[0].price}" id="lanyard1Price" class="form-control"/>-->
-<!--            </div>-->
-<!--            <div class="form-group">-->
-<!--                <label for="lanyard1Count">Count:</label>-->
-<!--                <input type="text" name="lanyard1.count" th:field="*{lanyards[0].count}" id="lanyard1Count" class="form-control"/>-->
-<!--            </div>-->
-
-<!--            <h2>Lanyard 2</h2>-->
-<!--            <div class="form-group">-->
-<!--                <label for="lanyard2Size">Size:</label>-->
-<!--                <select name="lanyard2.lanyardSize" th:field="*{lanyards[1].size}" id="lanyard2Size" class="form-control">-->
-<!--                    <option value="10мм">10мм</option>-->
-<!--                    <option value="16мм">16мм</option>-->
-<!--                    <option value="20мм">20мм</option>-->
-<!--                </select>-->
-<!--            </div>-->
-<!--            <div class="form-group">-->
-<!--                <label for="lanyard2Application">Application:</label>-->
-<!--                <select name="lanyard2.lanyardApplication" th:field="*{lanyards[1].application}" id="lanyard2Application" class="form-control">-->
-<!--                    <option value="Однотонная">Однотонная</option>-->
-<!--                    <option value="Сублимация">Сублимация</option>-->
-<!--                    <option value="Шелкография">Шелкография</option>-->
-<!--                </select>-->
-<!--            </div>-->
-<!--            <div class="form-group">-->
-<!--                <label for="lanyard2Bracing">Bracing:</label>-->
-<!--                <select name="lanyard2.lanyardBracing" th:field="*{lanyards[1].bracing}" id="lanyard2Bracing" class="form-control">-->
-<!--                    <option value="2 карабина-люкс">2 карабина-люкс</option>-->
-<!--                    <option value="Карабин люкс">Карабин люкс</option>-->
-<!--                    <option value="Пластиковая клипса">Пластиковая клипса</option>-->
-<!--                    <option value="Клипса">Клипса</option>-->
-<!--                </select>-->
-<!--            </div>-->
-<!--            <div class="form-group">-->
-<!--                <label for="lanyard2Price">Price:</label>-->
-<!--                <input type="text" name="lanyard2.price" th:field="*{lanyards[1].price}" id="lanyard2Price" class="form-control"/>-->
-<!--            </div>-->
-<!--            <div class="form-group">-->
-<!--                <label for="lanyard2Count">Count:</label>-->
-<!--                <input type="text" name="lanyard2.count" th:field="*{lanyards[1].count}" id="lanyard2Count" class="form-control"/>-->
-<!--            </div>-->
-<!--        </div>-->
-
-<!--        <div th:object="${bracerList}">-->
-<!--            <h2>Bracer 1</h2>-->
-<!--            <div class="form-group">-->
-<!--                <label for="bracer1material">Material:</label>-->
-<!--                <select name="bracer1material" th:field="*{bracers[0].material}" id="bracer1material" class="form-control" onchange="updateFormFields()">-->
-<!--                    <option value="БУМАЖНЫЙ" selected>БУМАЖНЫЙ</option>-->
-<!--                    <option value="ВИНИЛОВЫЙ">ВИНИЛОВЫЙ</option>-->
-<!--                </select>-->
-<!--            </div>-->
-<!--            <div class="form-group">-->
-<!--                <label for="bracer1length">Length:</label>-->
-<!--                <input type="text" name="bracer1length" th:field="*{bracers[0].length}" id="bracer1length" class="form-control" value="250"/>-->
-<!--            </div>-->
-<!--            <div class="form-group">-->
-<!--                <label for="bracer1width">Width:</label>-->
-<!--                <input type="text" name="bracer1width" th:field="*{bracers[0].width}" id="bracer1width" class="form-control" value="19"/>-->
-<!--            </div>-->
-<!--            <div class="form-group">-->
-<!--                <label for="bracer1application">Application:</label>-->
-<!--                <input type="text" name="bracer1application" th:field="*{bracers[0].application}" id="bracer1application" class="form-control" value="1+0"/>-->
-<!--            </div>-->
-<!--            <div class="form-group">-->
-<!--                <label for="bracer1color">Color:</label>-->
-<!--                <input type="text" name="bracer1color" th:field="*{bracers[0].color}" id="bracer1color" class="form-control" value=""/>-->
-<!--            </div>-->
-<!--            <div class="form-group" id="bracer1type-group" style="display: none;">-->
-<!--                <label for="bracer1type">Type:</label>-->
-<!--                <select name="bracer1type" th:field="*{bracers[0].type}" id="bracer1type" class="form-control">-->
-<!--                    <option value="L-тип">L-тип</option>-->
-<!--                    <option value="F-тип">F-тип</option>-->
-<!--                </select>-->
-<!--            </div>-->
-<!--            <div class="form-check" id="bracer1rfid-group" style="display: none;">-->
-<!--                <input type="hidden" name="bracer1.rfid" th:value="false"/>-->
-<!--                <input type="checkbox" class="form-check-input" id="rfid1" name="bracer1.rfid" th:field="*{bracers[0].rfid}"/>-->
-<!--                <label class="form-check-label" for="rfid1">RFID</label>-->
-<!--            </div>-->
-<!--            <div class="form-group">-->
-<!--                <label for="bracer1Price">Price:</label>-->
-<!--                <input type="text" name="bracer1.price" th:field="*{bracers[0].price}" id="bracer1Price" class="form-control"/>-->
-<!--            </div>-->
-<!--            <div class="form-group">-->
-<!--                <label for="bracer1Count">Count:</label>-->
-<!--                <input type="text" name="bracer1.count" th:field="*{bracers[0].count}" id="bracer1Count" class="form-control"/>-->
-<!--            </div>-->
-
-<!--            <h2>Bracer 2</h2>-->
-<!--            <div class="form-group">-->
-<!--                <label for="bracer2material">Material:</label>-->
-<!--                <select name="bracer2material" th:field="*{bracers[1].material}" id="bracer2material" class="form-control" onchange="updateFormFields()">-->
-<!--                    <option value="БУМАЖНЫЙ" selected>БУМАЖНЫЙ</option>-->
-<!--                    <option value="ВИНИЛОВЫЙ">ВИНИЛОВЫЙ</option>-->
-<!--                </select>-->
-<!--            </div>-->
-<!--            <div class="form-group">-->
-<!--                <label for="bracer2length">Length:</label>-->
-<!--                <input type="text" name="bracer2length" th:field="*{bracers[1].length}" id="bracer2length" class="form-control" value="250"/>-->
-<!--            </div>-->
-<!--            <div class="form-group">-->
-<!--                <label for="bracer2width">Width:</label>-->
-<!--                <input type="text" name="bracer2width" th:field="*{bracers[1].width}" id="bracer2width" class="form-control" value="19"/>-->
-<!--            </div>-->
-<!--            <div class="form-group">-->
-<!--                <label for="bracer2application">Application:</label>-->
-<!--                <input type="text" name="bracer2application" th:field="*{bracers[1].application}" id="bracer2application" class="form-control" value="1+0"/>-->
-<!--            </div>-->
-<!--            <div class="form-group">-->
-<!--                <label for="bracer2color">Color:</label>-->
-<!--                <input type="text" name="bracer2color" th:field="*{bracers[1].color}" id="bracer2color" class="form-control" value=""/>-->
-<!--            </div>-->
-<!--            <div class="form-group" id="bracer2type-group" style="display: none;">-->
-<!--                <label for="bracer2type">Type:</label>-->
-<!--                <select name="bracer2type" th:field="*{bracers[1].type}" id="bracer2type" class="form-control">-->
-<!--                    <option value="L-тип">L-тип</option>-->
-<!--                    <option value="F-тип">F-тип</option>-->
-<!--                </select>-->
-<!--            </div>-->
-<!--            <div class="form-check" id="bracer2rfid-group" style="display: none;">-->
-<!--                <input type="hidden" name="bracer2.rfid" th:value="false"/>-->
-<!--                <input type="checkbox" class="form-check-input" id="rfid2" name="bracer2.rfid" th:field="*{bracers[1].rfid}"/>-->
-<!--                <label class="form-check-label" for="rfid2">RFID</label>-->
-<!--            </div>-->
-<!--            <div class="form-group">-->
-<!--                <label for="bracer2Price">Price:</label>-->
-<!--                <input type="text" name="bracer2.price" th:field="*{bracers[1].price}" id="bracer2Price" class="form-control"/>-->
-<!--            </div>-->
-<!--            <div class="form-group">-->
-<!--                <label for="bracer2Count">Count:</label>-->
-<!--                <input type="text" name="bracer2.count" th:field="*{bracers[1].count}" id="bracer2Count" class="form-control"/>-->
-<!--            </div>-->
-<!--        </div>-->
-
-<!--        <div th:object="${insertList}">-->
-<!--            <h2>Insert 1</h2>-->
-<!--            <div class="form-group">-->
-<!--                <label for="insert1size">Size:</label>-->
-<!--                <input type="text" name="insert1size" th:field="*{inserts[0].size}" id="insert1size" class="form-control" value="86x54 мм"/>-->
-<!--            </div>-->
-<!--            <div class="form-group">-->
-<!--                <label for="insert1chroma">Chroma:</label>-->
-<!--                <select name="insert1chroma" th:field="*{inserts[0].chroma}" id="insert1chroma" class="form-control">-->
-<!--                    <option value="4+4" selected>4+4</option>-->
-<!--                    <option value="4+0">4+0</option>-->
-<!--                </select>-->
-<!--            </div>-->
-<!--            <div class="form-group">-->
-<!--                <label for="insert1density">Density:</label>-->
-<!--                <input type="text" name="insert1density" th:field="*{inserts[0].density}" id="insert1density" class="form-control" value="150 гр."/>-->
-<!--            </div>-->
-<!--            <div class="form-group">-->
-<!--                <label for="insert1Price">Price:</label>-->
-<!--                <input type="text" name="insert1.price" th:field="*{inserts[0].price}" id="insert1Price" class="form-control"/>-->
-<!--            </div>-->
-<!--            <div class="form-group">-->
-<!--                <label for="insert1Count">Count:</label>-->
-<!--                <input type="text" name="insert1.count" th:field="*{inserts[0].count}" id="insert1Count" class="form-control"/>-->
-<!--            </div>-->
-
-<!--            <h2>Insert 2</h2>-->
-<!--            <div class="form-group">-->
-<!--                <label for="insert2size">Size:</label>-->
-<!--                <input type="text" name="insert2size" th:field="*{inserts[1].size}" id="insert2size" class="form-control" value="86x54 мм"/>-->
-<!--            </div>-->
-<!--            <div class="form-group">-->
-<!--                <label for="insert2chroma">Chroma:</label>-->
-<!--                <select name="insert2chroma" th:field="*{inserts[1].chroma}" id="insert2chroma" class="form-control">-->
-<!--                    <option value="4+4" selected>4+4</option>-->
-<!--                    <option value="4+0">4+0</option>-->
-<!--                </select>-->
-<!--            </div>-->
-<!--            <div class="form-group">-->
-<!--                <label for="insert2density">Density:</label>-->
-<!--                <input type="text" name="insert2density" th:field="*{inserts[1].density}" id="insert2density" class="form-control" value="150 гр."/>-->
-<!--            </div>-->
-<!--            <div class="form-group">-->
-<!--                <label for="insert2Price">Price:</label>-->
-<!--                <input type="text" name="insert2.price" th:field="*{inserts[1].price}" id="insert2Price" class="form-control"/>-->
-<!--            </div>-->
-<!--            <div class="form-group">-->
-<!--                <label for="insert2Count">Count:</label>-->
-<!--                <input type="text" name="insert2.count" th:field="*{inserts[1].count}" id="insert2Count" class="form-control"/>-->
-<!--            </div>-->
-<!--        </div>-->
-
-<!--        <div th:object="${pocketList}">-->
-<!--            <h2>Pocket 1</h2>-->
-<!--            <div class="form-group">-->
-<!--                <label for="pocket1size">Size:</label>-->
-<!--                <input type="text" name="pocket1size" th:field="*{pockets[0].size}" id="pocket1size" class="form-control" value="86x54 мм"/>-->
-<!--            </div>-->
-<!--            <div class="form-group">-->
-<!--                <label for="pocket1Price">Price:</label>-->
-<!--                <input type="text" name="pocket1.price" th:field="*{pockets[0].price}" id="pocket1Price" class="form-control"/>-->
-<!--            </div>-->
-<!--            <div class="form-group">-->
-<!--                <label for="pocket1Count">Count:</label>-->
-<!--                <input type="text" name="pocket1.count" th:field="*{pockets[0].count}" id="pocket1Count" class="form-control"/>-->
-<!--            </div>-->
-
-<!--            <h2>Pocket 2</h2>-->
-<!--            <div class="form-group">-->
-<!--                <label for="pocket2size">Size:</label>-->
-<!--                <input type="text" name="pocket2size" th:field="*{pockets[1].size}" id="pocket2size" class="form-control" value="86x54 мм"/>-->
-<!--            </div>-->
-<!--            <div class="form-group">-->
-<!--                <label for="pocket2Price">Price:</label>-->
-<!--                <input type="text" name="pocket2.price" th:field="*{pockets[1].price}" id="pocket2Price" class="form-control"/>-->
-<!--            </div>-->
-<!--            <div class="form-group">-->
-<!--                <label for="pocket2Count">Count:</label>-->
-<!--                <input type="text" name="pocket2.count" th:field="*{pockets[1].count}" id="pocket2Count" class="form-control"/>-->
-<!--            </div>-->
-<!--        </div>-->
-
-<!--        <div th:object="${ribbonList}">-->
-<!--            <h2>Ribbon 1</h2>-->
-<!--            <div class="form-group">-->
-<!--                <label for="ribbon1kind">Kind:</label>-->
-<!--                <select name="ribbon1.kind" th:field="*{ribbons[0].kind}" id="ribbon1kind" class="form-control">-->
-<!--                    <option value="Полноцветный" selected>Полноцветный</option>-->
-<!--                    <option value="Монохромный">Монохромный</option>-->
-<!--                </select>-->
-<!--            </div>-->
-<!--            <div class="form-group">-->
-<!--                <label for="ribbon1Price">Price:</label>-->
-<!--                <input type="text" name="ribbon1.price" th:field="*{ribbons[0].price}" id="ribbon1Price" class="form-control"/>-->
-<!--            </div>-->
-<!--            <div class="form-group">-->
-<!--                <label for="ribbon1Count">Count:</label>-->
-<!--                <input type="text" name="ribbon1.count" th:field="*{ribbons[0].count}" id="ribbon1Count" class="form-control"/>-->
-<!--            </div>-->
-
-<!--            <h2>Ribbon 2</h2>-->
-<!--            <div class="form-group">-->
-<!--                <label for="ribbon2kind">Kind:</label>-->
-<!--                <select name="ribbon2.kind" th:field="*{ribbons[1].kind}" id="ribbon2kind" class="form-control">-->
-<!--                    <option value="Полноцветный" selected>Полноцветный</option>-->
-<!--                    <option value="Монохромный">Монохромный</option>-->
-<!--                </select>-->
-<!--            </div>-->
-<!--            <div class="form-group">-->
-<!--                <label for="ribbon2Price">Price:</label>-->
-<!--                <input type="text" name="ribbon2.price" th:field="*{ribbons[1].price}" id="ribbon2Price" class="form-control"/>-->
-<!--            </div>-->
-<!--            <div class="form-group">-->
-<!--                <label for="ribbon2Count">Count:</label>-->
-<!--                <input type="text" name="ribbon2.count" th:field="*{ribbons[1].count}" id="ribbon2Count" class="form-control"/>-->
-<!--            </div>-->
-<!--        </div>-->
-
-<!--        <div th:object="${stickerList}">-->
-<!--            <h2>Sticker 1</h2>-->
-<!--            <div class="form-group">-->
-<!--                <label for="sticker1stick">Stick:</label>-->
-<!--                <select name="sticker1.stick" th:field="*{stickers[0].stick}" id="sticker1stick" class="form-control">-->
-<!--                    <option value="90х38" selected>90х38</option>-->
-<!--                    <option value="62х100">62х100</option>-->
-<!--                    <option value="62х29">62х29</option>-->
-<!--                </select>-->
-<!--            </div>-->
-<!--            <div class="form-group">-->
-<!--                <label for="sticker1tape">Tape:</label>-->
-<!--                <input type="text" name="sticker1.tape" th:field="*{stickers[0].tape}" id="sticker1tape" class="form-control" placeholder="Отрезная лента 62, 38мм"/>-->
-<!--            </div>-->
-<!--            <div class="form-group form-check">-->
-<!--                <input type="hidden" name="sticker1.transparent" th:value="false"/>-->
-<!--                <input type="checkbox" name="sticker1.transparent" th:field="*{stickers[0].transparent}" id="sticker1transparent" class="form-check-input"/>-->
-<!--                <label class="form-check-label" for="sticker1transparent">Transparent</label>-->
-<!--            </div>-->
-<!--            <div class="form-group">-->
-<!--                <label for="sticker1Price">Price:</label>-->
-<!--                <input type="text" name="sticker1.price" th:field="*{stickers[0].price}" id="sticker1Price" class="form-control"/>-->
-<!--            </div>-->
-<!--            <div class="form-group">-->
-<!--                <label for="sticker1Count">Count:</label>-->
-<!--                <input type="text" name="sticker1.count" th:field="*{stickers[0].count}" id="sticker1Count" class="form-control"/>-->
-<!--            </div>-->
-
-<!--            <h2>Sticker 2</h2>-->
-<!--            <div class="form-group">-->
-<!--                <label for="sticker2stick">Stick:</label>-->
-<!--                <select name="sticker2.stick" th:field="*{stickers[1].stick}" id="sticker2stick" class="form-control">-->
-<!--                    <option value="90х38" selected>90х38</option>-->
-<!--                    <option value="62х100">62х100</option>-->
-<!--                    <option value="62х29">62х29</option>-->
-<!--                </select>-->
-<!--            </div>-->
-<!--            <div class="form-group">-->
-<!--                <label for="sticker2tape">Tape:</label>-->
-<!--                <input type="text" name="sticker2.tape" th:field="*{stickers[1].tape}" id="sticker2tape" class="form-control" placeholder="Отрезная лента 62, 38мм"/>-->
-<!--            </div>-->
-<!--            <div class="form-group form-check">-->
-<!--                <input type="hidden" name="sticker2.transparent" th:value="false"/>-->
-<!--                <input type="checkbox" name="sticker2.transparent" th:field="*{stickers[1].transparent}" id="sticker2transparent" class="form-check-input"/>-->
-<!--                <label class="form-check-label" for="sticker2transparent">Transparent</label>-->
-<!--            </div>-->
-<!--            <div class="form-group">-->
-<!--                <label for="sticker2Price">Price:</label>-->
-<!--                <input type="text" name="sticker2.price" th:field="*{stickers[1].price}" id="sticker2Price" class="form-control"/>-->
-<!--            </div>-->
-<!--            <div class="form-group">-->
-<!--                <label for="sticker2Count">Count:</label>-->
-<!--                <input type="text" name="sticker2.count" th:field="*{stickers[1].count}" id="sticker2Count" class="form-control"/>-->
-<!--            </div>-->
-<!--        </div>-->
-
-<!--        <script>-->
-<!--            document.addEventListener('DOMContentLoaded', function () {-->
-<!--                updateFormFields();-->
-<!--            });-->
-
-<!--            function updateFormFields() {-->
-<!--                var materialSelect1 = document.getElementById('bracer1material');-->
-<!--                var lengthInput1 = document.getElementById('bracer1length');-->
-<!--                var widthInput1 = document.getElementById('bracer1width');-->
-<!--                var typeGroup1 = document.getElementById('bracer1type-group');-->
-<!--                var rfidGroup1 = document.getElementById('bracer1rfid-group');-->
-
-<!--                if (materialSelect1.value === 'БУМАЖНЫЙ') {-->
-<!--                    lengthInput1.value = '250';-->
-<!--                    widthInput1.value = '19';-->
-<!--                    typeGroup1.style.display = 'none';-->
-<!--                    rfidGroup1.style.display = 'none';-->
-<!--                } else if (materialSelect1.value === 'ВИНИЛОВЫЙ') {-->
-<!--                    lengthInput1.value = '250';-->
-<!--                    widthInput1.value = '32';-->
-<!--                    typeGroup1.style.display = 'block';-->
-<!--                    rfidGroup1.style.display = 'block';-->
-<!--                }-->
-
-<!--                var materialSelect2 = document.getElementById('bracer2material');-->
-<!--                var lengthInput2 = document.getElementById('bracer2length');-->
-<!--                var widthInput2 = document.getElementById('bracer2width');-->
-<!--                var typeGroup2 = document.getElementById('bracer2type-group');-->
-<!--                var rfidGroup2 = document.getElementById('bracer2rfid-group');-->
-
-<!--                if (materialSelect2.value === 'БУМАЖНЫЙ') {-->
-<!--                    lengthInput2.value = '250';-->
-<!--                    widthInput2.value = '19';-->
-<!--                    typeGroup2.style.display = 'none';-->
-<!--                    rfidGroup2.style.display = 'none';-->
-<!--                } else if (materialSelect2.value === 'ВИНИЛОВЫЙ') {-->
-<!--                    lengthInput2.value = '250';-->
-<!--                    widthInput2.value = '32';-->
-<!--                    typeGroup2.style.display = 'block';-->
-<!--                    rfidGroup2.style.display = 'block';-->
-<!--                }-->
-<!--            }-->
-<!--        </script>-->
-
-<!--        <script>-->
-<!--            document.addEventListener('DOMContentLoaded', function () {-->
-<!--                const sizeInputs = document.querySelectorAll('input[name$="size"]');-->
-<!--                const densityInputs = document.querySelectorAll('input[name$="density"]');-->
-
-<!--                sizeInputs.forEach(input => {-->
-<!--                    input.addEventListener('blur', function () {-->
-<!--                        if (!this.value.endsWith(' мм')) {-->
-<!--                            this.value += ' мм';-->
-<!--                        }-->
-<!--                    });-->
-<!--                });-->
-
-<!--                densityInputs.forEach(input => {-->
-<!--                    input.addEventListener('blur', function () {-->
-<!--                        if (!this.value.endsWith(' гр.')) {-->
-<!--                            this.value += ' гр.';-->
-<!--                        }-->
-<!--                    });-->
-<!--                });-->
-<!--            });-->
-<!--        </script>-->
-
-<!--        <button type="submit" class="btn btn-primary">Save Supplies</button>-->
-<!--    </form>-->
-<!--</div>-->
-<!--</body>-->
-<!--</html>-->
-
-
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
@@ -955,26 +13,41 @@
         }
         .form-group-inline {
             display: flex;
-            align-items: center;
+            align-items: flex-start;
             margin-bottom: 10px;
         }
-        .form-group-inline label {
-            margin-right: 10px;
-        }
-        .form-group-inline .form-control {
+        .form-group-inline > div {
             margin-right: 10px;
             flex-grow: 1;
         }
+
         .form-check-inline {
             display: flex;
             align-items: center;
-            margin-left: 10px;
             height: 38px;
+            margin: 0 5px;
         }
         .form-check-inline .form-check-input {
             width: 36px;
             height: 36px;
+            margin: 0 8px;
+        }
+        .form-check-inline1 {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 38px;
+            margin: 0 10px;
+        }
+        .form-check-inline1 .form-check-input1 {
+            width: 36px;
+            height: 36px;
             margin: 0;
+        }
+        .form-check-inline1 label {
+            display: flex;
+            align-items: center;
+            margin-bottom: 0;
         }
         .form-group {
             margin-bottom: 15px;
@@ -985,547 +58,826 @@
         .form-section-buttons {
             margin-top: 20px;
         }
+        .hidden {
+            display: none;
+        }
+        .remove-staff-btn {
+            color: red;
+            cursor: pointer;
+            font-size: 1.5em;
+            position: absolute;
+            right: 10px;
+            top: 10px;
+        }
+        .position-relative {
+            position: relative;
+        }
+        .form-section-buttons .btn {
+            width: 100%;
+            padding: 10px;
+            font-size: 1rem;
+        }
+
+        .mb-2 {
+            margin-bottom: 10px; /* Небольшой отступ между кнопками по вертикали */
+        }
     </style>
 </head>
 <body>
 <div class="container form-container">
-    <h1>Input Supplies</h1>
+    <h1>Расходные материалы</h1>
+<!--    <div class="form-section-buttons">-->
+<!--        <button type="button" class="btn btn-primary" id="addBadge">Добавить бейдж</button>-->
+<!--        <button type="button" class="btn btn-primary" id="addLanyard">Добавить ланьярд</button>-->
+<!--        <button type="button" class="btn btn-primary" id="addSticker">Добавить наклейку</button>-->
+<!--        <button type="button" class="btn btn-primary" id="addBracer">Добавить браслет</button>-->
+<!--        <button type="button" class="btn btn-primary" id="addInsert">Добавить вкладыш</button>-->
+<!--        <button type="button" class="btn btn-primary" id="addPocket">Добавить карман</button>-->
+<!--        <button type="button" class="btn btn-primary" id="addRibbon">Добавить риббон</button>-->
+<!--        <button type="button" class="btn btn-primary" id="addAsup">Добавить доп. поле</button>-->
+<!--    </div>-->
+    <div class="form-section-buttons">
+        <div class="row">
+            <div class="col-md-3 col-sm-6 mb-2">
+                <button type="button" class="btn btn-primary btn-block" id="addBadge">Добавить бейдж</button>
+            </div>
+            <div class="col-md-3 col-sm-6 mb-2">
+                <button type="button" class="btn btn-primary btn-block" id="addLanyard">Добавить ланьярд</button>
+            </div>
+            <div class="col-md-3 col-sm-6 mb-2">
+                <button type="button" class="btn btn-primary btn-block" id="addSticker">Добавить наклейку</button>
+            </div>
+            <div class="col-md-3 col-sm-6 mb-2">
+                <button type="button" class="btn btn-primary btn-block" id="addBracer">Добавить браслет</button>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-3 col-sm-6 mb-2">
+                <button type="button" class="btn btn-primary btn-block" id="addInsert">Добавить вкладыш</button>
+            </div>
+            <div class="col-md-3 col-sm-6 mb-2">
+                <button type="button" class="btn btn-primary btn-block" id="addPocket">Добавить карман</button>
+            </div>
+            <div class="col-md-3 col-sm-6 mb-2">
+                <button type="button" class="btn btn-primary btn-block" id="addRibbon">Добавить риббон</button>
+            </div>
+            <div class="col-md-3 col-sm-6 mb-2">
+                <button type="button" class="btn btn-primary btn-block" id="addAsup">Добавить доп. поле</button>
+            </div>
+        </div>
+    </div>
     <form th:action="@{/input/saveSupplies}" method="post">
         <input type="hidden" name="headerId" th:value="${headerId}"/>
         <input type="hidden" name="suppliesId" th:value="${suppliesId}"/>
 
         <!-- Badge List -->
         <div th:object="${badgeList}">
-            <div id="badge1">
-                <h2>Badge 1</h2>
+            <div id="badge1" class="position-relative hidden">
+                <h2>Бейдж</h2>
                 <div class="form-group-inline">
-                    <label for="badge1Material">Material:</label>
-                    <select name="badge1.badgeMaterial" th:field="*{badges[0].badgeMaterial}" id="badge1Material" class="form-control" style="max-width: 200px;">
-                        <option value="ПЕЧАТНЫЙ">ПЕЧАТНЫЙ</option>
-                        <option value="ПЛАСТИКОВЫЙ">ПЛАСТИКОВЫЙ</option>
-                    </select>
+                    <div>
+                        <label for="badge1Material">Материал:</label>
+                        <select name="badge1.badgeMaterial" th:field="*{badges[0].badgeMaterial}" id="badge1Material" class="form-control" onchange="updateBadgeFields(1)">
+                            <option value="ПЕЧАТНЫЙ">ПЕЧАТНЫЙ</option>
+                            <option value="ПЛАСТИКОВЫЙ">ПЛАСТИКОВЫЙ</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="badge1LaminationKind">Ламинация:</label>
+                        <select name="badge1.laminationKind" th:field="*{badges[0].laminationKind}" id="badge1LaminationKind" class="form-control">
+                            <option value="МАТОВЫЙ">МАТОВЫЙ</option>
+                            <option value="ГЛЯНЦЕВЫЙ">ГЛЯНЦЕВЫЙ</option>
+                        </select>
+                    </div>
 
-                    <label for="badge1LaminationKind">Lamination Kind:</label>
-                    <select name="badge1.laminationKind" th:field="*{badges[0].laminationKind}" id="badge1LaminationKind" class="form-control" style="max-width: 200px;">
-                        <option value="МАТОВЫЙ">МАТОВЫЙ</option>
-                        <option value="ГЛЯНЦЕВЫЙ">ГЛЯНЦЕВЫЙ</option>
-                    </select>
-
-                    <div class="form-check-inline">
-                        <input type="hidden" name="badge1.rfid" th:value="false"/>
-                        <input type="checkbox" class="form-check-input" id="rfid1" name="badge1.rfid" th:field="*{badges[0].rfid}"/>
-                        <label class="form-check-label" for="rfid1">RFID</label>
+                    <div>
+                        <label for="rfid1">RFID</label>
+                        <div class="form-check-inline">
+                            <input type="hidden" name="badge1.rfid" th:value="false"/>
+                            <input type="checkbox" class="form-check-input" id="rfid1" name="badge1.rfid" th:field="*{badges[0].rfid}"/>
+                        </div>
+                    </div>
+                    <div>
+                        <label for="badge1Size">Размер:</label>
+                        <input type="text" name="badge1.size" th:field="*{badges[0].size}" id="badge1Size" class="form-control"/>
+                    </div>
+                    <div>
+                        <label for="badge1Chroma">Цветность:</label>
+                        <select name="badge1.chroma" th:field="*{badges[0].chroma}" id="badge1Chroma" class="form-control">
+                            <option value="4+0">4+0</option>
+                            <option value="4+4">4+4</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="badge1Count">Количество:</label>
+                        <input type="number" name="badge1.count" th:field="*{badges[0].count}" id="badge1Count" class="form-control"/>
+                    </div>
+                    <div>
+                        <label for="badge1Price">Стоимость:</label>
+                        <input type="number" name="badge1.price" th:field="*{badges[0].price}" id="badge1Price" class="form-control"/>
                     </div>
                 </div>
-                <div class="form-group-inline" style="margin-bottom: 15px;">
-                    <label for="badge1Size">Size:</label>
-                    <input type="text" name="badge1.size" th:field="*{badges[0].size}" id="badge1Size" class="form-control" style="max-width: 150px;"/>
-
-                    <label for="badge1Chroma">Chroma:</label>
-                    <input type="text" name="badge1.chroma" th:field="*{badges[0].chroma}" id="badge1Chroma" class="form-control" style="max-width: 150px;"/>
-
-                    <label for="badge1Density">Density:</label>
-                    <input type="text" name="badge1.density" th:field="*{badges[0].density}" id="badge1Density" class="form-control" style="max-width: 150px;"/>
-
-                    <label for="badge1Lamination">Lamination:</label>
-                    <input type="text" name="badge1.lamination" th:field="*{badges[0].lamination}" id="badge1Lamination" class="form-control" style="max-width: 150px;"/>
-                </div>
-                <div class="form-group-inline">
-                    <label for="badge1Price">Price:</label>
-                    <input type="text" name="badge1.price" th:field="*{badges[0].price}" id="badge1Price" class="form-control" style="max-width: 150px;"/>
-
-                    <label for="badge1Count">Count:</label>
-                    <input type="text" name="badge1.count" th:field="*{badges[0].count}" id="badge1Count" class="form-control" style="max-width: 150px;"/>
-                </div>
+                <div class="remove-staff-btn">&times;</div>
             </div>
 
-            <div id="badge2" style="display: none;">
-                <h2>Badge 2</h2>
+            <div id="badge2" class="position-relative hidden">
+                <h2>Бейдж дополнительный</h2>
                 <div class="form-group-inline">
-                    <label for="badge2Material">Material:</label>
-                    <select name="badge2.badgeMaterial" th:field="*{badges[1].badgeMaterial}" id="badge2Material" class="form-control" style="max-width: 200px;">
-                        <option value="ПЕЧАТНЫЙ">ПЕЧАТНЫЙ</option>
-                        <option value="ПЛАСТИКОВЫЙ">ПЛАСТИКОВЫЙ</option>
-                    </select>
+                    <div>
+                        <label for="badge2Material">Материал:</label>
+                        <select name="badge2.badgeMaterial" th:field="*{badges[1].badgeMaterial}" id="badge2Material" class="form-control" onchange="updateBadgeFields(2)">
+                            <option value="ПЕЧАТНЫЙ">ПЕЧАТНЫЙ</option>
+                            <option value="ПЛАСТИКОВЫЙ">ПЛАСТИКОВЫЙ</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="badge2LaminationKind">Ламинация:</label>
+                        <select name="badge2.laminationKind" th:field="*{badges[1].laminationKind}" id="badge2LaminationKind" class="form-control">
+                            <option value="МАТОВЫЙ">МАТОВЫЙ</option>
+                            <option value="ГЛЯНЦЕВЫЙ">ГЛЯНЦЕВЫЙ</option>
+                        </select>
+                    </div>
 
-                    <label for="badge2LaminationKind">Lamination Kind:</label>
-                    <select name="badge2.laminationKind" th:field="*{badges[1].laminationKind}" id="badge2LaminationKind" class="form-control" style="max-width: 200px;">
-                        <option value="МАТОВЫЙ">МАТОВЫЙ</option>
-                        <option value="ГЛЯНЦЕВЫЙ">ГЛЯНЦЕВЫЙ</option>
-                    </select>
-
-                    <div class="form-check-inline">
-                        <input type="hidden" name="badge2.rfid" th:value="false"/>
-                        <input type="checkbox" class="form-check-input" id="rfid2" name="badge2.rfid" th:field="*{badges[1].rfid}"/>
-                        <label class="form-check-label" for="rfid2">RFID</label>
+                    <div>
+                        <label for="rfid2">RFID</label>
+                        <div class="form-check-inline">
+                            <input type="hidden" name="badge2.rfid" th:value="false"/>
+                            <input type="checkbox" class="form-check-input" id="rfid2" name="badge2.rfid" th:field="*{badges[1].rfid}"/>
+                        </div>
+                    </div>
+                    <div>
+                        <label for="badge2Size">Размер:</label>
+                        <input type="text" name="badge2.size" th:field="*{badges[1].size}" id="badge2Size" class="form-control"/>
+                    </div>
+                    <div>
+                        <label for="badge2Chroma">Цветность:</label>
+                        <select name="badge2.chroma" th:field="*{badges[1].chroma}" id="badge2Chroma" class="form-control">
+                            <option value="4+0">4+0</option>
+                            <option value="4+4">4+4</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="badge2Count">Количество:</label>
+                        <input type="number" name="badge2.count" th:field="*{badges[1].count}" id="badge2Count" class="form-control"/>
+                    </div>
+                    <div>
+                        <label for="badge2Price">Стоимость:</label>
+                        <input type="number" name="badge2.price" th:field="*{badges[1].price}" id="badge2Price" class="form-control"/>
                     </div>
                 </div>
-                <div class="form-group-inline" style="margin-bottom: 15px;">
-                    <label for="badge2Size">Size:</label>
-                    <input type="text" name="badge2.size" th:field="*{badges[1].size}" id="badge2Size" class="form-control" style="max-width: 150px;"/>
-
-                    <label for="badge2Chroma">Chroma:</label>
-                    <input type="text" name="badge2.chroma" th:field="*{badges[1].chroma}" id="badge2Chroma" class="form-control" style="max-width: 150px;"/>
-
-                    <label for="badge2Density">Density:</label>
-                    <input type="text" name="badge2.density" th:field="*{badges[1].density}" id="badge2Density" class="form-control" style="max-width: 150px;"/>
-
-                    <label for="badge2Lamination">Lamination:</label>
-                    <input type="text" name="badge2.lamination" th:field="*{badges[1].lamination}" id="badge2Lamination" class="form-control" style="max-width: 150px;"/>
-                </div>
-                <div class="form-group-inline">
-                    <label for="badge2Price">Price:</label>
-                    <input type="text" name="badge2.price" th:field="*{badges[1].price}" id="badge2Price" class="form-control" style="max-width: 150px;"/>
-
-                    <label for="badge2Count">Count:</label>
-                    <input type="text" name="badge2.count" th:field="*{badges[1].count}" id="badge2Count" class="form-control" style="max-width: 150px;"/>
-                </div>
-                <button type="button" class="btn btn-danger" onclick="removeBadge2()">Удалить добавленный бейдж</button>
+                <div class="remove-staff-btn">&times;</div>
             </div>
         </div>
-
-        <button type="button" class="btn btn-primary add-badge-btn" onclick="addBadge2()">Добавить еще бейдж</button>
 
         <!-- Lanyard List -->
-        <div class="form-section" th:object="${lanyardList}">
-            <div id="lanyard1">
-                <h2>Lanyard 1</h2>
+        <div th:object="${lanyardList}">
+            <div id="lanyard1" class="position-relative hidden">
+                <h2>Ланьярд</h2>
                 <div class="form-group-inline">
-                    <label for="lanyard1Size">Size:</label>
-                    <select name="lanyard1.lanyardSize" th:field="*{lanyards[0].size}" id="lanyard1Size" class="form-control" style="max-width: 150px;">
-                        <option value="10мм">10мм</option>
-                        <option value="16мм">16мм</option>
-                        <option value="20мм">20мм</option>
-                    </select>
-
-                    <label for="lanyard1Application">Application:</label>
-                    <select name="lanyard1.lanyardApplication" th:field="*{lanyards[0].application}" id="lanyard1Application" class="form-control" style="max-width: 150px;">
-                        <option value="Однотонная">Однотонная</option>
-                        <option value="Сублимация">Сублимация</option>
-                        <option value="Шелкография">Шелкография</option>
-                    </select>
-
-                    <label for="lanyard1Bracing">Bracing:</label>
-                    <select name="lanyard1.lanyardBracing" th:field="*{lanyards[0].bracing}" id="lanyard1Bracing" class="form-control" style="max-width: 150px;">
-                        <option value="2 карабина-люкс">2 карабина-люкс</option>
-                        <option value="Карабин люкс">Карабин люкс</option>
-                        <option value="Пластиковая клипса">Пластиковая клипса</option>
-                        <option value="Клипса">Клипса</option>
-                    </select>
+                    <div>
+                        <label for="lanyard1Size">Ширина:</label>
+                        <select name="lanyard1.lanyardSize" th:field="*{lanyards[0].size}" id="lanyard1Size" class="form-control">
+                            <option value="10мм">10мм</option>
+                            <option value="16мм">16мм</option>
+                            <option value="20мм">20мм</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="lanyard1Application">Нанесение:</label>
+                        <select name="lanyard1.lanyardApplication" th:field="*{lanyards[0].application}" id="lanyard1Application" class="form-control">
+                            <option value="Однотонная">Однотонная</option>
+                            <option value="Сублимация">Сублимация</option>
+                            <option value="Шелкография">Шелкография</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="lanyard1Bracing">Крепление:</label>
+                        <select name="lanyard1.lanyardBracing" th:field="*{lanyards[0].bracing}" id="lanyard1Bracing" class="form-control">
+                            <option value="2 карабина-люкс">2 карабина-люкс</option>
+                            <option value="Карабин люкс">Карабин люкс</option>
+                            <option value="Пластиковая клипса">Пластиковая клипса</option>
+                            <option value="Клипса">Клипса</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="lanyard1Count">Количество:</label>
+                        <input type="number" name="lanyard1.count" th:field="*{lanyards[0].count}" id="lanyard1Count" class="form-control"/>
+                    </div>
+                    <div>
+                        <label for="lanyard1Price">Стоимость:</label>
+                        <input type="number" name="lanyard1.price" th:field="*{lanyards[0].price}" id="lanyard1Price" class="form-control"/>
+                    </div>
                 </div>
-                <div class="form-group-inline">
-                    <label for="lanyard1Price">Price:</label>
-                    <input type="text" name="lanyard1.price" th:field="*{lanyards[0].price}" id="lanyard1Price" class="form-control" style="max-width: 150px;"/>
-
-                    <label for="lanyard1Count">Count:</label>
-                    <input type="text" name="lanyard1.count" th:field="*{lanyards[0].count}" id="lanyard1Count" class="form-control" style="max-width: 150px;"/>
-                </div>
+                <div class="remove-staff-btn">&times;</div>
             </div>
 
-            <div id="lanyard2" style="display: none;">
-                <h2>Lanyard 2</h2>
+            <div id="lanyard2" class="position-relative hidden">
+                <h2>Ланьярд дополнительный</h2>
                 <div class="form-group-inline">
-                    <label for="lanyard2Size">Size:</label>
-                    <select name="lanyard2.lanyardSize" th:field="*{lanyards[1].size}" id="lanyard2Size" class="form-control" style="max-width: 150px;">
-                        <option value="10мм">10мм</option>
-                        <option value="16мм">16мм</option>
-                        <option value="20мм">20мм</option>
-                    </select>
-
-                    <label for="lanyard2Application">Application:</label>
-                    <select name="lanyard2.lanyardApplication" th:field="*{lanyards[1].application}" id="lanyard2Application" class="form-control" style="max-width: 150px;">
-                        <option value="Однотонная">Однотонная</option>
-                        <option value="Сублимация">Сублимация</option>
-                        <option value="Шелкография">Шелкография</option>
-                    </select>
-
-                    <label for="lanyard2Bracing">Bracing:</label>
-                    <select name="lanyard2.lanyardBracing" th:field="*{lanyards[1].bracing}" id="lanyard2Bracing" class="form-control" style="max-width: 150px;">
-                        <option value="2 карабина-люкс">2 карабина-люкс</option>
-                        <option value="Карабин люкс">Карабин люкс</option>
-                        <option value="Пластиковая клипса">Пластиковая клипса</option>
-                        <option value="Клипса">Клипса</option>
-                    </select>
+                    <div>
+                        <label for="lanyard2Size">Ширина:</label>
+                        <select name="lanyard2.lanyardSize" th:field="*{lanyards[1].size}" id="lanyard2Size" class="form-control">
+                            <option value="10мм">10мм</option>
+                            <option value="16мм">16мм</option>
+                            <option value="20мм">20мм</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="lanyard2Application">Нанесение:</label>
+                        <select name="lanyard2.lanyardApplication" th:field="*{lanyards[1].application}" id="lanyard2Application" class="form-control">
+                            <option value="Однотонная">Однотонная</option>
+                            <option value="Сублимация">Сублимация</option>
+                            <option value="Шелкография">Шелкография</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="lanyard2Bracing">Крепление:</label>
+                        <select name="lanyard2.lanyardBracing" th:field="*{lanyards[1].bracing}" id="lanyard2Bracing" class="form-control">
+                            <option value="2 карабина-люкс">2 карабина-люкс</option>
+                            <option value="Карабин люкс">Карабин люкс</option>
+                            <option value="Пластиковая клипса">Пластиковая клипса</option>
+                            <option value="Клипса">Клипса</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="lanyard2Count">Количество:</label>
+                        <input type="number" name="lanyard2.count" th:field="*{lanyards[1].count}" id="lanyard2Count" class="form-control"/>
+                    </div>
+                    <div>
+                        <label for="lanyard2Price">Стоимость:</label>
+                        <input type="number" name="lanyard2.price" th:field="*{lanyards[1].price}" id="lanyard2Price" class="form-control"/>
+                    </div>
                 </div>
-                <div class="form-group-inline">
-                    <label for="lanyard2Price">Price:</label>
-                    <input type="text" name="lanyard2.price" th:field="*{lanyards[1].price}" id="lanyard2Price" class="form-control" style="max-width: 150px;"/>
-
-                    <label for="lanyard2Count">Count:</label>
-                    <input type="text" name="lanyard2.count" th:field="*{lanyards[1].count}" id="lanyard2Count" class="form-control" style="max-width: 150px;"/>
-                </div>
-                <button type="button" class="btn btn-danger" onclick="removeLanyard2()">Удалить добавленную ленту</button>
+                <div class="remove-staff-btn">&times;</div>
             </div>
         </div>
-
-        <button type="button" class="btn btn-primary add-lanyard-btn" onclick="addLanyard2()">Добавить еще ленту</button>
 
         <!-- Sticker List -->
-        <div class="form-section" th:object="${stickerList}">
-            <div id="sticker1">
-                <h2>Sticker 1</h2>
+        <div th:object="${stickerList}">
+            <div id="sticker1" class="position-relative hidden">
+                <h2>Наклейка</h2>
                 <div class="form-group-inline">
-                    <label for="sticker1stick">Stick:</label>
-                    <select name="sticker1.stick" th:field="*{stickers[0].stick}" id="sticker1stick" class="form-control" style="max-width: 150px;">
-                        <option value="90х38" selected>90х38</option>
-                        <option value="62х100">62х100</option>
-                        <option value="62х29">62х29</option>
-                    </select>
+                    <div>
+                        <label for="sticker1stick">Наклейка:</label>
+                        <select name="sticker1.stick" th:field="*{stickers[0].stick}" id="sticker1stick" class="form-control">
+                            <option value="90х38" selected>90х38</option>
+                            <option value="62х100">62х100</option>
+                            <option value="62х29">62х29</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="sticker1tape">Лента:</label>
+                        <input type="text" name="sticker1.tape" th:field="*{stickers[0].tape}" id="sticker1tape" class="form-control" placeholder="Отрезная лента 62, 38мм"/>
+                    </div>
 
-                    <label for="sticker1tape">Tape:</label>
-                    <input type="text" name="sticker1.tape" th:field="*{stickers[0].tape}" id="sticker1tape" class="form-control" style="max-width: 150px;" placeholder="Отрезная лента 62, 38мм"/>
-
-                    <div class="form-check-inline">
-                        <input type="hidden" name="sticker1.transparent" th:value="false"/>
-                        <input type="checkbox" class="form-check-input" id="sticker1transparent" name="sticker1.transparent" th:field="*{stickers[0].transparent}"/>
-                        <label class="form-check-label" for="sticker1transparent">Transparent</label>
+                    <div>
+                        <label for="sticker1transparent">Прозрачная</label>
+                        <div class="form-check-inline1">
+                            <input type="hidden" name="sticker1.transparent" th:value="false"/>
+                            <input type="checkbox" class="form-check-input1" id="sticker1transparent" name="sticker1.transparent" th:field="*{stickers[0].transparent}"/>
+                        </div>
+                    </div>
+                    <div>
+                        <label for="sticker1Count">Количество:</label>
+                        <input type="number" name="sticker1.count" th:field="*{stickers[0].count}" id="sticker1Count" class="form-control"/>
+                    </div>
+                    <div>
+                        <label for="sticker1Price">Стоимость:</label>
+                        <input type="number" name="sticker1.price" th:field="*{stickers[0].price}" id="sticker1Price" class="form-control"/>
                     </div>
                 </div>
-                <div class="form-group-inline">
-                    <label for="sticker1Price">Price:</label>
-                    <input type="text" name="sticker1.price" th:field="*{stickers[0].price}" id="sticker1Price" class="form-control" style="max-width: 150px;"/>
-
-                    <label for="sticker1Count">Count:</label>
-                    <input type="text" name="sticker1.count" th:field="*{stickers[0].count}" id="sticker1Count" class="form-control" style="max-width: 150px;"/>
-                </div>
+                <div class="remove-staff-btn">&times;</div>
             </div>
 
-            <div id="sticker2" style="display: none;">
-                <h2>Sticker 2</h2>
+            <div id="sticker2" class="position-relative hidden">
+                <h2>Наклейка дополнительная</h2>
                 <div class="form-group-inline">
-                    <label for="sticker2stick">Stick:</label>
-                    <select name="sticker2.stick" th:field="*{stickers[1].stick}" id="sticker2stick" class="form-control" style="max-width: 150px;">
-                        <option value="90х38" selected>90х38</option>
-                        <option value="62х100">62х100</option>
-                        <option value="62х29">62х29</option>
-                    </select>
-
-                    <label for="sticker2tape">Tape:</label>
-                    <input type="text" name="sticker2.tape" th:field="*{stickers[1].tape}" id="sticker2tape" class="form-control" style="max-width: 150px;" placeholder="Отрезная лента 62, 38мм"/>
-
-                    <div class="form-check-inline">
-                        <input type="hidden" name="sticker2.transparent" th:value="false"/>
-                        <input type="checkbox" class="form-check-input" id="sticker2transparent" name="sticker2.transparent" th:field="*{stickers[1].transparent}"/>
-                        <label class="form-check-label" for="sticker2transparent">Transparent</label>
+                    <div>
+                        <label for="sticker2stick">Наклейка:</label>
+                        <select name="sticker2.stick" th:field="*{stickers[1].stick}" id="sticker2stick" class="form-control">
+                            <option value="90х38" selected>90х38</option>
+                            <option value="62х100">62х100</option>
+                            <option value="62х29">62х29</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="sticker2tape">Лента:</label>
+                        <input type="text" name="sticker2.tape" th:field="*{stickers[1].tape}" id="sticker2tape" class="form-control" placeholder="Отрезная лента 62, 38мм"/>
+                    </div>
+                    <div>
+                        <label for="sticker2transparent">Прозрачная</label>
+                        <div class="form-check-inline1">
+                            <input type="hidden" name="sticker2.transparent" th:value="false"/>
+                            <input type="checkbox" class="form-check-input1" id="sticker2transparent" name="sticker2.transparent" th:field="*{stickers[1].transparent}"/>
+                        </div>
+                    </div>
+                    <div>
+                        <label for="sticker2Count">Количество:</label>
+                        <input type="number" name="sticker2.count" th:field="*{stickers[1].count}" id="sticker2Count" class="form-control"/>
+                    </div>
+                    <div>
+                        <label for="sticker2Price">Стоимость:</label>
+                        <input type="number" name="sticker2.price" th:field="*{stickers[1].price}" id="sticker2Price" class="form-control"/>
                     </div>
                 </div>
-                <div class="form-group-inline">
-                    <label for="sticker2Price">Price:</label>
-                    <input type="text" name="sticker2.price" th:field="*{stickers[1].price}" id="sticker2Price" class="form-control" style="max-width: 150px;"/>
-
-                    <label for="sticker2Count">Count:</label>
-                    <input type="text" name="sticker2.count" th:field="*{stickers[1].count}" id="sticker2Count" class="form-control" style="max-width: 150px;"/>
-                </div>
-                <button type="button" class="btn btn-danger" onclick="removeSticker2()">Удалить добавленный стикер</button>
+                <div class="remove-staff-btn">&times;</div>
             </div>
         </div>
-
-        <button type="button" class="btn btn-primary add-sticker-btn" onclick="addSticker2()">Добавить еще стикер</button>
 
         <!-- Bracer List -->
-        <div id="bracerSection" style="display: none;">
-            <div th:object="${bracerList}">
-                <div id="bracer1">
-                    <h2>Bracer 1</h2>
-                    <div class="form-group-inline">
-                        <label for="bracer1material">Material:</label>
-                        <select name="bracer1.material" th:field="*{bracers[0].material}" id="bracer1material" class="form-control" style="max-width: 150px;" onchange="updateFormFields()">
+        <div th:object="${bracerList}">
+            <div id="bracer1" class="position-relative hidden">
+                <h2>Браслет контрольный</h2>
+                <div class="form-group-inline">
+                    <div>
+                        <label for="bracer1material">Материал:</label>
+                        <select name="bracer1.material" th:field="*{bracers[0].material}" id="bracer1material" class="form-control">
                             <option value="БУМАЖНЫЙ" selected>БУМАЖНЫЙ</option>
                             <option value="ВИНИЛОВЫЙ">ВИНИЛОВЫЙ</option>
                         </select>
-
-                        <label for="bracer1application">Application:</label>
-                        <input type="text" name="bracer1.application" th:field="*{bracers[0].application}" id="bracer1application" class="form-control" style="max-width: 150px;" value="1+0"/>
-
-                        <label for="bracer1color">Color:</label>
-                        <input type="text" name="bracer1.color" th:field="*{bracers[0].color}" id="bracer1color" class="form-control" style="max-width: 150px;" value=""/>
                     </div>
-                    <div class="form-group-inline">
-                        <label for="bracer1length">Length:</label>
-                        <input type="text" name="bracer1.length" th:field="*{bracers[0].length}" id="bracer1length" class="form-control" style="max-width: 150px;" value="250"/>
-
-                        <label for="bracer1width">Width:</label>
-                        <input type="text" name="bracer1.width" th:field="*{bracers[0].width}" id="bracer1width" class="form-control" style="max-width: 150px;" value="19"/>
+                    <div>
+                        <label for="bracer1color">Цвет:</label>
+                        <input type="text" name="bracer1.color" th:field="*{bracers[0].color}" id="bracer1color" class="form-control"/>
                     </div>
-                    <div class="form-group-inline">
-                        <label for="bracer1Price">Price:</label>
-                        <input type="text" name="bracer1.price" th:field="*{bracers[0].price}" id="bracer1Price" class="form-control" style="max-width: 150px;"/>
-
-                        <label for="bracer1Count">Count:</label>
-                        <input type="text" name="bracer1.count" th:field="*{bracers[0].count}" id="bracer1Count" class="form-control" style="max-width: 150px;"/>
+                    <div>
+                        <label for="bracer1application">Нанесение:</label>
+                        <input type="text" name="bracer1.application" th:field="*{bracers[0].application}" id="bracer1application" class="form-control" value="1+0"/>
+                    </div>
+                    <div>
+                        <label for="bracer1width">Ширина:</label>
+                        <input type="text" name="bracer1.width" th:field="*{bracers[0].width}" id="bracer1width" class="form-control"/>
+                    </div>
+                    <div>
+                        <label for="bracer1Count">Количество:</label>
+                        <input type="number" name="bracer1.count" th:field="*{bracers[0].count}" id="bracer1Count" class="form-control"/>
+                    </div>
+                    <div>
+                        <label for="bracer1Price">Стоимость:</label>
+                        <input type="number" name="bracer1.price" th:field="*{bracers[0].price}" id="bracer1Price" class="form-control"/>
                     </div>
                 </div>
+                <div class="remove-staff-btn">&times;</div>
+            </div>
 
-                <div id="bracer2" style="display: none;">
-                    <h2>Bracer 2</h2>
-                    <div class="form-group-inline">
-                        <label for="bracer2material">Material:</label>
-                        <select name="bracer2.material" th:field="*{bracers[1].material}" id="bracer2material" class="form-control" style="max-width: 150px;" onchange="updateFormFields()">
+            <div id="bracer2" class="position-relative hidden">
+                <h2>Браслет контрольный дополнительный</h2>
+                <div class="form-group-inline">
+                    <div>
+                        <label for="bracer2material">Материал:</label>
+                        <select name="bracer2.material" th:field="*{bracers[1].material}" id="bracer2material" class="form-control">
                             <option value="БУМАЖНЫЙ" selected>БУМАЖНЫЙ</option>
                             <option value="ВИНИЛОВЫЙ">ВИНИЛОВЫЙ</option>
                         </select>
-
-                        <label for="bracer2application">Application:</label>
-                        <input type="text" name="bracer2.application" th:field="*{bracers[1].application}" id="bracer2application" class="form-control" style="max-width: 150px;" value="1+0"/>
-
-                        <label for="bracer2color">Color:</label>
-                        <input type="text" name="bracer2.color" th:field="*{bracers[1].color}" id="bracer2color" class="form-control" style="max-width: 150px;" value=""/>
                     </div>
-                    <div class="form-group-inline">
-                        <label for="bracer2length">Length:</label>
-                        <input type="text" name="bracer2.length" th:field="*{bracers[1].length}" id="bracer2length" class="form-control" style="max-width: 150px;" value="250"/>
-
-                        <label for="bracer2width">Width:</label>
-                        <input type="text" name="bracer2.width" th:field="*{bracers[1].width}" id="bracer2width" class="form-control" style="max-width: 150px;" value="19"/>
+                    <div>
+                        <label for="bracer2color">Цвет:</label>
+                        <input type="text" name="bracer2.color" th:field="*{bracers[1].color}" id="bracer2color" class="form-control"/>
                     </div>
-                    <div class="form-group-inline">
-                        <label for="bracer2Price">Price:</label>
-                        <input type="text" name="bracer2.price" th:field="*{bracers[1].price}" id="bracer2Price" class="form-control" style="max-width: 150px;"/>
-
-                        <label for="bracer2Count">Count:</label>
-                        <input type="text" name="bracer2.count" th:field="*{bracers[1].count}" id="bracer2Count" class="form-control" style="max-width: 150px;"/>
+                    <div>
+                        <label for="bracer2application">Нанесение:</label>
+                        <input type="text" name="bracer2.application" th:field="*{bracers[1].application}" id="bracer2application" class="form-control" value="1+0"/>
                     </div>
-                    <button type="button" class="btn btn-danger" onclick="removeBracer2()">Удалить добавленный браслет</button>
+                    <div>
+                        <label for="bracer2width">Ширина:</label>
+                        <input type="text" name="bracer2.width" th:field="*{bracers[1].width}" id="bracer2width" class="form-control"/>
+                    </div>
+                    <div>
+                        <label for="bracer2Count">Количество:</label>
+                        <input type="number" name="bracer2.count" th:field="*{bracers[1].count}" id="bracer2Count" class="form-control"/>
+                    </div>
+                    <div>
+                        <label for="bracer2Price">Стоимость:</label>
+                        <input type="number" name="bracer2.price" th:field="*{bracers[1].price}" id="bracer2Price" class="form-control"/>
+                    </div>
                 </div>
-                <button type="button" class="btn btn-primary add-bracer-btn" onclick="addBracer2()">Добавить еще браслет</button>
+                <div class="remove-staff-btn">&times;</div>
             </div>
         </div>
-
-        <button type="button" class="btn btn-primary show-bracer-btn" onclick="showBracerSection()">Добавить браслеты</button>
 
         <!-- Insert List -->
-        <div id="insertSection" style="display: none;">
-            <div th:object="${insertList}">
-                <div id="insert1">
-                    <h2>Insert 1</h2>
-                    <div class="form-group-inline">
-                        <label for="insert1size">Size:</label>
-                        <input type="text" name="insert1size" th:field="*{inserts[0].size}" id="insert1size" class="form-control" style="max-width: 150px;" value="86x54 мм"/>
-
-                        <label for="insert1chroma">Chroma:</label>
-                        <select name="insert1chroma" th:field="*{inserts[0].chroma}" id="insert1chroma" class="form-control" style="max-width: 150px;">
+        <div th:object="${insertList}">
+            <div id="insert1" class="position-relative hidden">
+                <h2>Вкладыш</h2>
+                <div class="form-group-inline">
+                    <div>
+                        <label for="insert1size">Размер:</label>
+                        <input type="text" name="insert1size" th:field="*{inserts[0].size}" id="insert1size" class="form-control" value="86x54 мм"/>
+                    </div>
+                    <div>
+                        <label for="insert1chroma">Цветность:</label>
+                        <select name="insert1chroma" th:field="*{inserts[0].chroma}" id="insert1chroma" class="form-control">
                             <option value="4+4" selected>4+4</option>
                             <option value="4+0">4+0</option>
                         </select>
-
-                        <label for="insert1density">Density:</label>
-                        <input type="text" name="insert1density" th:field="*{inserts[0].density}" id="insert1density" class="form-control" style="max-width: 150px;" value="150 гр."/>
                     </div>
-                    <div class="form-group-inline">
-                        <label for="insert1Price">Price:</label>
-                        <input type="text" name="insert1.price" th:field="*{inserts[0].price}" id="insert1Price" class="form-control" style="max-width: 150px;"/>
-
-                        <label for="insert1Count">Count:</label>
-                        <input type="text" name="insert1.count" th:field="*{inserts[0].count}" id="insert1Count" class="form-control" style="max-width: 150px;"/>
+                    <div>
+                        <label for="insert1density">Плотность:</label>
+                        <input type="text" name="insert1density" th:field="*{inserts[0].density}" id="insert1density" class="form-control" value="150 гр."/>
+                    </div>
+                    <div>
+                        <label for="insert1Count">Количество:</label>
+                        <input type="number" name="insert1.count" th:field="*{inserts[0].count}" id="insert1Count" class="form-control"/>
+                    </div>
+                    <div>
+                        <label for="insert1Price">Стоимость:</label>
+                        <input type="number" name="insert1.price" th:field="*{inserts[0].price}" id="insert1Price" class="form-control"/>
                     </div>
                 </div>
+                <div class="remove-staff-btn">&times;</div>
+            </div>
 
-                <div id="insert2" style="display: none;">
-                    <h2>Insert 2</h2>
-                    <div class="form-group-inline">
-                        <label for="insert2size">Size:</label>
-                        <input type="text" name="insert2size" th:field="*{inserts[1].size}" id="insert2size" class="form-control" style="max-width: 150px;" value="86x54 мм"/>
-
-                        <label for="insert2chroma">Chroma:</label>
-                        <select name="insert2chroma" th:field="*{inserts[1].chroma}" id="insert2chroma" class="form-control" style="max-width: 150px;">
+            <div id="insert2" class="position-relative hidden">
+                <h2>Вкладыш дополнительный</h2>
+                <div class="form-group-inline">
+                    <div>
+                        <label for="insert2size">Размер:</label>
+                        <input type="text" name="insert2size" th:field="*{inserts[1].size}" id="insert2size" class="form-control" value="86x54 мм"/>
+                    </div>
+                    <div>
+                        <label for="insert2chroma">Цветность:</label>
+                        <select name="insert2chroma" th:field="*{inserts[1].chroma}" id="insert2chroma" class="form-control">
                             <option value="4+4" selected>4+4</option>
                             <option value="4+0">4+0</option>
                         </select>
-
-                        <label for="insert2density">Density:</label>
-                        <input type="text" name="insert2density" th:field="*{inserts[1].density}" id="insert2density" class="form-control" style="max-width: 150px;" value="150 гр."/>
                     </div>
-                    <div class="form-group-inline">
-                        <label for="insert2Price">Price:</label>
-                        <input type="text" name="insert2.price" th:field="*{inserts[1].price}" id="insert2Price" class="form-control" style="max-width: 150px;"/>
-
-                        <label for="insert2Count">Count:</label>
-                        <input type="text" name="insert2.count" th:field="*{inserts[1].count}" id="insert2Count" class="form-control" style="max-width: 150px;"/>
+                    <div>
+                        <label for="insert2density">Плотность:</label>
+                        <input type="text" name="insert2density" th:field="*{inserts[1].density}" id="insert2density" class="form-control" value="150 гр."/>
                     </div>
-                    <button type="button" class="btn btn-danger" onclick="removeInsert2()">Удалить добавленный вкладыш</button>
+                    <div>
+                        <label for="insert2Count">Количество:</label>
+                        <input type="number" name="insert2.count" th:field="*{inserts[1].count}" id="insert2Count" class="form-control"/>
+                    </div>
+                    <div>
+                        <label for="insert2Price">Стоимость:</label>
+                        <input type="number" name="insert2.price" th:field="*{inserts[1].price}" id="insert2Price" class="form-control"/>
+                    </div>
                 </div>
-                <button type="button" class="btn btn-primary add-insert-btn" onclick="addInsert2()">Добавить еще вкладыш</button>
+                <div class="remove-staff-btn">&times;</div>
             </div>
         </div>
-
-        <button type="button" class="btn btn-primary show-insert-btn" onclick="showInsertSection()">Добавить вкладыши</button>
 
         <!-- Pocket List -->
-        <div id="pocketSection" style="display: none;">
-            <div th:object="${pocketList}">
-                <div id="pocket1">
-                    <h2>Pocket 1</h2>
-                    <div class="form-group-inline">
-                        <label for="pocket1size">Size:</label>
-                        <input type="text" name="pocket1size" th:field="*{pockets[0].size}" id="pocket1size" class="form-control" style="max-width: 150px;" value="86x54 мм"/>
-
-                        <label for="pocket1Price">Price:</label>
-                        <input type="text" name="pocket1.price" th:field="*{pockets[0].price}" id="pocket1Price" class="form-control" style="max-width: 150px;"/>
-
-                        <label for="pocket1Count">Count:</label>
-                        <input type="text" name="pocket1.count" th:field="*{pockets[0].count}" id="pocket1Count" class="form-control" style="max-width: 150px;"/>
+        <div th:object="${pocketList}">
+            <div id="pocket1" class="position-relative hidden">
+                <h2>Карман</h2>
+                <div class="form-group-inline">
+                    <div>
+                        <label for="pocket1size">Размер:</label>
+                        <input type="text" name="pocket1size" th:field="*{pockets[0].size}" id="pocket1size" class="form-control" value="86x54 мм"/>
+                    </div>
+                    <div>
+                        <label for="pocket1Count">Количество:</label>
+                        <input type="number" name="pocket1.count" th:field="*{pockets[0].count}" id="pocket1Count" class="form-control"/>
+                    </div>
+                    <div>
+                        <label for="pocket1Price">Стоимость:</label>
+                        <input type="number" name="pocket1.price" th:field="*{pockets[0].price}" id="pocket1Price" class="form-control"/>
                     </div>
                 </div>
+                <div class="remove-staff-btn">&times;</div>
+            </div>
 
-                <div id="pocket2" style="display: none;">
-                    <h2>Pocket 2</h2>
-                    <div class="form-group-inline">
-                        <label for="pocket2size">Size:</label>
-                        <input type="text" name="pocket2size" th:field="*{pockets[1].size}" id="pocket2size" class="form-control" style="max-width: 150px;" value="86x54 мм"/>
-
-                        <label for="pocket2Price">Price:</label>
-                        <input type="text" name="pocket2.price" th:field="*{pockets[1].price}" id="pocket2Price" class="form-control" style="max-width: 150px;"/>
-
-                        <label for="pocket2Count">Count:</label>
-                        <input type="text" name="pocket2.count" th:field="*{pockets[1].count}" id="pocket2Count" class="form-control" style="max-width: 150px;"/>
+            <div id="pocket2" class="position-relative hidden">
+                <h2>Карман дополнительный</h2>
+                <div class="form-group-inline">
+                    <div>
+                        <label for="pocket2size">Размер:</label>
+                        <input type="text" name="pocket2size" th:field="*{pockets[1].size}" id="pocket2size" class="form-control" value="86x54 мм"/>
                     </div>
-                    <button type="button" class="btn btn-danger" onclick="removePocket2()">Удалить добавленный карман</button>
+                    <div>
+                        <label for="pocket2Count">Количество:</label>
+                        <input type="number" name="pocket2.count" th:field="*{pockets[1].count}" id="pocket2Count" class="form-control"/>
+                    </div>
+                    <div>
+                        <label for="pocket2Price">Стоимость:</label>
+                        <input type="number" name="pocket2.price" th:field="*{pockets[1].price}" id="pocket2Price" class="form-control"/>
+                    </div>
                 </div>
-                <button type="button" class="btn btn-primary add-pocket-btn" onclick="addPocket2()">Добавить еще карман</button>
+                <div class="remove-staff-btn">&times;</div>
             </div>
         </div>
-
-        <button type="button" class="btn btn-primary show-pocket-btn" onclick="showPocketSection()">Добавить карманы</button>
 
         <!-- Ribbon List -->
-        <div id="ribbonSection" style="display: none;">
-            <div th:object="${ribbonList}">
-                <div id="ribbon1">
-                    <h2>Ribbon 1</h2>
-                    <div class="form-group-inline">
-                        <label for="ribbon1kind">Kind:</label>
-                        <select name="ribbon1.kind" th:field="*{ribbons[0].kind}" id="ribbon1kind" class="form-control" style="max-width: 150px;">
+        <div th:object="${ribbonList}">
+            <div id="ribbon1" class="position-relative hidden">
+                <h2>Риббон для печати на пластике</h2>
+                <div class="form-group-inline">
+                    <div>
+                        <label for="ribbon1kind">Вид:</label>
+                        <select name="ribbon1.kind" th:field="*{ribbons[0].kind}" id="ribbon1kind" class="form-control">
                             <option value="Полноцветный" selected>Полноцветный</option>
                             <option value="Монохромный">Монохромный</option>
                         </select>
-
-                        <label for="ribbon1Price">Price:</label>
-                        <input type="text" name="ribbon1.price" th:field="*{ribbons[0].price}" id="ribbon1Price" class="form-control" style="max-width: 150px;"/>
-
-                        <label for="ribbon1Count">Count:</label>
-                        <input type="text" name="ribbon1.count" th:field="*{ribbons[0].count}" id="ribbon1Count" class="form-control" style="max-width: 150px;"/>
+                    </div>
+                    <div>
+                        <label for="ribbon1Count">Количество:</label>
+                        <input type="number" name="ribbon1.count" th:field="*{ribbons[0].count}" id="ribbon1Count" class="form-control"/>
+                    </div>
+                    <div>
+                        <label for="ribbon1Price">Стоимость:</label>
+                        <input type="number" name="ribbon1.price" th:field="*{ribbons[0].price}" id="ribbon1Price" class="form-control"/>
                     </div>
                 </div>
+                <div class="remove-staff-btn">&times;</div>
+            </div>
 
-                <div id="ribbon2" style="display: none;">
-                    <h2>Ribbon 2</h2>
-                    <div class="form-group-inline">
-                        <label for="ribbon2kind">Kind:</label>
-                        <select name="ribbon2.kind" th:field="*{ribbons[1].kind}" id="ribbon2kind" class="form-control" style="max-width: 150px;">
+            <div id="ribbon2" class="position-relative hidden">
+                <h2>Риббон для печати на пластике дополнительный</h2>
+                <div class="form-group-inline">
+                    <div>
+                        <label for="ribbon2kind">Вид:</label>
+                        <select name="ribbon2.kind" th:field="*{ribbons[1].kind}" id="ribbon2kind" class="form-control">
                             <option value="Полноцветный" selected>Полноцветный</option>
                             <option value="Монохромный">Монохромный</option>
                         </select>
-
-                        <label for="ribbon2Price">Price:</label>
-                        <input type="text" name="ribbon2.price" th:field="*{ribbons[1].price}" id="ribbon2Price" class="form-control" style="max-width: 150px;"/>
-
-                        <label for="ribbon2Count">Count:</label>
-                        <input type="text" name="ribbon2.count" th:field="*{ribbons[1].count}" id="ribbon2Count" class="form-control" style="max-width: 150px;"/>
                     </div>
-                    <button type="button" class="btn btn-danger" onclick="removeRibbon2()">Удалить добавленный риббон</button>
+                    <div>
+                        <label for="ribbon2Count">Количество:</label>
+                        <input type="number" name="ribbon2.count" th:field="*{ribbons[1].count}" id="ribbon2Count" class="form-control"/>
+                    </div>
+                    <div>
+                        <label for="ribbon2Price">Стоимость:</label>
+                        <input type="number" name="ribbon2.price" th:field="*{ribbons[1].price}" id="ribbon2Price" class="form-control"/>
+                    </div>
                 </div>
-                <button type="button" class="btn btn-primary add-ribbon-btn" onclick="addRibbon2()">Добавить еще риббон</button>
+                <div class="remove-staff-btn">&times;</div>
             </div>
         </div>
 
-        <button type="button" class="btn btn-primary show-ribbon-btn" onclick="showRibbonSection()">Добавить риббоны</button>
+        <!-- Additional (Asup) -->
+        <div th:object="${asupList}">
+            <div id="asup1" class="position-relative hidden">
+                <h2>Дополнительное поле (голограммы, дыроколы и пр)</h2>
+                <div class="form-group-inline">
+                    <div>
+                        <label for="asup1description">Описание:</label>
+                        <input type="text" name="asup1.description" th:field="*{asups[0].description}" id="asup1description" class="form-control"/>
+                    </div>
+                    <div>
+                        <label for="asup1Count">Количество:</label>
+                        <input type="number" name="asup1.count" th:field="*{asups[0].count}" id="asup1Count" class="form-control"/>
+                    </div>
+                    <div>
+                        <label for="asup1Price">Стоимость:</label>
+                        <input type="number" name="asup1.price" th:field="*{asups[0].price}" id="asup1Price" class="form-control"/>
+                    </div>
+                </div>
+                <div class="remove-staff-btn">&times;</div>
+            </div>
+
+            <div id="asup2" class="position-relative hidden">
+                <h2>Еще дополнительное поле (голограммы, дыроколы и пр)</h2>
+                <div class="form-group-inline">
+                    <div>
+                        <label for="asup2description">Описание:</label>
+                        <input type="text" name="asup2.description" th:field="*{asups[1].description}" id="asup2description" class="form-control"/>
+                    </div>
+                    <div>
+                        <label for="asup2Count">Количество:</label>
+                        <input type="number" name="asup2.count" th:field="*{asups[1].count}" id="asup2Count" class="form-control"/>
+                    </div>
+                    <div>
+                        <label for="asup2Price">Стоимость:</label>
+                        <input type="number" name="asup2.price" th:field="*{asups[1].price}" id="asup2Price" class="form-control"/>
+                    </div>
+                </div>
+                <div class="remove-staff-btn">&times;</div>
+            </div>
+        </div>
 
         <div class="form-section-buttons">
-            <button type="submit" class="btn btn-primary">Save Supplies</button>
+            <button type="submit" class="btn btn-primary">Сохранить</button>
         </div>
     </form>
 </div>
 
 <script>
-    function addBadge2() {
-        document.getElementById('badge2').style.display = 'block';
-        document.querySelector('.add-badge-btn').style.display = 'none';
+    function toggleRemoveButtons() {
+        // Переключаем кнопки удаления для бейджей
+        if ($('#badge2').hasClass('hidden')) {
+            $('#badge1 .remove-staff-btn').show();
+        } else {
+            $('#badge1 .remove-staff-btn').hide();
+            $('#badge2 .remove-staff-btn').show();
+        }
+
+        // Переключаем кнопки удаления для ланьярдов
+        if ($('#lanyard2').hasClass('hidden')) {
+            $('#lanyard1 .remove-staff-btn').show();
+        } else {
+            $('#lanyard1 .remove-staff-btn').hide();
+            $('#lanyard2 .remove-staff-btn').show();
+        }
+
+        // Переключаем кнопки удаления для наклеек
+        if ($('#sticker2').hasClass('hidden')) {
+            $('#sticker1 .remove-staff-btn').show();
+        } else {
+            $('#sticker1 .remove-staff-btn').hide();
+            $('#sticker2 .remove-staff-btn').show();
+        }
+
+        // Переключаем кнопки удаления для браслетов
+        if ($('#bracer2').hasClass('hidden')) {
+            $('#bracer1 .remove-staff-btn').show();
+        } else {
+            $('#bracer1 .remove-staff-btn').hide();
+            $('#bracer2 .remove-staff-btn').show();
+        }
+
+        // Переключаем кнопки удаления для вкладышей
+        if ($('#insert2').hasClass('hidden')) {
+            $('#insert1 .remove-staff-btn').show();
+        } else {
+            $('#insert1 .remove-staff-btn').hide();
+            $('#insert2 .remove-staff-btn').show();
+        }
+
+        // Переключаем кнопки удаления для карманов
+        if ($('#pocket2').hasClass('hidden')) {
+            $('#pocket1 .remove-staff-btn').show();
+        } else {
+            $('#pocket1 .remove-staff-btn').hide();
+            $('#pocket2 .remove-staff-btn').show();
+        }
+
+        // Переключаем кнопки удаления для риббонов
+        if ($('#ribbon2').hasClass('hidden')) {
+            $('#ribbon1 .remove-staff-btn').show();
+        } else {
+            $('#ribbon1 .remove-staff-btn').hide();
+            $('#ribbon2 .remove-staff-btn').show();
+        }
+
+        // Переключаем кнопки удаления для дополнительных полей
+        if ($('#asup2').hasClass('hidden')) {
+            $('#asup1 .remove-staff-btn').show();
+        } else {
+            $('#asup1 .remove-staff-btn').hide();
+            $('#asup2 .remove-staff-btn').show();
+        }
     }
 
-    function removeBadge2() {
-        document.getElementById('badge2').style.display = 'none';
-        document.querySelector('.add-badge-btn').style.display = 'inline-block';
+    function toggleAddButtons() {
+        // Скрываем кнопку "Добавить бейдж", если оба бейджа видимы
+        if (!$('#badge1').hasClass('hidden') && !$('#badge2').hasClass('hidden')) {
+            $('#addBadge').hide();
+        } else {
+            $('#addBadge').show();
+        }
+
+        // Скрываем кнопку "Добавить ланьярд", если оба ланьярда видимы
+        if (!$('#lanyard1').hasClass('hidden') && !$('#lanyard2').hasClass('hidden')) {
+            $('#addLanyard').hide();
+        } else {
+            $('#addLanyard').show();
+        }
+
+        // Скрываем кнопку "Добавить наклейку", если обе наклейки видимы
+        if (!$('#sticker1').hasClass('hidden') && !$('#sticker2').hasClass('hidden')) {
+            $('#addSticker').hide();
+        } else {
+            $('#addSticker').show();
+        }
+
+        // Скрываем кнопку "Добавить браслет", если оба браслета видимы
+        if (!$('#bracer1').hasClass('hidden') && !$('#bracer2').hasClass('hidden')) {
+            $('#addBracer').hide();
+        } else {
+            $('#addBracer').show();
+        }
+
+        // Скрываем кнопку "Добавить вкладыш", если оба вкладыша видимы
+        if (!$('#insert1').hasClass('hidden') && !$('#insert2').hasClass('hidden')) {
+            $('#addInsert').hide();
+        } else {
+            $('#addInsert').show();
+        }
+
+        // Скрываем кнопку "Добавить карман", если оба кармана видимы
+        if (!$('#pocket1').hasClass('hidden') && !$('#pocket2').hasClass('hidden')) {
+            $('#addPocket').hide();
+        } else {
+            $('#addPocket').show();
+        }
+
+        // Скрываем кнопку "Добавить риббон", если оба риббона видимы
+        if (!$('#ribbon1').hasClass('hidden') && !$('#ribbon2').hasClass('hidden')) {
+            $('#addRibbon').hide();
+        } else {
+            $('#addRibbon').show();
+        }
+
+        // Скрываем кнопку "Добавить доп. поле", если оба доп. поля видимы
+        if (!$('#asup1').hasClass('hidden') && !$('#asup2').hasClass('hidden')) {
+            $('#addAsup').hide();
+        } else {
+            $('#addAsup').show();
+        }
     }
 
-    function addLanyard2() {
-        document.getElementById('lanyard2').style.display = 'block';
-        document.querySelector('.add-lanyard-btn').style.display = 'none';
-    }
+    $('#addBadge').click(function() {
+        if ($('#badge1').hasClass('hidden')) {
+            $('#badge1').removeClass('hidden');
+        } else if ($('#badge2').hasClass('hidden')) {
+            $('#badge2').removeClass('hidden');
+        }
+        toggleRemoveButtons();
+        toggleAddButtons();
+    });
 
-    function removeLanyard2() {
-        document.getElementById('lanyard2').style.display = 'none';
-        document.querySelector('.add-lanyard-btn').style.display = 'inline-block';
-    }
+    $('#addLanyard').click(function() {
+        if ($('#lanyard1').hasClass('hidden')) {
+            $('#lanyard1').removeClass('hidden');
+        } else if ($('#lanyard2').hasClass('hidden')) {
+            $('#lanyard2').removeClass('hidden');
+        }
+        toggleRemoveButtons();
+        toggleAddButtons();
+    });
 
-    function addSticker2() {
-        document.getElementById('sticker2').style.display = 'block';
-        document.querySelector('.add-sticker-btn').style.display = 'none';
-    }
+    $('#addSticker').click(function() {
+        if ($('#sticker1').hasClass('hidden')) {
+            $('#sticker1').removeClass('hidden');
+        } else if ($('#sticker2').hasClass('hidden')) {
+            $('#sticker2').removeClass('hidden');
+        }
+        toggleRemoveButtons();
+        toggleAddButtons();
+    });
 
-    function removeSticker2() {
-        document.getElementById('sticker2').style.display = 'none';
-        document.querySelector('.add-sticker-btn').style.display = 'inline-block';
-    }
+    $('#addBracer').click(function() {
+        if ($('#bracer1').hasClass('hidden')) {
+            $('#bracer1').removeClass('hidden');
+        } else if ($('#bracer2').hasClass('hidden')) {
+            $('#bracer2').removeClass('hidden');
+        }
+        toggleRemoveButtons();
+        toggleAddButtons();
+    });
 
-    function addBracer2() {
-        document.getElementById('bracer2').style.display = 'block';
-        document.querySelector('.add-bracer-btn').style.display = 'none';
-    }
+    $('#addInsert').click(function() {
+        if ($('#insert1').hasClass('hidden')) {
+            $('#insert1').removeClass('hidden');
+        } else if ($('#insert2').hasClass('hidden')) {
+            $('#insert2').removeClass('hidden');
+        }
+        toggleRemoveButtons();
+        toggleAddButtons();
+    });
 
-    function removeBracer2() {
-        document.getElementById('bracer2').style.display = 'none';
-        document.querySelector('.add-bracer-btn').style.display = 'inline-block';
-    }
+    $('#addPocket').click(function() {
+        if ($('#pocket1').hasClass('hidden')) {
+            $('#pocket1').removeClass('hidden');
+        } else if ($('#pocket2').hasClass('hidden')) {
+            $('#pocket2').removeClass('hidden');
+        }
+        toggleRemoveButtons();
+        toggleAddButtons();
+    });
 
-    function showBracerSection() {
-        document.getElementById('bracerSection').style.display = 'block';
-        document.querySelector('.show-bracer-btn').style.display = 'none';
-    }
+    $('#addRibbon').click(function() {
+        if ($('#ribbon1').hasClass('hidden')) {
+            $('#ribbon1').removeClass('hidden');
+        } else if ($('#ribbon2').hasClass('hidden')) {
+            $('#ribbon2').removeClass('hidden');
+        }
+        toggleRemoveButtons();
+        toggleAddButtons();
+    });
 
-    function addInsert2() {
-        document.getElementById('insert2').style.display = 'block';
-        document.querySelector('.add-insert-btn').style.display = 'none';
-    }
+    $('#addAsup').click(function() {
+        if ($('#asup1').hasClass('hidden')) {
+            $('#asup1').removeClass('hidden');
+        } else if ($('#asup2').hasClass('hidden')) {
+            $('#asup2').removeClass('hidden');
+        }
+        toggleRemoveButtons();
+        toggleAddButtons();
+    });
 
-    function removeInsert2() {
-        document.getElementById('insert2').style.display = 'none';
-        document.querySelector('.add-insert-btn').style.display = 'inline-block';
-    }
+    // Remove section and reset values
+    $('.remove-staff-btn').click(function() {
+        var section = $(this).closest('.position-relative');
+        section.addClass('hidden');
 
-    function showInsertSection() {
-        document.getElementById('insertSection').style.display = 'block';
-        document.querySelector('.show-insert-btn').style.display = 'none';
-    }
+        // Reset all input fields to default values
+        section.find('select').val('');
+        section.find('input[type="text"]').val('');
+        section.find('input[type="number"]').val('');
+        section.find('input[type="checkbox"]').prop('checked', false);
 
-    function addPocket2() {
-        document.getElementById('pocket2').style.display = 'block';
-        document.querySelector('.add-pocket-btn').style.display = 'none';
-    }
+        // Toggle the remove buttons and add buttons visibility after hiding a section
+        toggleRemoveButtons();
+        toggleAddButtons();
+    });
 
-    function removePocket2() {
-        document.getElementById('pocket2').style.display = 'none';
-        document.querySelector('.add-pocket-btn').style.display = 'inline-block';
-    }
-
-    function showPocketSection() {
-        document.getElementById('pocketSection').style.display = 'block';
-        document.querySelector('.show-pocket-btn').style.display = 'none';
-    }
-
-    function addRibbon2() {
-        document.getElementById('ribbon2').style.display = 'block';
-        document.querySelector('.add-ribbon-btn').style.display = 'none';
-    }
-
-    function removeRibbon2() {
-        document.getElementById('ribbon2').style.display = 'none';
-        document.querySelector('.add-ribbon-btn').style.display = 'inline-block';
-    }
-
-    function showRibbonSection() {
-        document.getElementById('ribbonSection').style.display = 'block';
-        document.querySelector('.show-ribbon-btn').style.display = 'none';
-    }
+    // Initial call to hide all remove buttons except for the last added
+    toggleRemoveButtons();
+    toggleAddButtons();
 </script>
+
 </body>
 </html>

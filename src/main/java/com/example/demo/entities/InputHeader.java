@@ -6,7 +6,6 @@ import lombok.*;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
-import java.util.ArrayList;
 import java.util.List;
 
 @Getter
@@ -19,37 +18,27 @@ public class InputHeader {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    private String customer;
+
+    @JsonManagedReference
+    @ManyToOne
+    @JoinColumn(name = "customer_id")
+    private Customer customer;
+
     private String eventName;
     private String eventLocation;
     private LocalDate eventStartDate;
     private LocalDate eventEndDate;
     private LocalTime eventWorkStartTime;
     private LocalTime eventWorkEndTime;
-    private int visitorsCount;
+    private Integer visitorsCount;
     private String author;
     private Integer workDays;
+    private Integer periods;
     private boolean sameEquipmentForAllDays;
+    private boolean withManyRegPoints;
 
-    @JsonManagedReference
-    @OneToMany(mappedBy = "header")
-    private List<InputBody> inputBodies;
-
-    @JsonManagedReference
-    @OneToOne(mappedBy = "header")
-    private Supplies sup;
-
-    @JsonManagedReference
-    @OneToOne(mappedBy = "header")
-    private Mounting mounting;
-
-    @JsonManagedReference
-    @OneToMany(mappedBy = "header")
-    private List<Staff> staffs;
-
-    @JsonManagedReference
-    @OneToMany(mappedBy = "header")
-    private List<Logistic> logistic;
+    private LocalDate prePrintStart;
+    private LocalDate prePrintEnd;
 
     private LocalDate boolStart1;
     private LocalDate boolStart2;
@@ -60,11 +49,34 @@ public class InputHeader {
     private LocalDate boolEnd3;
     private LocalDate boolEnd4;
 
-    private Integer firstFormula;
-    private Integer secondFormula;
-    private Integer thirdFormula;
-    private Integer fourthFormula;
-    private Integer fifthFormula;
-    private Integer sixthFormula;
+    @JsonManagedReference
+    @OneToMany(mappedBy = "header")
+    private List<InputBody> inputBodies;
+
+    @JsonManagedReference
+    @OneToOne(mappedBy = "header")
+    private Supplies sup;
+
+    @JsonManagedReference
+    @OneToMany(mappedBy = "header")
+    private List<Mounting> mountings;
+
+    @JsonManagedReference
+    @OneToMany(mappedBy = "header")
+    private List<InputStaff> inputStaffs;
+
+    @JsonManagedReference
+    @OneToMany(mappedBy = "header")
+    private List<Logistic> logistic;
+
+    @JsonManagedReference
+    @OneToMany(mappedBy = "header")
+    private List<RegPoint> regPoints;
+
+    @JsonManagedReference
+    @OneToMany(mappedBy = "header")
+    private List<AdditionalSale> aSales;
+
+
 
 }

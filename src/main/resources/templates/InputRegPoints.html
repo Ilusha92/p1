@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <title>Точки аккредитации</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
+    <style>
+        .remove-regpoint-btn {
+            color: red;
+            cursor: pointer;
+            font-size: 1.5em;
+            border: none;
+            background: none;
+            position: relative;
+            top: 50%;
+            transform: translateY(-50%);
+            margin-left: 10px;
+        }
+        .hidden {
+            display: none;
+        }
+        .header-container {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-top: 20px; /* отступ перед заголовком */
+            margin-bottom: 20px; /* отступ после заголовка */
+        }
+        .add-regpoint-btn {
+            position: relative;
+            top: 0; /* регулировка по вертикали */
+            right: 196px; /* регулировка по горизонтали */
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="header-container">
+        <h1>Точки аккредитации</h1>
+        <button type="button" id="addRegPointButton" class="btn btn-secondary add-regpoint-btn">Добавить точку аккредитации</button>
+    </div>
+
+    <form id="regPointForm" th:action="@{/input/saveInputRegPoints}" th:object="${headerRegPoints}" method="post">
+        <input type="hidden" name="headerId" th:value="${headerId}" />
+        <input type="hidden" id="eventOver" th:value="${eventOver}" />
+
+        <div th:each="regPoint, iterStat : ${headerRegPoints.regPoints}">
+            <div class="form-group row hidden" th:classappend="${iterStat.index == 0} ? '' : 'hidden'" th:id="|regPointContainer_${iterStat.index}|">
+                <div class="col-sm-3">
+                    <input type="text" th:field="*{regPoints[__${iterStat.index}__].name}"
+                           th:id="|name_${iterStat.index}|"
+                           class="form-control" placeholder="Название точки" required/>
+                </div>
+                <div class="col-sm-2">
+                    <select th:field="*{regPoints[__${iterStat.index}__].description}"
+                            th:id="|description_${iterStat.index}|"
+                            class="form-control" required>
+                        <option value="" disabled selected>Выберите тип</option>
+                        <option value="Аккредитация">Аккредитация</option>
+                        <option value="Предрегистрация">Предрегистрация</option>
+                        <option value="Контроль доступа">Контроль доступа</option>
+                    </select>
+                </div>
+                <div class="col-sm-2">
+                    <input type="date" th:field="*{regPoints[__${iterStat.index}__].startRPDate}"
+                           th:id="|startRPDate_${iterStat.index}|"
+                           class="form-control" required/>
+                </div>
+                <div class="col-sm-2">
+                    <input type="date" th:field="*{regPoints[__${iterStat.index}__].endRPDate}"
+                           th:id="|endRPDate_${iterStat.index}|"
+                           class="form-control" required/>
+                </div>
+                <div class="col-sm-1 d-flex align-items-center">
+                    <button type="button" class="remove-regpoint-btn hidden" th:data-index="${iterStat.index}">&times;</button>
+                </div>
+            </div>
+        </div>
+
+        <button type="submit" id="submitButton" class="btn btn-primary">Далее</button>
+    </form>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const addRegPointButton = document.getElementById('addRegPointButton');
+        const submitButton = document.getElementById('submitButton');
+        const regPointContainers = document.querySelectorAll('[id^="regPointContainer_"]');
+        const removeButtons = document.querySelectorAll('.remove-regpoint-btn');
+        const eventOver = document.getElementById('eventOver').value;
+        let currentVisibleIndex = 0;
+
+        // Изначально показать только первый элемент и удалить required у скрытых полей
+        regPointContainers[currentVisibleIndex].classList.remove('hidden');
+        toggleRequiredAttributes();
+
+        addRegPointButton.addEventListener('click', function() {
+            if (currentVisibleIndex < regPointContainers.length - 1) {
+                currentVisibleIndex++;
+                regPointContainers[currentVisibleIndex].classList.remove('hidden');
+                removeButtons[currentVisibleIndex].classList.remove('hidden');
+                toggleRequiredAttributes();
+                // Скрыть кнопку удаления у предыдущего экземпляра
+                if (currentVisibleIndex > 0) {
+                    removeButtons[currentVisibleIndex - 1].classList.add('hidden');
+                }
+            }
+        });
+
+        removeButtons.forEach(function(button, index) {
+            button.addEventListener('click', function() {
+                regPointContainers[index].classList.add('hidden');
+                resetFields(regPointContainers[index]);
+                toggleRequiredAttributes();
+                if (currentVisibleIndex > 0) {
+                    currentVisibleIndex--;
+                }
+                // Показать кнопку удаления у последнего видимого экземпляра
+                if (currentVisibleIndex > 0) {
+                    removeButtons[currentVisibleIndex].classList.remove('hidden');
+                }
+            });
+        });
+
+        submitButton.addEventListener('click', function(event) {
+            if (!validateDates()) {
+                event.preventDefault();
+            }
+        });
+
+        function validateDates() {
+            const eventOverDate = new Date(eventOver);
+            const minYear = 2023;
+            const maxYear = 2050;
+
+            for (let i = 0; i <= currentVisibleIndex; i++) {
+                const nameField = document.getElementById(`name_${i}`).value.trim();
+                const startRPDate = new Date(document.getElementById(`startRPDate_${i}`).value);
+                const endRPDate = new Date(document.getElementById(`endRPDate_${i}`).value);
+
+                if (nameField === "") {
+                    alert(`Ошибка: Название точки в точке ${i + 1} должно быть заполнено.`);
+                    return false;
+                }
+
+                if (startRPDate > endRPDate) {
+                    alert(`Ошибка: Начальная дата в точке ${i + 1} не может быть позже конечной даты.`);
+                    return false;
+                }
+
+                if (endRPDate > eventOverDate || startRPDate > eventOverDate) {
+                    alert(`Ошибка: Даты в точке ${i + 1} не могут быть позже даты окончания мероприятия (${eventOver}).`);
+                    return false;
+                }
+
+                if (startRPDate.getFullYear() < minYear || startRPDate.getFullYear() > maxYear) {
+                    alert(`Ошибка: Год начальной даты в точке ${i + 1} должен быть в диапазоне от ${minYear} до ${maxYear}.`);
+                    return false;
+                }
+
+                if (endRPDate.getFullYear() < minYear || endRPDate.getFullYear() > maxYear) {
+                    alert(`Ошибка: Год конечной даты в точке ${i + 1} должен быть в диапазоне от ${minYear} до ${maxYear}.`);
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        function resetFields(container) {
+            const inputs = container.querySelectorAll('input');
+            const selects = container.querySelectorAll('select');
+            inputs.forEach(input => input.value = '');
+            selects.forEach(select => select.selectedIndex = 0);
+        }
+
+        function toggleRequiredAttributes() {
+            regPointContainers.forEach((container, index) => {
+                const inputs = container.querySelectorAll('input[required], select[required]');
+                inputs.forEach(input => {
+                    if (index <= currentVisibleIndex) {
+                        input.setAttribute('required', 'required');
+                    } else {
+                        input.removeAttribute('required');
+                    }
+                });
+            });
+        }
+    });
+</script>
+
+</body>
+</html>

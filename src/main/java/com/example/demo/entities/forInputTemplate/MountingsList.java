@@ -1,7 +1,6 @@
 package com.example.demo.entities.forInputTemplate;
 
-import com.example.demo.entities.InputStaff;
-import com.example.demo.entities.Staff;
+import com.example.demo.entities.Mounting;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
@@ -11,7 +10,9 @@ import java.util.List;
 @Getter
 @Setter
 @AllArgsConstructor
-public class HeaderStaffs {
+public class MountingsList {
 
-    private List<InputStaff> staffs;
+    List<Mounting> mountings;
+
+
 }

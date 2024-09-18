@@ -9,9 +9,11 @@ public interface InputService {
 
     Long saveInputHeader(InputHeader header, String username);
 
-    void saveInputBody(List<InputBody> bodies);
+    InputBody saveInputBody(InputBody body);
 
     void saveInputSupplies(Supplies sup);
+
+    RegPoint saveRegPoint(RegPoint regPoint);
 
     Badge saveBadge(Badge badge);
 
@@ -29,7 +31,11 @@ public interface InputService {
 
     Mounting saveMounting(Mounting mounting);
 
+    InputStaff saveInputStaff(InputStaff inputStaff);
+
     Staff saveStaff(Staff staff);
+
+    AdditionalSale saveAsale(AdditionalSale additionalSale);
 
     Logistic saveLogistic(Logistic logistic);
 
@@ -45,7 +51,8 @@ public interface InputService {
 
     void saveInputSuppliesBadges(List<Badge> badges);
 
-
     InputHeader getInputHeaderById(Long id);
+
+    Device saveDevice(Device device);
 
 }

@@ -1,487 +1,446 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
-  <meta charset="UTF-8"/>
-  <title>Input Body</title>
-  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
-  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-  <style>
-    .hidden {
-      display: none;
-    }
-    .remove-staff-btn {
-      color: red;
-      cursor: pointer;
-      font-size: 1.5em;
-      position: absolute;
-      right: 10px;
-      top: 10px;
-    }
-    .form-control {
-      width: 100%;
-      max-width: 100%;
-    }
-  </style>
+    <meta charset="UTF-8"/>
+    <title>Input Body Form</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
+
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+
+        h1 {
+            font-size: 2rem;
+            color: #333;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        h3 {
+            font-size: 1.25rem;
+            color: #444;
+            margin-bottom: 30px; /* Отступ в 30 пикселей */
+            display: inline-block;
+        }
+
+        label {
+            font-weight: 600;
+            color: #555;
+        }
+
+        input, select {
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            padding: 10px;
+            font-size: 14px;
+        }
+
+        .device-card {
+            background-color: #f5f5f5;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        .form-row {
+            display: flex;
+            align-items: center;
+            gap: 10px; /* Устанавливаем равномерные отступы между полями */
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group select {
+            flex-grow: 2; /* Поле выбора устройства занимает больше места */
+        }
+
+        .form-group input[type="number"] {
+            width: 150px; /* Фиксированная ширина для полей Цена и Количество */
+        }
+
+        .form-group .remove-device-btn {
+            width: 30px; /* Фиксированная ширина для кнопки удаления */
+            text-align: center;
+        }
+
+        .remove-device-btn {
+            color: red;
+            cursor: pointer;
+            font-size: 1.5em;
+            margin-left: 10px;
+            line-height: 1.5;
+        }
+
+        /* Стиль для кнопок */
+        .btn-add, .btn-primary {
+            background-color: #7ED6A6; /* Мятный цвет */
+            color: white;
+            border: none;
+            border-radius: 50px;
+            padding: 10px 20px;
+            font-size: 14px;
+            transition: background 0.3s ease, transform 0.3s ease;
+        }
+
+        .btn-add:hover, .btn-primary:hover {
+            background-color: #6CC497; /* Тёмно-мятный при наведении */
+            box-shadow: 0 5px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .btn-primary {
+            font-size: 16px;
+        }
+
+        /* Выровняем кнопки по правому краю */
+        .btn-add {
+            float: right;
+        }
+
+        /* Адаптивность */
+        @media (max-width: 768px) {
+            .form-row {
+                flex-direction: column;
+                gap: 10px; /* Отступы между полями на мобильных устройствах */
+            }
+
+            .btn-add {
+                float: none;
+                width: 100%;
+                text-align: center;
+            }
+
+            .form-group select,
+            .form-group input[type="number"],
+            .form-group .remove-device-btn {
+                width: 100%; /* На мобильных устройствах поля будут на всю ширину */
+            }
+        }
+    </style>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            // Скрываем дополнительные поля устройств
+            $('.device-group').each(function() {
+                $(this).find('.device-fields:gt(0)').hide();
+            });
+
+            // Добавляем устройства
+            $('.add-device-btn').click(function(e) {
+                e.preventDefault();
+                let deviceGroup = $(this).closest('.device-group');
+                let hiddenFields = deviceGroup.find('.device-fields:hidden');
+                if (hiddenFields.length > 0) {
+                    hiddenFields.first().show().find('select, input').prop('disabled', false); // Активируем скрытые поля
+                    updateRemoveButtons(deviceGroup);
+                }
+            });
+
+            // Удаление устройства
+            $(document).on('click', '.remove-device-btn', function() {
+                let deviceContainer = $(this).closest('.device-fields');
+                resetFields(deviceContainer);
+                deviceContainer.hide();
+                updateRemoveButtons($(this).closest('.device-group'));
+            });
+
+            function resetFields(container) {
+                container.find('input').val('');
+                container.find('select').val('');
+                container.find('select, input').prop('disabled', true); // Отключаем поля при скрытии
+            }
+
+            function updateRemoveButtons(deviceGroup) {
+                deviceGroup.find('.remove-device-btn').hide();
+                deviceGroup.find('.device-fields:visible').last().find('.remove-device-btn').show();
+            }
+
+            // function syncPrices(deviceName) {
+            //     let price = null;
+            //     $('.device-group select').each(function() {
+            //         if ($(this).val() === deviceName) {
+            //             let currentPrice = $(this).closest('.device-fields').find('input[type="number"]').first().val();
+            //             if (currentPrice) {
+            //                 price = currentPrice;
+            //                 return false;
+            //             }
+            //         }
+            //     });
+            //
+            //     if (price !== null) {
+            //         $('.device-group select').each(function() {
+            //             if ($(this).val() === deviceName) {
+            //                 $(this).closest('.device-fields').find('input[type="number"]').first().val(price);
+            //             }
+            //         });
+            //     }
+            // }
+            //
+            // $(document).on('change', 'select', function() {
+            //     let selectedDevice = $(this).val();
+            //     syncPrices(selectedDevice);
+            // });
+
+            // Обновляем цены для всех одинаковых устройств
+            function syncPrices(deviceName, newPrice) {
+                // Обходим все select'ы и находим те, которые совпадают с текущим устройством
+                $('.device-group select').each(function() {
+                    if ($(this).val() === deviceName) {
+                        // Обновляем цену для всех совпадающих устройств
+                        $(this).closest('.device-fields').find('.price-field').val(newPrice);
+                    }
+                });
+            }
+
+// Синхронизация цен при вводе
+            $(document).on('input', '.price-field', function() {
+                let currentDeviceName = $(this).closest('.device-fields').find('select').val();
+                let newPrice = $(this).val();  // Получаем новое значение цены
+                if (currentDeviceName) {
+                    syncPrices(currentDeviceName, newPrice);
+                }
+            });
+
+// Обновляем цену при изменении устройства
+            $(document).on('change', 'select', function() {
+                let selectedDevice = $(this).val();
+                let price = $(this).closest('.device-fields').find('.price-field').val();
+                if (selectedDevice && price) {
+                    syncPrices(selectedDevice, price);
+                }
+            });
+
+
+            // $(document).on('input', 'input[type="number"]', function() {
+            //     let currentDeviceName = $(this).closest('.device-fields').find('select').val();
+            //     syncPrices(currentDeviceName);
+            // });
+
+            $('.device-group').each(function() {
+                updateRemoveButtons($(this));
+            });
+
+            $('select').val('');
+
+            $('form').on('submit', function(event) {
+                let isValid = true;
+
+                $('.device-group').each(function(index) {
+                    let selectedValues = [];
+                    let groupIsValid = true;
+
+                    $(this).find('select:visible').each(function() {
+                        let value = $(this).val();
+                        if (selectedValues.includes(value)) {
+                            alert(`Ошибка: В группе устройств №${index + 1} выбрано несколько одинаковых девайсов.`);
+                            isValid = false;
+                            groupIsValid = false;
+                            return false;
+                        }
+                        selectedValues.push(value);
+                    });
+
+                    if (!groupIsValid) return false;
+                });
+
+                if (!isValid) {
+                    event.preventDefault();
+                    return false;
+                }
+
+                $('.device-group').each(function(index) {
+                    let firstDevice = $(this).find('.device-fields').first();
+                    let deviceName = firstDevice.find('select').val();
+                    let devicePrice = firstDevice.find('input[type="number"]').first().val();
+                    let deviceCount = firstDevice.find('input[type="number"]').last().val();
+
+                    if (deviceName === '' || devicePrice === '' || deviceCount === '') {
+                        alert(`Ошибка: В первой строке группы устройств №${index + 1} необходимо заполнить все поля.`);
+                        isValid = false;
+                        return false;
+                    }
+                });
+
+                if (!isValid) {
+                    event.preventDefault();
+                    return false;
+                }
+
+                $('.device-group').each(function(index) {
+                    $(this).find('.device-fields:visible').each(function(deviceIndex) {
+                        let deviceName = $(this).find('select').val();
+                        let devicePrice = $(this).find('input[type="number"]').first().val();
+                        let deviceCount = $(this).find('input[type="number"]').last().val();
+
+                        if (deviceName === '' || devicePrice === '' || deviceCount === '') {
+                            alert(`Ошибка: В строке №${deviceIndex + 1} группы устройств №${index + 1} необходимо либо заполнить все поля, либо скрыть строку.`);
+                            isValid = false;
+                            return false;
+                        }
+                    });
+
+                    if (!isValid) return false;
+                });
+
+                return true;
+            });
+        });
+    </script>
 </head>
 <body>
 <div class="container">
-  <h1>Основное оборудование</h1>
-  <form id="equipmentForm" th:action="@{/input/saveBodyInput}" th:object="${headerBodies}" method="post">
-    <input type="hidden" name="headerId" th:value="${headerId}" />
-    <input type="hidden" name="sameEquipmentForAllDays" th:value="${sameEquipmentForAllDays}" />
-    <input type="hidden" name="periods" th:value="${periods}" />
+    <h1>Оборудование, используемое для оказания услуг</h1>
+    <form th:action="@{/input/saveBodyInput}" th:object="${headerBodies}" method="post">
+        <input type="hidden" name="headerId" th:value="${headerId}" />
+        <input type="hidden" name="sameEquipmentForAllDays" th:value="${sameEquipmentForAllDays}" />
+        <input type="hidden" name="withManyRegPoints" th:value="${withManyRegPoints}" />
+        <input type="hidden" name="periods" th:value="${periods}" />
+        <input type="hidden" name="workDays" th:value="${workDays}" />
+        <input type="hidden" name="regPoints" th:value="${regPoints}" />
 
-    <div th:if="${sameEquipmentForAllDays}">
-      <h2>Оборудование на все дни</h2>
-      <div th:if="${periods == 0}">
-        <div class="form-group row">
-          <div class="col-sm-4">
-            <select id="softDevice" th:field="*{bodies[0].softDevice}" class="form-control">
-              <option value="" selected>-- Выбери оборудование для клиента --</option>
-              <option th:each="device : ${softDevices}" th:value="${device.id}" th:text="${device.name}"></option>
-            </select>
-          </div>
-          <div class="col-sm-4">
-            <input type="number" id="sDeviceCount" th:field="*{bodies[0].sDeviceCount}" class="form-control" placeholder="Количество" />
-          </div>
-          <div class="col-sm-4">
-            <input type="number" id="sDevicePrice" th:field="*{bodies[0].sDevicePrice}" class="form-control" value="1800" />
-          </div>
+        <!-- sameEquipmentForAllDays -->
+        <div th:if="${sameEquipmentForAllDays}">
+            <div th:each="inputBody, iterStat : ${headerBodies.bodies}" class="device-group device-card">
+                <header>
+                    <h3 th:text="${stringPeriods[iterStat.index]}"></h3>
+                    <button class="btn btn-add add-device-btn">Добавить device</button>
+                </header>
+                <div th:each="device, deviceStat : ${inputBody.devices}" class="device-fields device-container">
+                    <div class="form-row align-items-center">
+                        <div class="form-group">
+                            <select th:field="*{bodies[__${iterStat.index}__].devices[__${deviceStat.index}__].name}" class="form-control">
+                                <option value="" disabled selected>Выберите устройство</option>
+                                <option value="Ноутбук + ПО">Ноутбук + ПО</option>
+                                <option value="NUC + ПО">NUC + ПО</option>
+                                <option value="Планшет + ПО">Планшет + ПО</option>
+                                <option value="Принтер для печатик наклеек">Принтер для печатик наклеек</option>
+                                <option value="Принтер для печати на пластике">Принтер для печати на пластике</option>
+                                <option value="Кабельная коммутация">Кабельная коммутация</option>
+                                <option value="Сетевое оборудование">Сетевое оборудование</option>
+                                <option value="Web-камера">Web-камера</option>
+                                <option value="RFID-считыватель">RFID-считыватель</option>
+                                <option value="Сканер QR">Сканер QR</option>
+                                <option value="ТСД">ТСД</option>
+                                <option value="Монитор 24'">Монитор 24'</option>
+                                <option value="Монитор 22' с тачскрином">Монитор 22' с тачскрином</option>
+                                <option value="Монитор 13' с тачскрином">Монитор 13' с тачскрином</option>
+                                <option value="Стойка металлическая">Стойка металлическая</option>
+                                <option value="Турникет трипод">Турникет трипод</option>
+                                <option value="Платформа для турникета">Платформа для турникета</option>
+                                <option value="Контроллер СКУД">Контроллер СКУД</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <input type="number" th:field="*{bodies[__${iterStat.index}__].devices[__${deviceStat.index}__].priceFor1q}" class="form-control price-field" placeholder="Цена" />
+                        </div>
+                        <div class="form-group">
+                            <input type="number" th:field="*{bodies[__${iterStat.index}__].devices[__${deviceStat.index}__].count}" class="form-control" placeholder="Количество" />
+                        </div>
+                        <span class="remove-device-btn btn-delete">&times;</span>
+                    </div>
+                </div>
+            </div>
         </div>
 
-        <div class="form-group row">
-          <div class="col-sm-4">
-            <select th:field="*{bodies[0].printerDevice}" class="form-control">
-              <option value="" selected>-- Выбери принтер --</option>
-              <option th:each="device : ${printerDevices}" th:value="${device.id}" th:text="${device.name}"></option>
-            </select>
-          </div>
-          <div class="col-sm-4">
-            <input type="number" th:field="*{bodies[0].pDeviceCount}" class="form-control" placeholder="Количество" />
-          </div>
-          <div class="col-sm-4">
-            <input type="number" th:field="*{bodies[0].pDevicePrice}" class="form-control" />
-          </div>
+        <div th:if="${withManyRegPoints}">
+            <div th:each="inputBody, iterStat : ${headerBodies.bodies}" class="device-group device-card">
+                <header>
+                    <h3 th:text="${regPointsStrings[iterStat.index]}"></h3>
+                    <button class="btn btn-add add-device-btn">Добавить device</button>
+                </header>
+                <div th:each="device, deviceStat : ${inputBody.devices}" class="device-fields device-container">
+                    <div class="form-row align-items-center">
+                        <div class="form-group">
+                            <select th:field="*{bodies[__${iterStat.index}__].devices[__${deviceStat.index}__].name}" class="form-control">
+                                <option value="" disabled selected>Выберите устройство</option>
+                                <option value="Ноутбук + ПО">Ноутбук + ПО</option>
+                                <option value="NUC + ПО">NUC + ПО</option>
+                                <option value="Планшет + ПО">Планшет + ПО</option>
+                                <option value="Принтер для печатик наклеек">Принтер для печатик наклеек</option>
+                                <option value="Принтер для печати на пластике">Принтер для печати на пластике</option>
+                                <option value="Кабельная коммутация">Кабельная коммутация</option>
+                                <option value="Сетевое оборудование">Сетевое оборудование</option>
+                                <option value="Web-камера">Web-камера</option>
+                                <option value="RFID-считыватель">RFID-считыватель</option>
+                                <option value="Сканер QR">Сканер QR</option>
+                                <option value="ТСД">ТСД</option>
+                                <option value="Монитор 24'">Монитор 24'</option>
+                                <option value="Монитор 22' с тачскрином">Монитор 22' с тачскрином</option>
+                                <option value="Монитор 13' с тачскрином">Монитор 13' с тачскрином</option>
+                                <option value="Стойка металлическая">Стойка металлическая</option>
+                                <option value="Турникет трипод">Турникет трипод</option>
+                                <option value="Платформа для турникета">Платформа для турникета</option>
+                                <option value="Контроллер СКУД">Контроллер СКУД</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <input type="number" th:field="*{bodies[__${iterStat.index}__].devices[__${deviceStat.index}__].priceFor1q}" class="form-control price-field" placeholder="Цена" />
+                        </div>
+                        <div class="form-group">
+                            <input type="number" th:field="*{bodies[__${iterStat.index}__].devices[__${deviceStat.index}__].count}" class="form-control" placeholder="Количество" />
+                        </div>
+                        <span class="remove-device-btn btn-delete">&times;</span>
+                    </div>
+                </div>
+            </div>
         </div>
 
-        <div class="form-group row">
-          <label class="col-sm-4 col-form-label">Кабельная коммутация:</label>
-          <div class="col-sm-4">
-            <input type="number" th:field="*{bodies[0].switchingCount}" class="form-control" placeholder="1" />
-          </div>
-          <div class="col-sm-4">
-            <input type="number" th:field="*{bodies[0].switchingPrice}" class="form-control" placeholder="750" />
-          </div>
-        </div>
-
-        <div class="form-group row">
-          <label class="col-sm-4 col-form-label">Сетевое оборудование:</label>
-          <div class="col-sm-3">
-            <input type="number" th:field="*{bodies[0].networkCount}" class="form-control" placeholder="1" />
-          </div>
-          <div class="col-sm-3">
-            <input type="number" th:field="*{bodies[0].networkPrice}" class="form-control" placeholder="1200" />
-          </div>
-        </div>
-
-        <div class="form-group row hidden" id="cameraFields_all">
-          <label class="col-sm-4 col-form-label">Web-камера:</label>
-          <div class="col-sm-4">
-            <input type="number" th:field="*{bodies[0].cameraDeviceCount}" class="form-control" placeholder="1" />
-          </div>
-          <div class="col-sm-4">
-            <input type="number" th:field="*{bodies[0].cameraDevicePrice}" class="form-control" placeholder="750" />
-          </div>
-          <div class="col-sm-1">
-            <span class="remove-staff-btn" data-type="camera" data-index="all">&times;</span>
-          </div>
-        </div>
-
-        <div class="form-group row hidden" id="scannerFields_all">
-          <label class="col-sm-4 col-form-label">2D-Сканер:</label>
-          <div class="col-sm-3">
-            <input type="number" th:field="*{bodies[0].barcodeDeviceCount}" class="form-control" placeholder="1" />
-          </div>
-          <div class="col-sm-3">
-            <input type="number" th:field="*{bodies[0].barcodeDevicePrice}" class="form-control" placeholder="1000" />
-          </div>
-          <div class="col-sm-1">
-            <span class="remove-staff-btn" data-type="scanner" data-index="all">&times;</span>
-          </div>
-        </div>
-
-        <div class="form-group row hidden" id="rfidFields_all">
-          <label class="col-sm-4 col-form-label">RFID-считыватель:</label>
-          <div class="col-sm-3">
-            <input type="number" th:field="*{bodies[0].rfidReaderDeviceCount}" class="form-control" placeholder="1" />
-          </div>
-          <div class="col-sm-3">
-            <input type="number" th:field="*{bodies[0].rfidReaderDevicePrice}" class="form-control" placeholder="1000" />
-          </div>
-          <div class="col-sm-1">
-            <span class="remove-staff-btn" data-type="rfid" data-index="all">&times;</span>
-          </div>
-        </div>
-
-        <div class="form-group row hidden" id="tsdFields_all">
-          <label class="col-sm-4 col-form-label">ТСД:</label>
-          <div class="col-sm-3">
-            <input type="number" th:field="*{bodies[0].tsdCount}" class="form-control" placeholder="1" />
-          </div>
-          <div class="col-sm-3">
-            <input type="number" th:field="*{bodies[0].tsdPrice}" class="form-control" placeholder="1000" />
-          </div>
-          <div class="col-sm-1">
-            <span class="remove-staff-btn" data-type="tsd" data-index="all">&times;</span>
-          </div>
-        </div>
-
-        <div class="form-group">
-          <button type="button" class="btn btn-secondary add-equipment-button-all" data-type="camera">Добавить web-камеры</button>
-          <button type="button" class="btn btn-secondary add-equipment-button-all" data-type="scanner">Добавить 2D-сканеры</button>
-          <button type="button" class="btn btn-secondary add-equipment-button-all" data-type="rfid">Добавить RFID-считыватели</button>
-          <button type="button" class="btn btn-secondary add-equipment-button-all" data-type="tsd">Добавить ТСД</button>
-        </div>
-      </div>
-
-      <div th:if="${periods > 0}">
-        <div th:each="period, iterStat : ${#numbers.sequence(0, periods - 1)}">
-          <h3 th:text="${periodDates[iterStat.index * 2]} + ' - ' + ${periodDates[iterStat.index * 2 + 1]}" style="text-align: center;">Период</h3>
-
-          <div class="form-group row">
-            <div class="col-sm-4">
-              <select id="softDevice_${iterStat.index}" th:field="*{bodies[__${iterStat.index}__].softDevice}" class="form-control">
-                <option value="" selected>-- Выбери оборудование для клиента --</option>
-                <option th:each="device : ${softDevices}" th:value="${device.id}" th:text="${device.name}"></option>
-              </select>
+        <div th:if="${!sameEquipmentForAllDays && !withManyRegPoints}">
+            <div th:each="inputBody, iterStat : ${headerBodies.bodies}" class="device-group device-card">
+                <header>
+                    <h3 th:text="${workDates[iterStat.index]}"></h3>
+                    <button class="btn btn-add add-device-btn">Добавить device</button>
+                </header>
+                <div th:each="device, deviceStat : ${inputBody.devices}" class="device-fields device-container">
+                    <div class="form-row align-items-center">
+                        <div class="form-group">
+                            <select th:field="*{bodies[__${iterStat.index}__].devices[__${deviceStat.index}__].name}" class="form-control">
+                                <option value="" disabled selected>Выберите устройство</option>
+                                <option value="Ноутбук + ПО">Ноутбук + ПО</option>
+                                <option value="NUC + ПО">NUC + ПО</option>
+                                <option value="Планшет + ПО">Планшет + ПО</option>
+                                <option value="Принтер для печатик наклеек">Принтер для печатик наклеек</option>
+                                <option value="Принтер для печати на пластике">Принтер для печати на пластике</option>
+                                <option value="Кабельная коммутация">Кабельная коммутация</option>
+                                <option value="Сетевое оборудование">Сетевое оборудование</option>
+                                <option value="Web-камера">Web-камера</option>
+                                <option value="RFID-считыватель">RFID-считыватель</option>
+                                <option value="Сканер QR">Сканер QR</option>
+                                <option value="ТСД">ТСД</option>
+                                <option value="Монитор 24'">Монитор 24'</option>
+                                <option value="Монитор 22' с тачскрином">Монитор 22' с тачскрином</option>
+                                <option value="Монитор 13' с тачскрином">Монитор 13' с тачскрином</option>
+                                <option value="Стойка металлическая">Стойка металлическая</option>
+                                <option value="Турникет трипод">Турникет трипод</option>
+                                <option value="Платформа для турникета">Платформа для турникета</option>
+                                <option value="Контроллер СКУД">Контроллер СКУД</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <input type="number" th:field="*{bodies[__${iterStat.index}__].devices[__${deviceStat.index}__].priceFor1q}" class="form-control price-field" placeholder="Цена" />
+                        </div>
+                        <div class="form-group">
+                            <input type="number" th:field="*{bodies[__${iterStat.index}__].devices[__${deviceStat.index}__].count}" class="form-control" placeholder="Количество" />
+                        </div>
+                        <span class="remove-device-btn btn-delete">&times;</span>
+                    </div>
+                </div>
             </div>
-            <div class="col-sm-4">
-              <input type="number" id="sDeviceCount_${iterStat.index}" th:field="*{bodies[__${iterStat.index}__].sDeviceCount}" class="form-control" placeholder="Количество" />
-            </div>
-            <div class="col-sm-4">
-              <input type="number" id="sDevicePrice_${iterStat.index}" th:field="*{bodies[__${iterStat.index}__].sDevicePrice}" class="form-control" value="1800" />
-            </div>
-          </div>
-
-          <div class="form-group row">
-            <div class="col-sm-4">
-              <select th:field="*{bodies[__${iterStat.index}__].printerDevice}" class="form-control">
-                <option value="" selected>-- Выбери принтер --</option>
-                <option th:each="device : ${printerDevices}" th:value="${device.id}" th:text="${device.name}"></option>
-              </select>
-            </div>
-            <div class="col-sm-4">
-              <input type="number" th:field="*{bodies[__${iterStat.index}__].pDeviceCount}" class="form-control" placeholder="Количество" />
-            </div>
-            <div class="col-sm-4">
-              <input type="number" th:field="*{bodies[__${iterStat.index}__].pDevicePrice}" class="form-control" />
-            </div>
-          </div>
-
-          <div class="form-group row">
-            <label class="col-sm-4 col-form-label">Кабельная коммутация:</label>
-            <div class="col-sm-4">
-              <input type="number" th:field="*{bodies[__${iterStat.index}__].switchingCount}" class="form-control" placeholder="1" />
-            </div>
-            <div class="col-sm-4">
-              <input type="number" th:field="*{bodies[__${iterStat.index}__].switchingPrice}" class="form-control" placeholder="750" />
-            </div>
-          </div>
-
-          <div class="form-group row">
-            <label class="col-sm-4 col-form-label">Сетевое оборудование:</label>
-            <div class="col-sm-4">
-              <input type="number" th:field="*{bodies[__${iterStat.index}__].networkCount}" class="form-control" placeholder="1" />
-            </div>
-            <div class="col-sm-4">
-              <input type="number" th:field="*{bodies[__${iterStat.index}__].networkPrice}" class="form-control" placeholder="1200" />
-            </div>
-          </div>
-
-          <div class="form-group row hidden" th:attr="id='cameraFields__' + ${iterStat.index}">
-            <label class="col-sm-4 col-form-label">Web-камера:</label>
-            <div class="col-sm-3">
-              <input type="number" th:field="*{bodies[__${iterStat.index}__].cameraDeviceCount}" class="form-control" placeholder="1" />
-            </div>
-            <div class="col-sm-3">
-              <input type="number" th:field="*{bodies[__${iterStat.index}__].cameraDevicePrice}" class="form-control" placeholder="750" />
-            </div>
-            <div class="col-sm-1">
-              <span class="remove-staff-btn" data-type="camera" th:data-index="${iterStat.index}">&times;</span>
-            </div>
-          </div>
-
-          <div class="form-group row hidden" th:attr="id='scannerFields__' + ${iterStat.index}">
-            <label class="col-sm-4 col-form-label">2D-Сканер:</label>
-            <div class="col-sm-3">
-              <input type="number" th:field="*{bodies[__${iterStat.index}__].barcodeDeviceCount}" class="form-control" placeholder="1" />
-            </div>
-            <div class="col-sm-3">
-              <input type="number" th:field="*{bodies[__${iterStat.index}__].barcodeDevicePrice}" class="form-control" placeholder="1000" />
-            </div>
-            <div class="col-sm-1">
-              <span class="remove-staff-btn" data-type="scanner" th:data-index="${iterStat.index}">&times;</span>
-            </div>
-          </div>
-
-          <div class="form-group row hidden" th:attr="id='rfidFields__' + ${iterStat.index}">
-            <label class="col-sm-4 col-form-label">RFID-считыватель:</label>
-            <div class="col-sm-3">
-              <input type="number" th:field="*{bodies[__${iterStat.index}__].rfidReaderDeviceCount}" class="form-control" placeholder="1" />
-            </div>
-            <div class="col-sm-3">
-              <input type="number" th:field="*{bodies[__${iterStat.index}__].rfidReaderDevicePrice}" class="form-control" placeholder="1000" />
-            </div>
-            <div class="col-sm-1">
-              <span class="remove-staff-btn" data-type="rfid" th:data-index="${iterStat.index}">&times;</span>
-            </div>
-          </div>
-
-          <div class="form-group row hidden" th:attr="id='tsdFields__' + ${iterStat.index}">
-            <label class="col-sm-4 col-form-label">ТСД:</label>
-            <div class="col-sm-3">
-              <input type="number" th:field="*{bodies[__${iterStat.index}__].tsdCount}" class="form-control" placeholder="1" />
-            </div>
-            <div class="col-sm-3">
-              <input type="number" th:field="*{bodies[__${iterStat.index}__].tsdPrice}" class="form-control" placeholder="1000" />
-            </div>
-            <div class="col-sm-1">
-              <span class="remove-staff-btn" data-type="tsd" th:data-index="${iterStat.index}">&times;</span>
-            </div>
-          </div>
-
-          <div class="form-group">
-            <button type="button" class="btn btn-secondary add-equipment-button" th:data-index="${iterStat.index}" th:data-type="'camera'">Добавить web-камеры</button>
-            <button type="button" class="btn btn-secondary add-equipment-button" th:data-index="${iterStat.index}" th:data-type="'scanner'">Добавить 2D-сканеры</button>
-            <button type="button" class="btn btn-secondary add-equipment-button" th:data-index="${iterStat.index}" th:data-type="'rfid'">Добавить RFID-считыватели</button>
-            <button type="button" class="btn btn-secondary add-equipment-button" th:data-index="${iterStat.index}" th:data-type="'tsd'">Добавить ТСД</button>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <div th:if="${!sameEquipmentForAllDays}">
-      <h2>Оборудование на разные дни</h2>
-      <div th:each="body, iterStat : ${headerBodies.bodies}">
-        <h3 th:text="${daysWithoutPeriod[iterStat.index]}">День</h3>
-        <div class="form-group row">
-          <div class="col-sm-4">
-            <select id="softDevice_${iterStat.index}" th:field="*{bodies[__${iterStat.index}__].softDevice}" class="form-control">
-              <option value="" selected>-- Выбери оборудование для клиента --</option>
-              <option th:each="device : ${softDevices}" th:value="${device.id}" th:text="${device.name}"></option>
-            </select>
-          </div>
-          <div class="col-sm-4">
-            <input type="number" id="sDeviceCount_${iterStat.index}" th:field="*{bodies[__${iterStat.index}__].sDeviceCount}" class="form-control" placeholder="Количество" />
-          </div>
-          <div class="col-sm-4">
-            <input type="number" id="sDevicePrice_${iterStat.index}" th:field="*{bodies[__${iterStat.index}__].sDevicePrice}" class="form-control" />
-          </div>
-        </div>
-
-        <div class="form-group row">
-          <div class="col-sm-4">
-            <select th:field="*{bodies[__${iterStat.index}__].printerDevice}" class="form-control">
-              <option value="" selected>-- Выбери принтер --</option>
-              <option th:each="device : ${printerDevices}" th:value="${device.id}" th:text="${device.name}"></option>
-            </select>
-          </div>
-          <div class="col-sm-4">
-            <input type="number" th:field="*{bodies[__${iterStat.index}__].pDeviceCount}" class="form-control" placeholder="Количество" />
-          </div>
-          <div class="col-sm-4">
-            <input type="number" th:field="*{bodies[__${iterStat.index}__].pDevicePrice}" class="form-control" />
-          </div>
-        </div>
-
-        <div class="form-group row">
-          <label class="col-sm-4 col-form-label">Кабельная коммутация:</label>
-          <div class="col-sm-4">
-            <input type="number" th:field="*{bodies[__${iterStat.index}__].switchingCount}" class="form-control" placeholder="1" />
-          </div>
-          <div class="col-sm-4">
-            <input type="number" th:field="*{bodies[__${iterStat.index}__].switchingPrice}" class="form-control" placeholder="750" />
-          </div>
-        </div>
-
-        <div class="form-group row">
-          <label class="col-sm-4 col-form-label">Сетевое оборудование:</label>
-          <div class="col-sm-4">
-            <input type="number" th:field="*{bodies[__${iterStat.index}__].networkCount}" class="form-control" placeholder="1" />
-          </div>
-          <div class="col-sm-4">
-            <input type="number" th:field="*{bodies[__${iterStat.index}__].networkPrice}" class="form-control" placeholder="1200" />
-          </div>
-        </div>
-
-        <div class="form-group row hidden" th:attr="id='cameraFields__' + ${iterStat.index}">
-          <label class="col-sm-4 col-form-label">Web-камера:</label>
-          <div class="col-sm-3">
-            <input type="number" th:field="*{bodies[__${iterStat.index}__].cameraDeviceCount}" class="form-control" placeholder="1" />
-          </div>
-          <div class="col-sm-3">
-            <input type="number" th:field="*{bodies[__${iterStat.index}__].cameraDevicePrice}" class="form-control" placeholder="750" />
-          </div>
-          <div class="col-sm-1">
-            <span class="remove-staff-btn" data-type="camera" th:data-index="${iterStat.index}">&times;</span>
-          </div>
-        </div>
-
-        <div class="form-group row hidden" th:attr="id='scannerFields__' + ${iterStat.index}">
-          <label class="col-sm-4 col-form-label">2D-Сканер:</label>
-          <div class="col-sm-3">
-            <input type="number" th:field="*{bodies[__${iterStat.index}__].barcodeDeviceCount}" class="form-control" placeholder="1" />
-          </div>
-          <div class="col-sm-3">
-            <input type="number" th:field="*{bodies[__${iterStat.index}__].barcodeDevicePrice}" class="form-control" placeholder="1000" />
-          </div>
-          <div class="col-sm-1">
-            <span class="remove-staff-btn" data-type="scanner" th:data-index="${iterStat.index}">&times;</span>
-          </div>
-        </div>
-
-        <div class="form-group row hidden" th:attr="id='rfidFields__' + ${iterStat.index}">
-          <label class="col-sm-4 col-form-label">RFID-считыватель:</label>
-          <div class="col-sm-3">
-            <input type="number" th:field="*{bodies[__${iterStat.index}__].rfidReaderDeviceCount}" class="form-control" placeholder="1" />
-          </div>
-          <div class="col-sm-3">
-            <input type="number" th:field="*{bodies[__${iterStat.index}__].rfidReaderDevicePrice}" class="form-control" placeholder="1000" />
-          </div>
-          <div class="col-sm-1">
-            <span class="remove-staff-btn" data-type="rfid" th:data-index="${iterStat.index}">&times;</span>
-          </div>
-        </div>
-
-        <div class="form-group row hidden" th:attr="id='tsdFields__' + ${iterStat.index}">
-          <label class="col-sm-4 col-form-label">ТСД:</label>
-          <div class="col-sm-3">
-            <input type="number" th:field="*{bodies[__${iterStat.index}__].tsdCount}" class="form-control" placeholder="1" />
-          </div>
-          <div class="col-sm-3">
-            <input type="number" th:field="*{bodies[__${iterStat.index}__].tsdPrice}" class="form-control" placeholder="1000" />
-          </div>
-          <div class="col-sm-1">
-            <span class="remove-staff-btn" data-type="tsd" th:data-index="${iterStat.index}">&times;</span>
-          </div>
         </div>
 
         <div class="form-group">
-          <button type="button" class="btn btn-secondary add-equipment-button" th:data-index="${iterStat.index}" th:data-type="'camera'">Добавить web-камеры</button>
-          <button type="button" class="btn btn-secondary add-equipment-button" th:data-index="${iterStat.index}" th:data-type="'scanner'">Добавить 2D-сканеры</button>
-          <button type="button" class="btn btn-secondary add-equipment-button" th:data-index="${iterStat.index}" th:data-type="'rfid'">Добавить RFID-считыватели</button>
-          <button type="button" class="btn btn-secondary add-equipment-button" th:data-index="${iterStat.index}" th:data-type="'tsd'">Добавить ТСД</button>
+            <button type="submit" class="btn btn-primary">Submit</button>
         </div>
-      </div>
-    </div>
-
-    <button type="submit" class="btn btn-primary">Далее</button>
-  </form>
+    </form>
 </div>
-
-<script>
-  function validateForm() {
-    let isValid = true;
-    let errorMessage = '';
-
-    // Проверка для общего оборудования
-    if (document.getElementById('softDevice')) {
-      const softDevice = document.getElementById('softDevice').value;
-      const sDeviceCount = document.getElementById('sDeviceCount').value;
-      const sDevicePrice = document.getElementById('sDevicePrice').value;
-
-      if (!softDevice || !sDeviceCount || !sDevicePrice) {
-        errorMessage += 'Заполните все поля для основного оборудования.\n';
-        isValid = false;
-      }
-    }
-
-    // Проверка для каждого периода
-    const periods = document.querySelectorAll('[id^="softDevice_"]');
-    periods.forEach((element) => {
-      const index = element.id.split('_')[1];
-      const softDevice = element.value;
-      const sDeviceCount = document.getElementById('sDeviceCount_' + index).value;
-      const sDevicePrice = document.getElementById('sDevicePrice_' + index).value;
-
-      if (!softDevice || !sDeviceCount || !sDevicePrice) {
-        errorMessage += `Оборудование для клиента обязательно к заполнению, проверь первую строку у всех дней или периодов.\n`;
-        isValid = false;
-      }
-    });
-
-    if (!isValid) {
-      alert(errorMessage);
-    }
-
-    return isValid;
-  }
-
-  $(document).ready(function() {
-    // Убираем обработчик submit из jQuery и передаем его в функцию validateForm
-    $('#equipmentForm').on('submit', function(event) {
-      if (!validateForm()) {
-        event.preventDefault(); // Отменить отправку формы, если валидация не пройдена
-      }
-    });
-
-    // Код для добавления полей
-    $('.add-equipment-button').on('click', function() {
-      var index = $(this).data('index');
-      var type = $(this).data('type');
-      $(this).hide();  // Скрываем кнопку добавления
-      toggleEquipmentFields(index, type, false);
-    });
-
-    $('.add-equipment-button-all').on('click', function() {
-      var type = $(this).data('type');
-      $(this).hide();  // Скрываем кнопку добавления
-      toggleEquipmentFields(0, type, true);
-    });
-
-    // Код для удаления полей
-    $(document).on('click', '.remove-staff-btn', function() {
-      var index = $(this).data('index');
-      var type = $(this).data('type');
-      resetEquipmentFields(index, type);
-    });
-
-    function toggleEquipmentFields(index, type, isAllDays) {
-      var fieldId = getFieldId(index, type, isAllDays);
-      $('#' + fieldId).toggleClass('hidden');
-    }
-
-    function resetEquipmentFields(index, type) {
-      var fieldId = getFieldId(index, type);
-      $('#' + fieldId).find('input').val(''); // Сбрасываем значения полей
-      $('#' + fieldId).toggleClass('hidden');
-      $('.add-equipment-button[data-index="' + index + '"][data-type="' + type + '"]').show(); // Показываем кнопку добавления
-    }
-
-    function getFieldId(index, type, isAllDays) {
-      var fieldId;
-
-      switch(type) {
-        case 'camera':
-          fieldId = isAllDays ? 'cameraFields_all' : 'cameraFields__' + index;
-          break;
-        case 'scanner':
-          fieldId = isAllDays ? 'scannerFields_all' : 'scannerFields__' + index;
-          break;
-        case 'rfid':
-          fieldId = isAllDays ? 'rfidFields_all' : 'rfidFields__' + index;
-          break;
-        case 'tsd':
-          fieldId = isAllDays ? 'tsdFields_all' : 'tsdFields__' + index;
-          break;
-      }
-
-      return fieldId;
-    }
-  });
-</script>
-
 </body>
 </html>
-
-

@@ -3,8 +3,7 @@ package com.example.demo.controllers;
 import com.example.demo.entities.*;
 import com.example.demo.entities.forInputTemplate.*;
 import com.example.demo.entities.forSupplies.*;
-import com.example.demo.repository.DeviceRepository;
-import com.example.demo.repository.InputHeaderRepository;
+import com.example.demo.services.CustomerServiceImpl;
 import com.example.demo.services.ExcelServiceImpl;
 import com.example.demo.services.InputServiceImpl;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -13,27 +12,21 @@ import com.fasterxml.jackson.datatype.hibernate5.Hibernate5Module;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
+import java.util.stream.Collectors;
 
 @Controller
 public class InputController {
 
     private final InputServiceImpl inputService;
-    private final DeviceRepository deviceRepository;
+    private final CustomerServiceImpl customerService;
     private final ExcelServiceImpl excelService;
     private final ObjectMapper objectMapper = new ObjectMapper()
             .registerModule(new JavaTimeModule())
@@ -41,217 +34,171 @@ public class InputController {
             .registerModule(new Hibernate5Module());
 
     @Autowired
-    public InputController(InputServiceImpl inputService,DeviceRepository deviceRepository,
+    public InputController(InputServiceImpl inputService, CustomerServiceImpl customerService,
                            ExcelServiceImpl excelService) {
         this.inputService = inputService;
-        this.deviceRepository = deviceRepository;
+        this.customerService = customerService;
         this.excelService = excelService;
-    }
 
+    }
 
     @GetMapping("/input/header")
     public String showInputHeader(Model model) {
-        model.addAttribute("input", new InputHeader());
+        List<Customer> customers = customerService.getAllCustomers();
+        model.addAttribute("inputHeader", new InputHeader());
+        model.addAttribute("customers", customers);
         return "inputHeader";
     }
 
     @PostMapping("/input/saveHeaderInput")
-    public String saveInput(@Valid @ModelAttribute("inputHeader") InputHeader header
-            , BindingResult bindingResult, Authentication authentication) {
-        if (bindingResult.hasErrors()) {
-            return "inputHeader";
-        }
-        LocalDate lastPeriodEnd = header.getEventStartDate().minusDays(1);
-
-        if (header.getBoolStart1() != null && header.getBoolEnd1() != null) {
-            lastPeriodEnd = header.getBoolEnd1();
-        }
-
-        if (header.getBoolStart2() != null && header.getBoolEnd2() != null) {
-            lastPeriodEnd = header.getBoolEnd2();
-        }
-
-        if (header.getBoolStart3() != null && header.getBoolEnd3() != null) {
-            lastPeriodEnd = header.getBoolEnd3();
-        }
-
-        if (lastPeriodEnd.isBefore(header.getEventEndDate())) {
-            header.setBoolStart4(lastPeriodEnd.plusDays(1));
-            header.setBoolEnd4(header.getEventEndDate());
-        }
-
+    public String saveInput(@Valid @ModelAttribute("inputHeader") InputHeader header,
+                            Authentication authentication) {
         String currentUsername = authentication.getName();
         Long headerId = inputService.saveInputHeader(header, currentUsername);
         excelService.createNewFile(header);
+        if(header.isWithManyRegPoints()){
+            return "redirect:/input/regPoints?headerId=" + headerId;
+        } else {
+            return "redirect:/input/body?headerId=" + headerId;
+        }
+    }
+
+    @GetMapping("/input/regPoints")
+    public String showInputRegPoints(@RequestParam("headerId") Long headerId, Model model) {
+        InputHeader header = inputService.getInputHeaderById(headerId);
+        LocalDate eventOver = header.getEventEndDate();
+        List<RegPoint> regPoints = new ArrayList<>();
+        for(int i = 0; i < 16; i++){
+            RegPoint regPoint = new RegPoint();
+            regPoint.setHeader(header);
+            regPoints.add(regPoint);
+        }
+        HeaderRegPoints headerRegPoints = new HeaderRegPoints(regPoints);
+        model.addAttribute("headerRegPoints",headerRegPoints);
+        model.addAttribute("eventOver", eventOver);
+        model.addAttribute("headerId", headerId);
+        return "InputRegPoints";
+    }
+
+    @PostMapping("/input/saveInputRegPoints")
+    public String saveInputRegPoints(@Valid @ModelAttribute HeaderRegPoints headerRegPoints,
+                                     @RequestParam("headerId") Long headerId) {
+        InputHeader header = inputService.getInputHeaderById(headerId);
+
+        List<RegPoint> regPoints = headerRegPoints.getRegPoints();
+        for(RegPoint regPoint : regPoints){
+            regPoint.setHeader(header);
+            if(isValidRegPoint(regPoint)){
+                inputService.saveRegPoint(regPoint);
+            }
+        }
         return "redirect:/input/body?headerId=" + headerId;
+    }
+
+    private boolean isValidRegPoint(RegPoint regPoint) {
+        return regPoint.getName() != null && !regPoint.getName().isBlank() &&
+                regPoint.getDescription() != null && !regPoint.getDescription().isBlank() &&
+                regPoint.getStartRPDate() != null &&
+                regPoint.getEndRPDate() != null;
     }
 
     @GetMapping("/input/body")
     public String showInputBody(@RequestParam("headerId") Long headerId, Model model) {
         InputHeader header = inputService.getInputHeaderById(headerId);
-        if (header == null) {
-            return "errorPageHeader"; // Здесь errorPage - название вашего представления с сообщением об ошибке
-        }
-//        List<Device> softDevices = deviceRepository.findByIdIn(List.of(1L, 2L, 3L));
-//        List<Device> printerDevices = deviceRepository.findByIdIn(List.of(4L, 5L));
-
         List<InputBody> inputBodies = new ArrayList<>();
-        for (int i = 0; i < header.getWorkDays(); i++) {
-            InputBody body = new InputBody();
-            body.setHeader(header);
-            inputBodies.add(body);
-        }
 
-        int periods = 0;
-        LocalDate lastPeriodEnd = header.getEventStartDate().minusDays(1);
-        if (header.getBoolStart1() != null && header.getBoolEnd1() != null) {
-            periods++;
-            lastPeriodEnd = header.getBoolEnd1();
-        }
-        if (header.getBoolStart2() != null && header.getBoolEnd2() != null) {
-            periods++;
-            lastPeriodEnd = header.getBoolEnd2();
-        } else if (header.getBoolStart1() != null && header.getBoolEnd1() != null &&
-                header.getBoolEnd1().isBefore(header.getEventEndDate()) &&
-                header.getBoolEnd1().isAfter(lastPeriodEnd)) {
-            periods++;
-            lastPeriodEnd = header.getBoolEnd1();
-        }
-        if (header.getBoolStart3() != null && header.getBoolEnd3() != null) {
-            periods++;
-            lastPeriodEnd = header.getBoolEnd3();
-        } else if (header.getBoolStart2() != null && header.getBoolEnd2() != null &&
-                header.getBoolEnd2().isBefore(header.getEventEndDate()) &&
-                header.getBoolEnd2().isAfter(lastPeriodEnd)) {
-            periods++;
-            lastPeriodEnd = header.getBoolEnd2();
-        }
-        if (lastPeriodEnd.isBefore(header.getEventEndDate())) {
-            periods++;
-        }
+        if (header.isWithManyRegPoints()) {
+            for (int i = 0; i < header.getRegPoints().size(); i++) {
+                InputBody body = new InputBody();
+                body.setHeader(header);
 
-        System.out.println("Количество валидных периодов: " + periods);
+                List<Device> devicesForInput = new ArrayList<>();
+                for (int k = 0; k < 20; k++) {
+                    Device device = new Device();
+                    device.setBody(body);
+                    devicesForInput.add(device);
+                }
+                body.setDevices(devicesForInput);
+                inputBodies.add(body);
+            }
+        } else if (header.isSameEquipmentForAllDays()) {
+            for (int i = 0; i < header.getPeriods(); i++) {
+                InputBody body = new InputBody();
+                body.setHeader(header);
 
-        List<String> periodDates = new ArrayList<>();
-        if (header.getBoolStart1() != null && header.getBoolEnd1() != null) {
-            periodDates.add(header.getBoolStart1().toString());
-            periodDates.add(header.getBoolEnd1().toString());
+                List<Device> devicesForInput = new ArrayList<>();
+                for (int k = 0; k < 20; k++) {
+                    Device device = new Device();
+                    device.setBody(body);
+                    devicesForInput.add(device);
+                }
+                body.setDevices(devicesForInput);
+                inputBodies.add(body);
+            }
+        } else {
+            for (int i = 0; i < header.getWorkDays(); i++) {
+                InputBody body = new InputBody();
+                body.setHeader(header);
+
+                List<Device> devicesForInput = new ArrayList<>();
+                for (int k = 0; k < 20; k++) {
+                    Device device = new Device();
+                    device.setBody(body);
+                    devicesForInput.add(device);
+                }
+                body.setDevices(devicesForInput);
+                inputBodies.add(body);
+            }
         }
-        if (header.getBoolStart2() != null && header.getBoolEnd2() != null) {
-            periodDates.add(header.getBoolStart2().toString());
-            periodDates.add(header.getBoolEnd2().toString());
-        }
-        if (header.getBoolStart3() != null && header.getBoolEnd3() != null) {
-            periodDates.add(header.getBoolStart3().toString());
-            periodDates.add(header.getBoolEnd3().toString());
-        }
-        if (header.getBoolStart4() != null && header.getBoolEnd4() != null) {
-            periodDates.add(header.getBoolStart4().toString());
-            periodDates.add(header.getBoolEnd4().toString());
-        }
-
-        List<String> daysWithoutPeriod = new ArrayList<>();
-
-        LocalDate startDate = header.getEventStartDate();
-        LocalDate endDate = header.getEventEndDate();
-
-        while (!startDate.isAfter(endDate)) {
-            daysWithoutPeriod.add(startDate.toString());
-            startDate = startDate.plusDays(1);
-        }
-
-
 
         HeaderBodies headerBodies = new HeaderBodies(inputBodies);
-//        model.addAttribute("softDevices", softDevices);
-//        model.addAttribute("printerDevices", printerDevices);
+
+        model.addAttribute("workDates", inputService.getDatesOfWorkDays(header));
+        model.addAttribute("regPointsStrings", inputService.getRegPointsStrings(header));
+        model.addAttribute("stringPeriods", inputService.getPeriodsStrings(header));
+
         model.addAttribute("headerId", headerId);
         model.addAttribute("headerBodies", headerBodies);
         model.addAttribute("sameEquipmentForAllDays", header.isSameEquipmentForAllDays());
-        model.addAttribute("periods", periods);
-        model.addAttribute("periodDates", periodDates);
-        model.addAttribute("daysWithoutPeriod", daysWithoutPeriod);
+        model.addAttribute("withManyRegPoints", header.isWithManyRegPoints());
+        model.addAttribute("periods", header.getPeriods());
+        model.addAttribute("workDays", header.getWorkDays());
+        model.addAttribute("regPoints", header.getRegPoints().size());
         return "inputBody";
     }
 
     @PostMapping("/input/saveBodyInput")
-    public String saveInputBody(@Valid @ModelAttribute HeaderBodies bodies,
-                                @RequestParam("headerId") Long headerId,
-                                @RequestParam("sameEquipmentForAllDays") boolean sameEquipmentForAllDays,
-                                @RequestParam("periods") int periods,
-                                BindingResult bindingResult, Model model) {
-        if (bindingResult.hasErrors()) {
-            System.out.println("Binding result has errors:");
-            bindingResult.getAllErrors().forEach(error -> System.out.println(error));
-            return "errorBodyPage";
-        }
-
+    public String saveBodyInput(@ModelAttribute HeaderBodies headerBodies,
+                                @RequestParam("headerId") Long headerId) {
         InputHeader header = inputService.getInputHeaderById(headerId);
-        if (header == null) {
-            return "errorPageHeader";
-        }
 
-        List<InputBody> bodiesToSave = new ArrayList<>();
+        List<InputBody> bodies = headerBodies.getBodies();
 
-        if (sameEquipmentForAllDays && periods > 0) {
-            for (int i = 0; i < periods; i++) {
-                InputBody templateBody = bodies.getBodies().get(i);
-                InputBody body = new InputBody();
-                body.setSoftDevice(templateBody.getSoftDevice());
-                body.setPrinterDevice(templateBody.getPrinterDevice());
-                body.setSDeviceCount(templateBody.getSDeviceCount());
-                body.setSDevicePrice(templateBody.getSDevicePrice());
-                body.setPDeviceCount(templateBody.getPDeviceCount());
-                body.setPDevicePrice(templateBody.getPDevicePrice());
-                body.setNetworkCount(templateBody.getNetworkCount());
-                body.setNetworkPrice(templateBody.getNetworkPrice());
-                body.setSwitchingCount(templateBody.getSwitchingCount());
-                body.setSwitchingPrice(templateBody.getSwitchingPrice());
-                body.setCameraDeviceCount(templateBody.getCameraDeviceCount());
-                body.setCameraDevicePrice(templateBody.getCameraDevicePrice());
-                body.setBarcodeDeviceCount(templateBody.getBarcodeDeviceCount());
-                body.setBarcodeDevicePrice(templateBody.getBarcodeDevicePrice());
-                body.setRfidReaderDeviceCount(templateBody.getRfidReaderDeviceCount());
-                body.setRfidReaderDevicePrice(templateBody.getRfidReaderDevicePrice());
-                body.setTsdCount(templateBody.getTsdCount());
-                body.setTsdPrice(templateBody.getTsdPrice());
-                body.setHeader(header);
-                bodiesToSave.add(body);
-            }
-        } else if (sameEquipmentForAllDays) {
-            InputBody templateBody = bodies.getBodies().get(0);
-            InputBody body = new InputBody();
-            body.setSoftDevice(templateBody.getSoftDevice());
-            body.setPrinterDevice(templateBody.getPrinterDevice());
-            body.setSDeviceCount(templateBody.getSDeviceCount());
-            body.setSDevicePrice(templateBody.getSDevicePrice());
-            body.setPDeviceCount(templateBody.getPDeviceCount());
-            body.setPDevicePrice(templateBody.getPDevicePrice());
-            body.setNetworkCount(templateBody.getNetworkCount());
-            body.setNetworkPrice(templateBody.getNetworkPrice());
-            body.setSwitchingCount(templateBody.getSwitchingCount());
-            body.setSwitchingPrice(templateBody.getSwitchingPrice());
-            body.setCameraDeviceCount(templateBody.getCameraDeviceCount());
-            body.setCameraDevicePrice(templateBody.getCameraDevicePrice());
-            body.setBarcodeDeviceCount(templateBody.getBarcodeDeviceCount());
-            body.setBarcodeDevicePrice(templateBody.getBarcodeDevicePrice());
-            body.setRfidReaderDeviceCount(templateBody.getRfidReaderDeviceCount());
-            body.setRfidReaderDevicePrice(templateBody.getRfidReaderDevicePrice());
-            body.setTsdCount(templateBody.getTsdCount());
-            body.setTsdPrice(templateBody.getTsdPrice());
+        for (InputBody body : bodies) {
             body.setHeader(header);
-            bodiesToSave.add(body);
-        } else {
-            for (InputBody body : bodies.getBodies()) {
-                body.setHeader(header);
-                bodiesToSave.add(body);
-            }
-        }
 
-        model.addAttribute("bodies", bodiesToSave);
-        inputService.saveInputBody(bodiesToSave);
-        excelService.updateFileWithBodyData(header, bodiesToSave, periods);
+            List<Device> validDevices = body.getDevices().stream()
+                    .filter(this::isValidDevice)
+                    .peek(device -> device.setBody(body))
+                    .collect(Collectors.toList());
+
+            body.setDevices(validDevices);
+            header.getInputBodies().add(body);
+            inputService.saveInputBody(body);
+
+            for (Device device : validDevices) {
+                inputService.saveDevice(device);
+            }
+
+        }
+        excelService.updateFileWithBodyData(header);
         return "redirect:/input/supplies?headerId=" + headerId;
+    }
+
+    private boolean isValidDevice(Device device) {
+        return device.getName() != null && !device.getName().isBlank() &&
+                device.getPriceFor1q() != null && device.getPriceFor1q() > 0 &&
+                device.getCount() != null && device.getCount() > 0;
     }
 
     @GetMapping("/input/supplies")
@@ -259,64 +206,8 @@ public class InputController {
 
         Supplies supplies = new Supplies();
         supplies.setHeader(inputService.getInputHeaderById(headerId));
-        inputService.saveInputSupplies(supplies); // Здесь Supplies готов, сохранен и связан с InputHeader
+        inputService.saveInputSupplies(supplies);
         Long suppliesId = supplies.getId();
-
-        Badge badge1 = new Badge(); //
-        Badge badge2 = new Badge(); //Здесь инициализированы два Badge, у них пока везде null
-        badge1.setSupplies(inputService.getSuppliesById(suppliesId));
-        badge2.setSupplies(inputService.getSuppliesById(suppliesId));// привязываем Supplies к Badge'ам
-        supplies.getBadges().add(badge1);
-        supplies.getBadges().add(badge2);//привязываем Badge'ы к Supplies
-
-        Lanyard lanyard1 = new Lanyard();
-        Lanyard lanyard2 = new Lanyard();
-        lanyard1.setSupplies(inputService.getSuppliesById(suppliesId));
-        lanyard2.setSupplies(inputService.getSuppliesById(suppliesId));
-        supplies.getLanyards().add(lanyard1);
-        supplies.getLanyards().add(lanyard2);
-
-        Bracer bracer1 = new Bracer();
-        Bracer bracer2 = new Bracer();
-        bracer1.setSupplies(inputService.getSuppliesById(suppliesId));
-        bracer2.setSupplies(inputService.getSuppliesById(suppliesId));
-        supplies.getBracers().add(bracer1);
-        supplies.getBracers().add(bracer2);
-
-        Insert insert1 = new Insert();
-        Insert insert2 = new Insert();
-        insert1.setSupplies(inputService.getSuppliesById(suppliesId));
-        insert2.setSupplies(inputService.getSuppliesById(suppliesId));
-        supplies.getInserts().add(insert1);
-        supplies.getInserts().add(insert2);
-
-        Pocket pocket1 = new Pocket();
-        Pocket pocket2 = new Pocket();
-        pocket1.setSupplies(inputService.getSuppliesById(suppliesId));
-        pocket2.setSupplies(inputService.getSuppliesById(suppliesId));
-        supplies.getPockets().add(pocket1);
-        supplies.getPockets().add(pocket2);
-
-        Ribbon ribbon1 = new Ribbon();
-        Ribbon ribbon2 = new Ribbon();
-        ribbon2.setSupplies(inputService.getSuppliesById(suppliesId));
-        ribbon1.setSupplies(inputService.getSuppliesById(suppliesId));
-        supplies.getRibbons().add(ribbon1);
-        supplies.getRibbons().add(ribbon2);
-
-        Sticker sticker1 = new Sticker();
-        Sticker sticker2 = new Sticker();
-        sticker1.setSupplies(inputService.getSuppliesById(suppliesId));
-        sticker2.setSupplies(inputService.getSuppliesById(suppliesId));
-        supplies.getStickers().add(sticker1);
-        supplies.getStickers().add(sticker2);
-
-        Asup asup1 = new Asup();
-        Asup asup2 = new Asup();
-        asup1.setSupplies(inputService.getSuppliesById(suppliesId));
-        asup2.setSupplies(inputService.getSuppliesById(suppliesId));
-        supplies.getAsups().add(asup1);
-        supplies.getAsups().add(asup2);
 
         BadgeList badgeList = new BadgeList(supplies.getBadges());
         LanyardList lanyardList = new LanyardList(supplies.getLanyards());
@@ -326,6 +217,54 @@ public class InputController {
         RibbonList ribbonList = new RibbonList(supplies.getRibbons());
         StickerList stickerList = new StickerList(supplies.getStickers());
         AsupList asupList = new AsupList(supplies.getAsups());
+
+        for (int i = 0; i < 2; i++) {
+            Badge badge = new Badge();
+            badge.setSupplies(inputService.getSuppliesById(suppliesId));
+            badgeList.getBadges().add(badge);
+        }
+
+        for (int i = 0; i < 2; i++) {
+            Lanyard lanyard = new Lanyard();
+            lanyard.setSupplies(inputService.getSuppliesById(suppliesId));
+            lanyardList.getLanyards().add(lanyard);
+        }
+
+        for (int i = 0; i < 2; i++) {
+            Bracer bracer = new Bracer();
+            bracer.setSupplies(inputService.getSuppliesById(suppliesId));
+            bracerList.getBracers().add(bracer);
+        }
+
+        for (int i = 0; i < 2; i++) {
+            Insert insert = new Insert();
+            insert.setSupplies(inputService.getSuppliesById(suppliesId));
+            insertList.getInserts().add(insert);
+        }
+
+        for (int i = 0; i < 2; i++) {
+            Pocket pocket = new Pocket();
+            pocket.setSupplies(inputService.getSuppliesById(suppliesId));
+            pocketList.getPockets().add(pocket);
+        }
+
+        for (int i = 0; i < 2; i++) {
+            Ribbon ribbon = new Ribbon();
+            ribbon.setSupplies(inputService.getSuppliesById(suppliesId));
+            ribbonList.getRibbons().add(ribbon);
+        }
+
+        for (int i = 0; i < 2; i++) {
+            Sticker sticker = new Sticker();
+            sticker.setSupplies(inputService.getSuppliesById(suppliesId));
+            stickerList.getStickers().add(sticker);
+        }
+
+        for (int i = 0; i < 2; i++) {
+            Asup asup = new Asup();
+            asup.setSupplies(inputService.getSuppliesById(suppliesId));
+            asupList.getAsups().add(asup);
+        }
 
         model.addAttribute("headerId", headerId);
         model.addAttribute("suppliesId", suppliesId);
@@ -352,45 +291,86 @@ public class InputController {
                                @ModelAttribute("asupList") AsupList asupList,
                                @RequestParam("suppliesId") Long suppliesId,
                                Model model) {
-        badgeList.getBadges().get(0).setSupplies(inputService.getSuppliesById(suppliesId));
-        badgeList.getBadges().get(1).setSupplies(inputService.getSuppliesById(suppliesId));
-        inputService.saveBadge(badgeList.getBadges().get(0));
-        inputService.saveBadge(badgeList.getBadges().get(1));
 
-        lanyardList.getLanyards().get(0).setSupplies(inputService.getSuppliesById(suppliesId));
-        lanyardList.getLanyards().get(1).setSupplies(inputService.getSuppliesById(suppliesId));
-        inputService.saveLanyard(lanyardList.getLanyards().get(0));
-        inputService.saveLanyard(lanyardList.getLanyards().get(1));
+        List<Badge> validBadges = badgeList.getBadges().stream()
+                .filter(badge -> badge.getPrice() != null && badge.getPrice() > 0 &&
+                        badge.getCount() != null && badge.getCount() > 0)
+                .peek(badge -> badge.setSupplies(inputService.getSuppliesById(suppliesId)))
+                .collect(Collectors.toList());
 
-        bracerList.getBracers().get(0).setSupplies(inputService.getSuppliesById(suppliesId));
-        bracerList.getBracers().get(1).setSupplies(inputService.getSuppliesById(suppliesId));
-        inputService.saveBracer(bracerList.getBracers().get(0));
-        inputService.saveBracer(bracerList.getBracers().get(1));
+        for (Badge badge : validBadges) {
+            inputService.saveBadge(badge);
+        }
 
-        insertList.getInserts().get(0).setSupplies(inputService.getSuppliesById(suppliesId));
-        insertList.getInserts().get(1).setSupplies(inputService.getSuppliesById(suppliesId));
-        inputService.saveInsert(insertList.getInserts().get(0));
-        inputService.saveInsert(insertList.getInserts().get(1));
+        List<Lanyard> validLanyards = lanyardList.getLanyards().stream()
+                .filter(lanyard -> lanyard.getPrice() != null && lanyard.getPrice() > 0 &&
+                        lanyard.getCount() != null && lanyard.getCount() > 0)
+                .peek(lanyard -> lanyard.setSupplies(inputService.getSuppliesById(suppliesId)))
+                .collect(Collectors.toList());
 
-        pocketList.getPockets().get(0).setSupplies(inputService.getSuppliesById(suppliesId));
-        pocketList.getPockets().get(1).setSupplies(inputService.getSuppliesById(suppliesId));
-        inputService.savePocket(pocketList.getPockets().get(0));
-        inputService.savePocket(pocketList.getPockets().get(1));
+        for (Lanyard lanyard : validLanyards) {
+            inputService.saveLanyard(lanyard);
+        }
 
-        ribbonList.getRibbons().get(0).setSupplies(inputService.getSuppliesById(suppliesId));
-        ribbonList.getRibbons().get(1).setSupplies(inputService.getSuppliesById(suppliesId));
-        inputService.saveRibbon(ribbonList.getRibbons().get(0));
-        inputService.saveRibbon(ribbonList.getRibbons().get(1));
+        List<Bracer> validBracers = bracerList.getBracers().stream()
+                .filter(bracer -> bracer.getPrice() != null && bracer.getPrice() > 0 &&
+                        bracer.getCount() != null && bracer.getCount() > 0)
+                .peek(bracer -> bracer.setSupplies(inputService.getSuppliesById(suppliesId)))
+                .collect(Collectors.toList());
 
-        stickerList.getStickers().get(0).setSupplies(inputService.getSuppliesById(suppliesId));
-        stickerList.getStickers().get(1).setSupplies(inputService.getSuppliesById(suppliesId));
-        inputService.saveSticker(stickerList.getStickers().get(0));
-        inputService.saveSticker(stickerList.getStickers().get(1));
+        for (Bracer bracer : validBracers) {
+            inputService.saveBracer(bracer);
+        }
 
-        asupList.getAsups().get(0).setSupplies(inputService.getSuppliesById(suppliesId));
-        asupList.getAsups().get(1).setSupplies(inputService.getSuppliesById(suppliesId));
-        inputService.saveAsup(asupList.getAsups().get(0));
-        inputService.saveAsup(asupList.getAsups().get(1));
+        List<Insert> validInserts = insertList.getInserts().stream()
+                .filter(insert -> insert.getPrice() != null && insert.getPrice() > 0 &&
+                        insert.getCount() != null && insert.getCount() > 0)
+                .peek(insert -> insert.setSupplies(inputService.getSuppliesById(suppliesId)))
+                .collect(Collectors.toList());
+
+        for (Insert insert : validInserts) {
+            inputService.saveInsert(insert);
+        }
+
+        List<Pocket> validPockets = pocketList.getPockets().stream()
+                .filter(pocket -> pocket.getPrice() != null && pocket.getPrice() > 0 &&
+                        pocket.getCount() != null && pocket.getCount() > 0)
+                .peek(pocket -> pocket.setSupplies(inputService.getSuppliesById(suppliesId)))
+                .collect(Collectors.toList());
+
+        for (Pocket pocket : validPockets) {
+            inputService.savePocket(pocket);
+        }
+
+        List<Ribbon> validRibbons = ribbonList.getRibbons().stream()
+                .filter(ribbon -> ribbon.getPrice() != null && ribbon.getPrice() > 0 &&
+                        ribbon.getCount() != null && ribbon.getCount() > 0)
+                .peek(ribbon -> ribbon.setSupplies(inputService.getSuppliesById(suppliesId)))
+                .collect(Collectors.toList());
+
+        for (Ribbon ribbon : validRibbons) {
+            inputService.saveRibbon(ribbon);
+        }
+
+        List<Sticker> validStickers = stickerList.getStickers().stream()
+                .filter(sticker -> sticker.getPrice() != null && sticker.getPrice() > 0 &&
+                        sticker.getCount() != null && sticker.getCount() > 0)
+                .peek(sticker -> sticker.setSupplies(inputService.getSuppliesById(suppliesId)))
+                .collect(Collectors.toList());
+
+        for (Sticker sticker : validStickers) {
+            inputService.saveSticker(sticker);
+        }
+
+        List<Asup> validAsups = asupList.getAsups().stream()
+                .filter(asup -> asup.getPrice() != null && asup.getPrice() > 0 &&
+                        asup.getCount() != null && asup.getCount() > 0)
+                .peek(asup -> asup.setSupplies(inputService.getSuppliesById(suppliesId)))
+                .collect(Collectors.toList());
+
+        for (Asup asup : validAsups) {
+            inputService.saveAsup(asup);
+        }
 
         InputHeader header = inputService.getInputHeaderById(headerId);
         Supplies supplies = inputService.getSuppliesById(suppliesId);
@@ -401,174 +381,201 @@ public class InputController {
     @GetMapping("/input/staff")
     public String showInputStaff(@RequestParam("headerId") Long headerId, Model model) {
         InputHeader header = inputService.getInputHeaderById(headerId);
-        Integer daysWithoutPeriod = header.getWorkDays();
-        Mounting m = new Mounting();
-        m.setHeader(inputService.getInputHeaderById(headerId));
+        List<InputStaff> inputStaffs = new ArrayList<>();
+        MountingsList mountingsList = new MountingsList(new ArrayList<>());
 
-        List<Staff> staffs = new ArrayList<>();
-        for (int i = 1; i < 37; i++) {//было i < 36
-            Staff staff = new Staff();
-            staff.setHeader(header);
-            staffs.add(staff);
-        }
 
-        int periods = 0;
-        LocalDate lastPeriodEnd = header.getEventStartDate().minusDays(1);
-        if (header.getBoolStart1() != null && header.getBoolEnd1() != null) {
-            periods++;
-            lastPeriodEnd = header.getBoolEnd1();
+        for(int i = 0; i < 3; i++){
+            Mounting m = new Mounting();
+            m.setHeader(header);
+            mountingsList.getMountings().add(m);
         }
-        if (header.getBoolStart2() != null && header.getBoolEnd2() != null) {
-            periods++;
-            lastPeriodEnd = header.getBoolEnd2();
-        } else if (header.getBoolStart1() != null && header.getBoolEnd1() != null &&
-                header.getBoolEnd1().isBefore(header.getEventEndDate()) &&
-                header.getBoolEnd1().isAfter(lastPeriodEnd)) {
-            periods++;
-            lastPeriodEnd = header.getBoolEnd1();
-        }
-        if (header.getBoolStart3() != null && header.getBoolEnd3() != null) {
-            periods++;
-            lastPeriodEnd = header.getBoolEnd3();
-        } else if (header.getBoolStart2() != null && header.getBoolEnd2() != null &&
-                header.getBoolEnd2().isBefore(header.getEventEndDate()) &&
-                header.getBoolEnd2().isAfter(lastPeriodEnd)) {
-            periods++;
-            lastPeriodEnd = header.getBoolEnd2();
-        }
-        if (lastPeriodEnd.isBefore(header.getEventEndDate())) {
-            periods++;
-        }
+        System.out.println("mountingsize"+mountingsList.getMountings().size());
+        if (header.isWithManyRegPoints()) {
+            for (int i = 0; i < header.getRegPoints().size(); i++) {
+                InputStaff inputStaff = new InputStaff();
+                inputStaff.setHeader(header);
 
-        List<String> periodDates = new ArrayList<>();
-        if (header.getBoolStart1() != null && header.getBoolEnd1() != null) {
-            periodDates.add(header.getBoolStart1().toString());
-            periodDates.add(header.getBoolEnd1().toString());
-        }
-        if (header.getBoolStart2() != null && header.getBoolEnd2() != null) {
-            periodDates.add(header.getBoolStart2().toString());
-            periodDates.add(header.getBoolEnd2().toString());
-        }
-        if (header.getBoolStart3() != null && header.getBoolEnd3() != null) {
-            periodDates.add(header.getBoolStart3().toString());
-            periodDates.add(header.getBoolEnd3().toString());
-        }
-        if (header.getBoolStart4() != null && header.getBoolEnd4() != null) {
-            periodDates.add(header.getBoolStart4().toString());
-            periodDates.add(header.getBoolEnd4().toString());
-        }
+                List<Staff> staffsForInput = new ArrayList<>();
+                for (int k = 0; k < 20; k++) {
+                    Staff staff = new Staff();
+                    staff.setStaff(inputStaff);
+                    staffsForInput.add(staff);
+                }
+                inputStaff.setStaffs(staffsForInput);
+                inputStaffs.add(inputStaff);
+                //отладка
+                System.out.println(inputStaffs.size());
+            }
+        } else if (header.isSameEquipmentForAllDays()) {
+            for (int i = 0; i < header.getPeriods(); i++) {
+                InputStaff inputStaff = new InputStaff();
+                inputStaff.setHeader(header);
 
-        List<String> datesWithoutPeriod = new ArrayList<>();
+                List<Staff> staffsForInput = new ArrayList<>();
+                for (int k = 0; k < 20; k++) {
+                    Staff staff = new Staff();
+                    staff.setStaff(inputStaff);
+                    staffsForInput.add(staff);
+                }
+                inputStaff.setStaffs(staffsForInput);
+                inputStaffs.add(inputStaff);
+                //отладка
+                System.out.println(inputStaffs.size());
+            }
+        } else {
+            for (int i = 0; i < header.getWorkDays(); i++) {
+                InputStaff inputStaff = new InputStaff();
+                inputStaff.setHeader(header);
 
-        LocalDate startDate = header.getEventStartDate();
-        LocalDate endDate = header.getEventEndDate();
-
-        while (!startDate.isAfter(endDate)) {
-            datesWithoutPeriod.add(startDate.toString());
-            startDate = startDate.plusDays(1);
+                List<Staff> staffsForInput = new ArrayList<>();
+                for (int k = 0; k < 20; k++) {
+                    Staff staff = new Staff();
+                    staff.setStaff(inputStaff);
+                    staffsForInput.add(staff);
+                }
+                inputStaff.setStaffs(staffsForInput);
+                inputStaffs.add(inputStaff);
+                //отладка
+                System.out.println(inputStaffs.size());
+            }
         }
 
 
-
-        String staffsJson = "";
-        try {
-            staffsJson = objectMapper.writeValueAsString(staffs);
-        } catch (Exception e) {
-            e.printStackTrace();
-            // Логирование ошибки или обработка
-        }
-
-        System.out.println("Количество валидных периодов: " + periods);
-        System.out.println("Periods: " + periods);
-        System.out.println("Period Dates: " + periodDates);
+        HeaderStaffs headerStaffs = new HeaderStaffs(inputStaffs);
 
 
-        HeaderStaffs headerStaffs = new HeaderStaffs(staffs);
-        model.addAttribute("m", m);
+        model.addAttribute("workDates", inputService.getDatesOfWorkDays(header));
+        model.addAttribute("regPointsStrings", inputService.getRegPointsStrings(header));
+        model.addAttribute("stringPeriods", inputService.getPeriodsStrings(header));
+
         model.addAttribute("headerId", headerId);
         model.addAttribute("headerStaffs", headerStaffs);
-        model.addAttribute("periods", periods);
-        model.addAttribute("staffsJson", staffsJson);
+        model.addAttribute("mountingsList", mountingsList);
         model.addAttribute("sameEquipmentForAllDays", header.isSameEquipmentForAllDays());
-        model.addAttribute("periodDates", periodDates);
-        model.addAttribute("daysWithoutPeriod", daysWithoutPeriod);
+        model.addAttribute("withManyRegPoints", header.isWithManyRegPoints());
+        model.addAttribute("periods", header.getPeriods());
+        model.addAttribute("workDays", header.getWorkDays());
+        model.addAttribute("regPoints", header.getRegPoints().size());
 
         return "inputStaff";
     }
 
     @PostMapping("/input/saveStaffInput")
-    public String saveStaffInput(@ModelAttribute Mounting m,
+    public String saveStaffInput(@ModelAttribute MountingsList mountingsList,
                                  @ModelAttribute HeaderStaffs headerStaffs,
-                                 @RequestParam("headerId") Long headerId,
-                                 @RequestParam("periods") int periods) {
+                                 @RequestParam("headerId") Long headerId) {
         InputHeader header = inputService.getInputHeaderById(headerId);
-        m.setHeader(header);
-        inputService.saveMounting(m);
-        // Получаем список сотрудников из объекта HeaderStaffs
-        List<Staff> staffs = headerStaffs.getStaffs();
 
-        // Обработка и сохранение каждого сотрудника
-        for (Staff staff : staffs) {
-            // Привязываем header к каждому сотруднику
-            staff.setHeader(header);
-            if (staff.getBetPerHour() == null) {
-                staff.setBetPerHour(0);
+        List<Mounting> mos = mountingsList.getMountings();
+        for(Mounting m: mos){
+            m.setHeader(header);
+            if(isValidMounting(m)){
+                inputService.saveMounting(m);
             }
-            if (staff.getStaffQuantity() == null) {
-                staff.setStaffQuantity(0);
-            }
-            inputService.saveStaff(staff);
         }
-        excelService.updateFileWithStaff(header, staffs, m, periods);
+
+        List<InputStaff> staffs = headerStaffs.getStaffs();
+        for (InputStaff inputStaff : staffs) {
+            inputStaff.setHeader(header);
+
+            List<Staff> validStaffs = inputStaff.getStaffs().stream()
+                    .filter(this::isValidStaff)
+                    .peek(staff -> staff.setStaff(inputStaff))
+                    .collect(Collectors.toList());
+
+            inputStaff.setStaffs(validStaffs);
+            header.getInputStaffs().add(inputStaff);
+            inputService.saveInputStaff(inputStaff);
+
+            for(Staff staff: validStaffs){
+                inputService.saveStaff(staff);
+            }
+        }
+        excelService.updateFileWithStaff(header);
         return "redirect:/input/logistic?headerId=" + headerId;
     }
 
-    @GetMapping("/input/logistic")
-    public String showInputLogistic(@RequestParam("headerId") Long headerId,
-                                    Model model) {
-        InputHeader header = inputService.getInputHeaderById(headerId);
+    private boolean isValidStaff(Staff staff) {
+        return staff.getKindOfStaff() != null && !staff.getKindOfStaff().isBlank() &&  // Проверяем наличие и непустоту вида персонала
+                staff.getStartTime() != null &&  // Проверяем наличие времени начала
+                staff.getEndTime() != null &&  // Проверяем наличие времени окончания
+                staff.getStaffQuantity() != null && staff.getStaffQuantity() > 0 &&  // Проверяем количество персонала (должно быть больше 0)
+                staff.getBetPerHour() != null && staff.getBetPerHour() > 0 &&  // Проверяем ставку в час (должно быть больше 0)
+                !staff.getEndTime().isBefore(staff.getStartTime());  // Проверяем, что время окончания не раньше времени начала
+    }
 
-        List<Logistic> logistics = new ArrayList<>();
-        for (int i = 0; i < 10; i++) {//10
+    private boolean isValidMounting(Mounting mounting) {
+        return mounting.getKindOfService() != null && !mounting.getKindOfService().isBlank() &&  // Проверяем наличие и непустоту вида услуги
+                mounting.getWorkHours() != null && mounting.getWorkHours() > 0 &&  // Проверяем часы работы (должны быть больше 0)
+                mounting.getAgentCount() != null && mounting.getAgentCount() > 0 &&  // Проверяем количество агентов (должно быть больше 0)
+                mounting.getPriceForHour() != null && mounting.getPriceForHour() > 0;  // Проверяем ставку в час (должна быть больше 0)
+    }
+
+    @GetMapping("/input/logistic")
+    public String showInputLogisticAndASales(@RequestParam("headerId") Long headerId, Model model) {
+        InputHeader header = inputService.getInputHeaderById(headerId);
+        HeaderLogistics headerLogistics = new HeaderLogistics(new ArrayList<>());
+        HeaderAsales headerAsales = new HeaderAsales(new ArrayList<>());
+
+        for (int i = 0; i < 10; i++) {
             Logistic logistic = new Logistic();
             logistic.setHeader(header);
-            logistics.add(logistic);
-            System.out.println(logistic);
+            headerLogistics.getLogistics().add(logistic);
         }
 
-        HeaderLogistics headerLogistics = new HeaderLogistics(logistics);
-        model.addAttribute("headerId", headerId);
-        model.addAttribute("headerLogistics", headerLogistics);
-        return "inputLogistic";
+        for (int i = 0; i < 10; i++) {
+            AdditionalSale sale = new AdditionalSale();
+            sale.setHeader(header);
+            headerAsales.getASales().add(sale);
+        }
 
+        model.addAttribute("headerLogistics", headerLogistics);
+        model.addAttribute("headerAsales", headerAsales);
+        model.addAttribute("headerId", headerId);
+        return "inputLogisticAndASales";
     }
 
-    @PostMapping("/input/saveLogisticInput")
-    public String saveLogisticInput(@ModelAttribute HeaderLogistics headerLogistics,
-                                    @RequestParam("headerId") Long headerId) {
+    @PostMapping("/input/saveLogisticAndASalesInput")
+    public String saveLogisticAndASalesInput(@ModelAttribute HeaderLogistics headerLogistics,
+                                             @ModelAttribute HeaderAsales headerAsales,
+                                             @RequestParam("headerId") Long headerId) {
         InputHeader header = inputService.getInputHeaderById(headerId);
-        List<Logistic> logistics = headerLogistics.getLogistics();
 
-        // Обработка и сохранение каждого сотрудника
-        for (Logistic logistic : logistics) {
-            System.out.println(logistic);
-            // Привязываем header к каждому сотруднику
-            logistic.setHeader(header);
-            System.out.println(logistic);
-            if (logistic.getPrice() == null) {
-                logistic.setPrice(0);
-            }
-            if (logistic.getCount() == null) {
-                logistic.setCount(0);
-            }
-            if (logistic.getHeader() == null) {
-                throw new IllegalStateException("Header не должен быть null");
-            }
+        List<Logistic> validLogistics = headerLogistics.getLogistics().stream()
+                .filter(this::isValidLogistic)
+                .peek(logistic -> logistic.setHeader(header))
+                .collect(Collectors.toList());
 
+        for (Logistic logistic : validLogistics) {
             inputService.saveLogistic(logistic);
         }
-        excelService.updateFileWithLogistics(header, logistics);
 
-        return "redirect:/"; // Перенаправление на страницу успешного сохранения
+        List<AdditionalSale> validAsales = headerAsales.getASales().stream()
+                .filter(this::isValidAsale)
+                .peek(additionalSale -> additionalSale.setHeader(header))
+                .collect(Collectors.toList());
+
+        for (AdditionalSale additionalSale : validAsales) {
+            inputService.saveAsale(additionalSale);
+        }
+
+        excelService.updateFileWithLogistics(header, validLogistics);
+
+        return "redirect:/";
     }
+
+    private boolean isValidLogistic(Logistic logistic) {
+        return logistic.getDescription() != null && !logistic.getDescription().isBlank() &&
+                logistic.getPrice() != null && logistic.getPrice() > 0 &&
+                logistic.getCount() != null && logistic.getCount() > 0;
+    }
+
+    private boolean isValidAsale(AdditionalSale asale) {
+        return asale.getDescription() != null && !asale.getDescription().isBlank() &&
+                asale.getPrice() != null && asale.getPrice() > 0 &&
+                asale.getCount() != null && asale.getCount() > 0;
+    }
+
+
 }

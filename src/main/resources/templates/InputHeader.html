@@ -1,243 +1,10 @@
-<!--<!DOCTYPE html>-->
-<!--<html lang="en" xmlns:th="http://www.thymeleaf.org">-->
-<!--<head>-->
-<!--    <meta charset="UTF-8"/>-->
-<!--    <title>О мероприятии</title>-->
-<!--    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">-->
-<!--    <style>-->
-<!--        .short-input {-->
-<!--            width: 75%;-->
-<!--            margin: auto;-->
-<!--        }-->
-<!--        .sshort-input {-->
-<!--            width: 45%;-->
-<!--            margin: auto;-->
-<!--        }-->
-<!--        .ssshort-input {-->
-<!--            width: 50%;-->
-<!--            margin: auto;-->
-<!--        }-->
-<!--        .centered-form {-->
-<!--            max-width: 600px;-->
-<!--            margin: auto;-->
-<!--            text-align: center;-->
-<!--        }-->
-<!--        .form-row .form-group {-->
-<!--            flex: 1;-->
-<!--            text-align: center;-->
-<!--        }-->
-<!--        label {-->
-<!--            text-align: center;-->
-<!--            display: block;-->
-<!--        }-->
-<!--        .form-check {-->
-<!--            display: flex;-->
-<!--            justify-content: center;-->
-<!--            align-items: center;-->
-<!--        }-->
-<!--        .form-check-input {-->
-<!--            margin-right: 290px;-->
-<!--        }-->
-<!--        .period-inputs {-->
-<!--            display: none;-->
-<!--        }-->
-<!--        .period-label {-->
-<!--            text-align: left;-->
-<!--        }-->
-<!--        .period-dates {-->
-<!--            display: flex;-->
-<!--            justify-content: space-between;-->
-<!--        }-->
-<!--        .btn-home {-->
-<!--            margin-top: 20px;-->
-<!--            display: block;-->
-<!--            margin-left: auto;-->
-<!--            margin-right: auto;-->
-<!--        }-->
-<!--    </style>-->
-<!--    <script>-->
-<!--        function validateForm() {-->
-<!--            let isValid = true;-->
-<!--            let errorMessage = '';-->
-
-<!--            const customer = document.getElementById('customer').value.trim();-->
-<!--            const eventName = document.getElementById('eventName').value.trim();-->
-<!--            const eventLocation = document.getElementById('eventLocation').value.trim();-->
-<!--            const eventWorkStartTime = document.getElementById('eventWorkStartTime').value;-->
-<!--            const eventWorkEndTime = document.getElementById('eventWorkEndTime').value;-->
-
-<!--            if (!customer) {-->
-<!--                errorMessage += 'Поле "Заказчик" обязательно для заполнения.\n';-->
-<!--                isValid = false;-->
-<!--            }-->
-<!--            if (!eventName) {-->
-<!--                errorMessage += 'Поле "Название мероприятия" обязательно для заполнения.\n';-->
-<!--                isValid = false;-->
-<!--            }-->
-<!--            if (!eventLocation) {-->
-<!--                errorMessage += 'Поле "Место проведения" обязательно для заполнения.\n';-->
-<!--                isValid = false;-->
-<!--            }-->
-<!--            if (eventWorkStartTime && eventWorkEndTime && eventWorkStartTime > eventWorkEndTime) {-->
-<!--                errorMessage += 'Начало работы аккредитации не может быть позже окончания.\n';-->
-<!--                isValid = false;-->
-<!--            }-->
-
-<!--            if (!isValid) {-->
-<!--                alert(errorMessage);-->
-<!--            }-->
-
-<!--            return isValid;-->
-<!--        }-->
-
-<!--        function validateDates() {-->
-<!--            let eventStartDate = new Date(document.getElementById('eventStartDate').value);-->
-<!--            let eventEndDate = new Date(document.getElementById('eventEndDate').value);-->
-<!--            let periods = [-->
-<!--                {start: document.getElementById('boolStart1').value, end: document.getElementById('boolEnd1').value},-->
-<!--                {start: document.getElementById('boolStart2').value, end: document.getElementById('boolEnd2').value},-->
-<!--                {start: document.getElementById('boolStart3').value, end: document.getElementById('boolEnd3').value}-->
-<!--            ];-->
-<!--            const sameEquipmentForAllDays = document.getElementById('sameEquipmentForAllDays').checked;-->
-
-<!--            if (eventStartDate > eventEndDate) {-->
-<!--                alert('Дата начала не может быть позже даты окончания.');-->
-<!--                return false;-->
-<!--            }-->
-
-<!--            if (!sameEquipmentForAllDays) {-->
-<!--                const dayDifference = (eventEndDate - eventStartDate) / (1000 * 60 * 60 * 24);-->
-<!--                if (dayDifference > 5) {-->
-<!--                    alert('Если оборудование не одинаково на все дни, то продолжительность мероприятия не может превышать 6 дней.');-->
-<!--                    return false;-->
-<!--                }-->
-<!--            }-->
-
-<!--            for (let period of periods) {-->
-<!--                if (period.start && period.end) {-->
-<!--                    if (period.start > period.end) {-->
-<!--                        alert('Начало периода не может быть позже конца периода.');-->
-<!--                        return false;-->
-<!--                    }-->
-<!--                    if (period.start < eventStartDate || period.end > eventEndDate) {-->
-<!--                        alert('Периоды не могут выходить за границы начала и конца события.');-->
-<!--                        return false;-->
-<!--                    }-->
-<!--                }-->
-<!--            }-->
-<!--            return true;-->
-<!--        }-->
-
-<!--        window.onload = function() {-->
-<!--            let year = 2024;-->
-<!--            document.getElementById('eventStartDate').addEventListener('input', function() {-->
-<!--                let value = this.value.split('-');-->
-<!--                value[0] = year;-->
-<!--                this.value = value.join('-');-->
-<!--            });-->
-<!--            document.getElementById('eventEndDate').addEventListener('input', function() {-->
-<!--                let value = this.value.split('-');-->
-<!--                value[0] = year;-->
-<!--                this.value = value.join('-');-->
-<!--            });-->
-
-<!--            document.getElementById('sameEquipmentForAllDays').addEventListener('change', function() {-->
-<!--                let periodInputs = document.querySelectorAll('.period-inputs');-->
-<!--                periodInputs.forEach(function(input) {-->
-<!--                    input.style.display = document.getElementById('sameEquipmentForAllDays').checked ? 'block' : 'none';-->
-<!--                });-->
-<!--            });-->
-
-<!--            document.querySelector('form').addEventListener('submit', function(event) {-->
-<!--                if (!validateForm() || !validateDates()) {-->
-<!--                    event.preventDefault();-->
-<!--                }-->
-<!--            });-->
-<!--        }-->
-<!--    </script>-->
-<!--</head>-->
-<!--<body>-->
-<!--<div class="container">-->
-<!--    <h1 class="text-center">Информация о мероприятии</h1>-->
-<!--    <form th:action="@{/input/saveHeaderInput}" method="post" class="centered-form">-->
-<!--        <div class="form-group">-->
-<!--            <label for="customer">Заказчик</label>-->
-<!--            <input type="text" id="customer" name="customer" class="form-control short-input" placeholder="Компания, контактное лицо"/>-->
-<!--        </div>-->
-<!--        <div class="form-group">-->
-<!--            <label for="eventName">Название мероприятия</label>-->
-<!--            <input type="text" id="eventName" name="eventName" class="form-control ssshort-input"/>-->
-<!--        </div>-->
-<!--        <div class="form-group">-->
-<!--            <label for="eventLocation">Место проведения</label>-->
-<!--            <input type="text" id="eventLocation" name="eventLocation" class="form-control ssshort-input"/>-->
-<!--        </div>-->
-<!--        <div class="form-row">-->
-<!--            <div class="form-group">-->
-<!--                <label for="eventStartDate">Дата начала</label>-->
-<!--                <input type="date" id="eventStartDate" name="eventStartDate" class="form-control sshort-input"/>-->
-<!--            </div>-->
-<!--            <div class="form-group">-->
-<!--                <label for="eventEndDate">Дата окончания</label>-->
-<!--                <input type="date" id="eventEndDate" name="eventEndDate" class="form-control sshort-input"/>-->
-<!--            </div>-->
-<!--        </div>-->
-<!--        <div class="form-row">-->
-<!--            <div class="form-group">-->
-<!--                <label for="eventWorkStartTime">Начало работы аккредитации</label>-->
-<!--                <input type="time" id="eventWorkStartTime" name="eventWorkStartTime" class="form-control sshort-input"/>-->
-<!--            </div>-->
-<!--            <div class="form-group">-->
-<!--                <label for="eventWorkEndTime">Окончание работы аккредитации</label>-->
-<!--                <input type="time" id="eventWorkEndTime" name="eventWorkEndTime" class="form-control sshort-input"/>-->
-<!--            </div>-->
-<!--        </div>-->
-<!--        <div class="form-group">-->
-<!--            <label for="visitorsCount">Количество участников</label>-->
-<!--            <input type="number" id="visitorsCount" name="visitorsCount" class="form-control sshort-input"/>-->
-<!--        </div>-->
-<!--        <div class="form-check">-->
-<!--            <input type="checkbox" class="form-check-input" id="sameEquipmentForAllDays" name="sameEquipmentForAllDays"/>-->
-<!--            <label class="form-check-label" for="sameEquipmentForAllDays">Оборудование на все дни одинаковое</label>-->
-<!--        </div>-->
-
-<!--        <div class="period-inputs">-->
-<!--            <div class="form-group">-->
-<!--                <label class="period-label">Период 1</label>-->
-<!--                <div class="period-dates">-->
-<!--                    <input type="date" id="boolStart1" name="boolStart1" class="form-control sshort-input"/>-->
-<!--                    <input type="date" id="boolEnd1" name="boolEnd1" class="form-control sshort-input"/>-->
-<!--                </div>-->
-<!--            </div>-->
-<!--            <div class="form-group">-->
-<!--                <label class="period-label">Период 2</label>-->
-<!--                <div class="period-dates">-->
-<!--                    <input type="date" id="boolStart2" name="boolStart2" class="form-control sshort-input"/>-->
-<!--                    <input type="date" id="boolEnd2" name="boolEnd2" class="form-control sshort-input"/>-->
-<!--                </div>-->
-<!--            </div>-->
-<!--            <div class="form-group">-->
-<!--                <label class="period-label">Период 3</label>-->
-<!--                <div class="period-dates">-->
-<!--                    <input type="date" id="boolStart3" name="boolStart3" class="form-control sshort-input"/>-->
-<!--                    <input type="date" id="boolEnd3" name="boolEnd3" class="form-control sshort-input"/>-->
-<!--                </div>-->
-<!--            </div>-->
-<!--        </div>-->
-
-<!--        <button type="submit" class="btn btn-primary">Далее</button>-->
-<!--    </form>-->
-<!--    <button onclick="window.location.href='/'" class="btn btn-secondary btn-home">На главную</button>-->
-<!--</div>-->
-<!--</body>-->
-<!--</html>-->
-
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8"/>
     <title>О мероприятии</title>
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css" rel="stylesheet"/>
     <style>
         .short-input {
             width: 75%;
@@ -289,16 +56,45 @@
             margin-right: auto;
         }
         .form-control {
-            border: 2px solid #007bff; /* Синий цвет по умолчанию */
+            border: 2px solid #007bff;
         }
         .form-control.is-valid {
-            border-color: #28a745; /* Зеленый цвет */
+            border-color: #28a745;
         }
         .form-control.is-invalid {
-            border-color: #dc3545; /* Красный цвет */
+            border-color: #dc3545;
+        }
+        .select2-container--default .select2-selection--single {
+            height: calc(1.5em + .75rem + 2px);
+            border: 2px solid #007bff;
+            border-radius: .25rem;
+            padding: .375rem .75rem;
+        }
+        .select2-container--default .select2-selection--single .select2-selection__rendered {
+            color: #495057;
+            line-height: calc(1.5em + .75rem + 2px);
+        }
+        .select2-container--default .select2-selection--single .select2-selection__arrow {
+            height: calc(1.5em + .75rem + 2px);
+            right: 10px;
+        }
+        .form-row {
+            display: flex;
+            flex-wrap: nowrap;
+            justify-content: space-between;
         }
     </style>
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js"></script>
     <script>
+        $(document).ready(function() {
+            $('#customerSelect').select2({
+                placeholder: "Выберите заказчика",
+                allowClear: true,
+                width: 'resolve'
+            }).val(null).trigger('change');
+        });
+
         function validateField(field, isValid) {
             if (isValid) {
                 field.classList.remove('is-invalid');
@@ -313,20 +109,29 @@
             let isValid = true;
             let errorMessage = '';
 
-            const customer = document.getElementById('customer').value.trim();
+            const customer = document.getElementById('customerSelect').value;
             const eventName = document.getElementById('eventName').value.trim();
             const eventLocation = document.getElementById('eventLocation').value.trim();
             const eventWorkStartTime = document.getElementById('eventWorkStartTime').value;
             const eventWorkEndTime = document.getElementById('eventWorkEndTime').value;
+            const eventStartDate = document.getElementById('eventStartDate').value;
+            const eventEndDate = document.getElementById('eventEndDate').value;
+            const prePrintStart = document.getElementById('prePrintStart').value;
+            const prePrintEnd = document.getElementById('prePrintEnd').value;
+            const visitorsCount = document.getElementById('visitorsCount').value;
+            const withManyRegPoints = document.getElementById('withManyRegPoints').checked;
+            const sameEquipmentForAllDays = document.getElementById('sameEquipmentForAllDays').checked;
 
+            // Валидация поля Заказчик
             if (!customer) {
                 errorMessage += 'Поле "Заказчик" обязательно для заполнения.\n';
-                validateField(document.getElementById('customer'), false);
+                validateField(document.getElementById('customerSelect').nextSibling, false);
                 isValid = false;
             } else {
-                validateField(document.getElementById('customer'), true);
+                validateField(document.getElementById('customerSelect').nextSibling, true);
             }
 
+            // Валидация поля Название мероприятия
             if (!eventName) {
                 errorMessage += 'Поле "Название мероприятия" обязательно для заполнения.\n';
                 validateField(document.getElementById('eventName'), false);
@@ -335,6 +140,7 @@
                 validateField(document.getElementById('eventName'), true);
             }
 
+            // Валидация поля Место проведения
             if (!eventLocation) {
                 errorMessage += 'Поле "Место проведения" обязательно для заполнения.\n';
                 validateField(document.getElementById('eventLocation'), false);
@@ -343,15 +149,104 @@
                 validateField(document.getElementById('eventLocation'), true);
             }
 
-            if (eventWorkStartTime && eventWorkEndTime) {
-                if (eventWorkStartTime > eventWorkEndTime) {
-                    errorMessage += 'Начало работы аккредитации не может быть позже окончания.\n';
-                    validateField(document.getElementById('eventWorkStartTime'), false);
-                    validateField(document.getElementById('eventWorkEndTime'), false);
+            // Валидация количества участников
+            if (visitorsCount && visitorsCount < 0) {
+                errorMessage += 'Количество участников не может быть отрицательным.\n';
+                validateField(document.getElementById('visitorsCount'), false);
+                isValid = false;
+            } else {
+                validateField(document.getElementById('visitorsCount'), true);
+            }
+
+            // Валидация временных полей аккредитации
+            if (!eventWorkStartTime || !eventWorkEndTime) {
+                errorMessage += 'Поля "Начало работы аккредитации" и "Окончание работы аккредитации" обязательны для заполнения.\n';
+                validateField(document.getElementById('eventWorkStartTime'), false);
+                validateField(document.getElementById('eventWorkEndTime'), false);
+                isValid = false;
+            } else if (eventWorkStartTime > eventWorkEndTime) {
+                errorMessage += 'Начало работы аккредитации не может быть позже окончания.\n';
+                validateField(document.getElementById('eventWorkStartTime'), false);
+                validateField(document.getElementById('eventWorkEndTime'), false);
+                isValid = false;
+            } else {
+                validateField(document.getElementById('eventWorkStartTime'), true);
+                validateField(document.getElementById('eventWorkEndTime'), true);
+            }
+
+            // Валидация дат начала и окончания мероприятия
+            if (eventStartDate && eventEndDate) {
+                const startYear = parseInt(eventStartDate.split('-')[0]);
+                const endYear = parseInt(eventEndDate.split('-')[0]);
+
+                // Преобразуем даты в объекты для дальнейших вычислений
+                const startDate = new Date(eventStartDate);
+                const endDate = new Date(eventEndDate);
+
+                // Проверка года
+                if (startYear < 2024 || startYear > 2030 || endYear < 2024 || endYear > 2030) {
+                    errorMessage += 'Год мероприятия должен быть в диапазоне с 2024 по 2030.\n';
+                    validateField(document.getElementById('eventStartDate'), false);
+                    validateField(document.getElementById('eventEndDate'), false);
                     isValid = false;
                 } else {
-                    validateField(document.getElementById('eventWorkStartTime'), true);
-                    validateField(document.getElementById('eventWorkEndTime'), true);
+                    validateField(document.getElementById('eventStartDate'), true);
+                    validateField(document.getElementById('eventEndDate'), true);
+                }
+
+                // Расчет количества дней между датами
+                const timeDifference = endDate - startDate;
+                const dayDifference = timeDifference / (1000 * 60 * 60 * 24); // переводим миллисекунды в дни
+
+                // Если разница больше 12 дней, блокируем отправку формы
+                if (dayDifference > 12) {
+                    errorMessage += 'Слишком много отдельных рабочих дней, наверняка можно как-то распределить на периоды.\n';
+                    validateField(document.getElementById('eventStartDate'), false);
+                    validateField(document.getElementById('eventEndDate'), false);
+                    isValid = false;
+                } else {
+                    validateField(document.getElementById('eventStartDate'), true);
+                    validateField(document.getElementById('eventEndDate'), true);
+                }
+            }
+
+
+
+            // Валидация полей prePrintStart и prePrintEnd
+            if (prePrintStart && prePrintEnd) {
+                if (prePrintStart > prePrintEnd) {
+                    errorMessage += 'Дата начала предпечати не может быть позже даты окончания предпечати.\n';
+                    validateField(document.getElementById('prePrintStart'), false);
+                    validateField(document.getElementById('prePrintEnd'), false);
+                    isValid = false;
+                } else {
+                    validateField(document.getElementById('prePrintStart'), true);
+                    validateField(document.getElementById('prePrintEnd'), true);
+                }
+            } else if (prePrintStart || prePrintEnd) {
+                errorMessage += 'Если одно из полей "Начало предпечатной подготовки" или "Окончание предпечатной подготовки" заполнено, оба должны быть заполнены.\n';
+                validateField(document.getElementById('prePrintStart'), false);
+                validateField(document.getElementById('prePrintEnd'), false);
+                isValid = false;
+            }
+
+            // Валидация с учетом withManyRegPoints
+            if (withManyRegPoints) {
+                if (prePrintStart || prePrintEnd) {
+                    errorMessage += 'Поля "Начало предпечати" и "Окончание предпечати" должны быть пустыми, если выбрана опция "Несколько регистрационных точек".\n';
+                    validateField(document.getElementById('prePrintStart'), false);
+                    validateField(document.getElementById('prePrintEnd'), false);
+                    isValid = false;
+                } else {
+                    validateField(document.getElementById('prePrintStart'), true);
+                    validateField(document.getElementById('prePrintEnd'), true);
+                }
+                if (sameEquipmentForAllDays) {
+                    errorMessage += 'Если выбрана опция "Несколько регистрационных точек", то "Оборудование на все дни одинаковое" должно быть снято.\n';
+                    validateField(document.getElementById('sameEquipmentForAllDays').nextSibling, false);
+                    isValid = false;
+                } else {
+                    validateField(document.getElementById('sameEquipmentForAllDays').nextSibling, true);
                 }
             }
 
@@ -362,63 +257,7 @@
             return isValid;
         }
 
-        function validateDates() {
-            let eventStartDate = new Date(document.getElementById('eventStartDate').value);
-            let eventEndDate = new Date(document.getElementById('eventEndDate').value);
-            let periods = [
-                {start: document.getElementById('boolStart1').value, end: document.getElementById('boolEnd1').value},
-                {start: document.getElementById('boolStart2').value, end: document.getElementById('boolEnd2').value},
-                {start: document.getElementById('boolStart3').value, end: document.getElementById('boolEnd3').value}
-            ];
-            const sameEquipmentForAllDays = document.getElementById('sameEquipmentForAllDays').checked;
-
-            let datesValid = true;
-
-            if (eventStartDate > eventEndDate) {
-                alert('Дата начала не может быть позже даты окончания.');
-                validateField(document.getElementById('eventStartDate'), false);
-                validateField(document.getElementById('eventEndDate'), false);
-                datesValid = false;
-            } else {
-                validateField(document.getElementById('eventStartDate'), true);
-                validateField(document.getElementById('eventEndDate'), true);
-            }
-
-            if (!sameEquipmentForAllDays) {
-                const dayDifference = (eventEndDate - eventStartDate) / (1000 * 60 * 60 * 24);
-                if (dayDifference > 5) {
-                    alert('Если оборудование не одинаково на все дни, то продолжительность мероприятия не может превышать 6 дней.');
-                    datesValid = false;
-                }
-            }
-
-            for (let period of periods) {
-                if (period.start && period.end) {
-                    let periodStart = new Date(period.start);
-                    let periodEnd = new Date(period.end);
-                    if (periodStart > periodEnd || periodStart < eventStartDate || periodEnd > eventEndDate) {
-                        alert('Периоды не могут выходить за границы начала и конца события.');
-                        datesValid = false;
-                    }
-                }
-            }
-
-            return datesValid;
-        }
-
         window.onload = function() {
-            let year = 2024;
-            document.getElementById('eventStartDate').addEventListener('input', function() {
-                let value = this.value.split('-');
-                value[0] = year;
-                this.value = value.join('-');
-            });
-            document.getElementById('eventEndDate').addEventListener('input', function() {
-                let value = this.value.split('-');
-                value[0] = year;
-                this.value = value.join('-');
-            });
-
             document.getElementById('sameEquipmentForAllDays').addEventListener('change', function() {
                 let periodInputs = document.querySelectorAll('.period-inputs');
                 periodInputs.forEach(function(input) {
@@ -426,8 +265,21 @@
                 });
             });
 
+
+            document.getElementById('withManyRegPoints').addEventListener('change', function() {
+                let prePrintFields = document.getElementById('preprintRow');
+                if (this.checked) {
+                    prePrintFields.style.display = 'none';
+                    document.getElementById('prePrintStart').value = '';
+                    document.getElementById('prePrintEnd').value = '';
+                } else {
+                    prePrintFields.style.display = 'flex';
+                }
+            });
+
+
             document.querySelector('form').addEventListener('submit', function(event) {
-                if (!validateForm() || !validateDates()) {
+                if (!validateForm()) {
                     event.preventDefault();
                 }
             });
@@ -437,72 +289,103 @@
 <body>
 <div class="container">
     <h1 class="text-center">Информация о мероприятии</h1>
-    <form th:action="@{/input/saveHeaderInput}" method="post" class="centered-form">
+    <form th:action="@{/input/saveHeaderInput}" th:object="${inputHeader}" method="post" class="centered-form">
         <div class="form-group">
-            <label for="customer">Заказчик</label>
-            <input type="text" id="customer" name="customer" class="form-control short-input" placeholder="Компания, контактное лицо"/>
+            <label for="customer">Заказчик:</label>
+            <select id="customerSelect" name="customer.id" th:field="*{customer.id}" class="form-control ssshort-input">
+                <option value="" disabled selected></option>
+                <option th:each="customer : ${customers}"
+                        th:value="${customer.id}"
+                        th:text="${customer.name}"></option>
+            </select>
         </div>
         <div class="form-group">
             <label for="eventName">Название мероприятия</label>
-            <input type="text" id="eventName" name="eventName" class="form-control ssshort-input"/>
+            <input type="text" id="eventName" name="eventName" class="form-control ssshort-input" th:field="*{eventName}"/>
         </div>
         <div class="form-group">
             <label for="eventLocation">Место проведения</label>
-            <input type="text" id="eventLocation" name="eventLocation" class="form-control ssshort-input"/>
+            <input type="text" id="eventLocation" name="eventLocation" class="form-control ssshort-input" th:field="*{eventLocation}"/>
         </div>
         <div class="form-row">
             <div class="form-group">
                 <label for="eventStartDate">Дата начала</label>
-                <input type="date" id="eventStartDate" name="eventStartDate" class="form-control sshort-input"/>
+                <input type="date" id="eventStartDate" name="eventStartDate" class="form-control sshort-input" th:field="*{eventStartDate}"/>
             </div>
             <div class="form-group">
                 <label for="eventEndDate">Дата окончания</label>
-                <input type="date" id="eventEndDate" name="eventEndDate" class="form-control sshort-input"/>
+                <input type="date" id="eventEndDate" name="eventEndDate" class="form-control sshort-input" th:field="*{eventEndDate}"/>
             </div>
         </div>
         <div class="form-row">
             <div class="form-group">
                 <label for="eventWorkStartTime">Начало работы аккредитации</label>
-                <input type="time" id="eventWorkStartTime" name="eventWorkStartTime" class="form-control sshort-input"/>
+                <input type="time" id="eventWorkStartTime" name="eventWorkStartTime" class="form-control sshort-input" th:field="*{eventWorkStartTime}"/>
             </div>
             <div class="form-group">
                 <label for="eventWorkEndTime">Окончание работы аккредитации</label>
-                <input type="time" id="eventWorkEndTime" name="eventWorkEndTime" class="form-control sshort-input"/>
+                <input type="time" id="eventWorkEndTime" name="eventWorkEndTime" class="form-control sshort-input" th:field="*{eventWorkEndTime}"/>
             </div>
         </div>
+
         <div class="form-group">
             <label for="visitorsCount">Количество участников</label>
-            <input type="number" id="visitorsCount" name="visitorsCount" class="form-control sshort-input"/>
+            <input type="number" id="visitorsCount" name="visitorsCount" class="form-control ssshort-input" th:field="*{visitorsCount}"/>
+        </div>
+        <!-- Добавляем поля для предпечатной подготовки -->
+<!--        <div class="form-row">-->
+<!--            <div class="form-group">-->
+<!--                <label for="prePrintStart">Начало предпечати</label>-->
+<!--                <input type="date" id="prePrintStart" name="prePrintStart" class="form-control sshort-input" th:field="*{prePrintStart}"/>-->
+<!--            </div>-->
+<!--            <div class="form-group">-->
+<!--                <label for="prePrintEnd">Окончание предпечати</label>-->
+<!--                <input type="date" id="prePrintEnd" name="prePrintEnd" class="form-control sshort-input" th:field="*{prePrintEnd}"/>-->
+<!--            </div>-->
+<!--        </div>-->
+        <div class="form-row" id="preprintRow">
+            <div class="form-group col-md-6">
+                <label for="prePrintStart">Начало предпечати</label>
+                <input type="date" id="prePrintStart" name="prePrintStart" class="form-control sshort-input" th:field="*{prePrintStart}">
+            </div>
+            <div class="form-group col-md-6">
+                <label for="prePrintEnd">Окончание предпечати</label>
+                <input type="date" id="prePrintEnd" name="prePrintEnd" class="form-control sshort-input" th:field="*{prePrintEnd}">
+            </div>
         </div>
         <div class="form-check">
-            <input type="checkbox" class="form-check-input" id="sameEquipmentForAllDays" name="sameEquipmentForAllDays"/>
+            <input type="checkbox" class="form-check-input" id="withManyRegPoints" name="withManyRegPoints" th:field="*{withManyRegPoints}"/>
+            <label class="form-check-label" for="withManyRegPoints">Несколько точек регистрации</label>
+        </div>
+        <div class="form-check">
+            <input type="checkbox" class="form-check-input" id="sameEquipmentForAllDays" name="sameEquipmentForAllDays" th:field="*{sameEquipmentForAllDays}"/>
             <label class="form-check-label" for="sameEquipmentForAllDays">Оборудование на все дни одинаковое</label>
         </div>
+        <!-- Добавляем чекбокс "С несколькими регистрационными точками" -->
 
         <div class="period-inputs">
             <div class="form-group">
                 <label class="period-label">Период 1</label>
                 <div class="period-dates">
-                    <input type="date" id="boolStart1" name="boolStart1" class="form-control sshort-input"/>
-                    <input type="date" id="boolEnd1" name="boolEnd1" class="form-control sshort-input"/>
+                    <input type="date" id="boolStart1" name="boolStart1" class="form-control sshort-input" th:field="*{boolStart1}"/>
+                    <input type="date" id="boolEnd1" name="boolEnd1" class="form-control sshort-input" th:field="*{boolEnd1}"/>
                 </div>
             </div>
             <div class="form-group">
                 <label class="period-label">Период 2</label>
                 <div class="period-dates">
-                    <input type="date" id="boolStart2" name="boolStart2" class="form-control sshort-input"/>
-                    <input type="date" id="boolEnd2" name="boolEnd2" class="form-control sshort-input"/>
+                    <input type="date" id="boolStart2" name="boolStart2" class="form-control sshort-input" th:field="*{boolStart2}"/>
+                    <input type="date" id="boolEnd2" name="boolEnd2" class="form-control sshort-input" th:field="*{boolEnd2}"/>
                 </div>
             </div>
             <div class="form-group">
                 <label class="period-label">Период 3</label>
                 <div class="period-dates">
-                    <input type="date" id="boolStart3" name="boolStart3" class="form-control sshort-input"/>
-                    <input type="date" id="boolEnd3" name="boolEnd3" class="form-control sshort-input"/>
+                    <input type="date" id="boolStart3" name="boolStart3" class="form-control sshort-input" th:field="*{boolStart3}"/>
+                    <input type="date" id="boolEnd3" name="boolEnd3" class="form-control sshort-input" th:field="*{boolEnd3}"/>
                 </div>
             </div>
         </div>
-
         <button type="submit" class="btn btn-primary">Далее</button>
     </form>
     <button onclick="window.location.href='/'" class="btn btn-secondary btn-home">На главную</button>

@@ -4,22 +4,23 @@ import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.util.List;
+import java.time.LocalDate;
 
 @Getter
 @Setter
 @Builder
 @AllArgsConstructor
-@NoArgsConstructor(access = AccessLevel.PUBLIC)
-@Entity(name = "input_body")
-public class InputBody {
+@NoArgsConstructor
+@Entity(name = "regPoint")
+public class RegPoint {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
-    @OneToMany(mappedBy = "body", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Device> devices;
+    private String name;
+    private String description;
+    private LocalDate startRPDate;
+    private LocalDate endRPDate;
 
     @JsonBackReference
     @ManyToOne

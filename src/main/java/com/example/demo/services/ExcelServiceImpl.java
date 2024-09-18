@@ -1,7 +1,6 @@
 package com.example.demo.services;
 
 import com.example.demo.entities.*;
-import com.example.demo.repository.InputHeaderRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.ss.util.CellRangeAddress;
@@ -12,6 +11,7 @@ import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 import java.io.*;
+import java.time.Duration;
 import java.time.LocalDate;
 import java.time.Period;
 import java.time.format.DateTimeFormatter;
@@ -24,7 +24,6 @@ import java.util.*;
 public class ExcelServiceImpl implements ExcelService {
     private final ResourceLoader resourceLoader;
     private final String excelFilesDirectory = "files";
-    HashMap<String, List<Integer>> formulaMap = new HashMap<>();
 
     public File createNewFile(InputHeader header) {
 
@@ -50,11 +49,9 @@ public class ExcelServiceImpl implements ExcelService {
             Sheet sheet = workbook.getSheetAt(0);
             writeHeader(header, sheet);
             String fileName = dateFormatterForFileName(header.getEventStartDate(), header.getEventEndDate())
-                    + " " + header.getCustomer() + " СМЕТА РЕГИСТРАЦИИ Ver1";
+                    + " " + header.getEventName() + " СМЕТА РЕГИСТРАЦИИ Ver1";
             String filePath = excelFilesDirectory + File.separator + fileName + ".xlsx";
             File outputFile = new File(filePath);
-
-            formulaMap.put(fileName, new ArrayList<>());
 
             FileOutputStream fileOut = new FileOutputStream(outputFile);
             workbook.write(fileOut);
@@ -81,7 +78,7 @@ public class ExcelServiceImpl implements ExcelService {
         Row row3 = sheet.getRow(5);
         Cell cell3 = row3.getCell(3);
         // Логика с датами
-        cell3.setCellValue(dateFormatterForCell(header.getEventStartDate(), header.getEventEndDate()));
+        cell3.setCellValue(formatPeriod(header.getEventStartDate(), header.getEventEndDate()));
 
         // Время работы
         Row row4 = sheet.getRow(6);
@@ -94,10 +91,10 @@ public class ExcelServiceImpl implements ExcelService {
         cell5.setCellValue(header.getVisitorsCount());
     }
 
-    public void updateFileWithBodyData(InputHeader header, List<InputBody> bodies, int periods) {
+    public void updateFileWithBodyData(InputHeader header) {
         try {
             String fileName = dateFormatterForFileName(header.getEventStartDate(), header.getEventEndDate())
-                    + " " + header.getCustomer() + " СМЕТА РЕГИСТРАЦИИ Ver1";
+                    + " " + header.getEventName() + " СМЕТА РЕГИСТРАЦИИ Ver1";
             String filePath = excelFilesDirectory + File.separator + fileName + ".xlsx";
             File file = new File(filePath);
 
@@ -108,22 +105,37 @@ public class ExcelServiceImpl implements ExcelService {
             Workbook workbook = new XSSFWorkbook(new FileInputStream(file));
             Sheet sheet = workbook.getSheetAt(0);
 
-            CellStyle topRowStyle = workbook.createCellStyle();
-            topRowStyle.setAlignment(HorizontalAlignment.CENTER);
-            topRowStyle.setVerticalAlignment(VerticalAlignment.CENTER);
-            topRowStyle.setBorderTop(BorderStyle.DOUBLE);
-            topRowStyle.setBorderLeft(BorderStyle.THIN);
-            topRowStyle.setBorderRight(BorderStyle.THIN);
 
-            CellStyle topRowStyle1 = workbook.createCellStyle();
-            topRowStyle1.setAlignment(HorizontalAlignment.LEFT);
-            topRowStyle1.setVerticalAlignment(VerticalAlignment.CENTER);
-            topRowStyle1.setBorderTop(BorderStyle.DOUBLE);
-            topRowStyle1.setBorderLeft(BorderStyle.THIN);
-            topRowStyle1.setBorderRight(BorderStyle.THIN);
+            CellStyle bottomBlockRowStyle = workbook.createCellStyle();
+            bottomBlockRowStyle.setAlignment(HorizontalAlignment.CENTER);
+            bottomBlockRowStyle.setVerticalAlignment(VerticalAlignment.CENTER);
+            bottomBlockRowStyle.setBorderBottom(BorderStyle.DOUBLE);
+            bottomBlockRowStyle.setBorderLeft(BorderStyle.THIN);
+            bottomBlockRowStyle.setBorderRight(BorderStyle.THIN);
 
-            writeBody(header, bodies, sheet, periods, topRowStyle, topRowStyle1);
+            CellStyle bottomBlockRowStyle1 = workbook.createCellStyle();
+            bottomBlockRowStyle1.setAlignment(HorizontalAlignment.LEFT);
+            bottomBlockRowStyle1.setVerticalAlignment(VerticalAlignment.CENTER);
+            bottomBlockRowStyle1.setBorderBottom(BorderStyle.DOUBLE);
+            bottomBlockRowStyle1.setBorderLeft(BorderStyle.THIN);
+            bottomBlockRowStyle1.setBorderRight(BorderStyle.THIN);
 
+            CellStyle bottomLastRowStyle = workbook.createCellStyle();
+            bottomLastRowStyle.setAlignment(HorizontalAlignment.CENTER);
+            bottomLastRowStyle.setVerticalAlignment(VerticalAlignment.CENTER);
+            bottomLastRowStyle.setBorderBottom(BorderStyle.THICK);
+            bottomLastRowStyle.setBorderLeft(BorderStyle.THIN);
+            bottomLastRowStyle.setBorderRight(BorderStyle.THIN);
+
+            CellStyle bottomLastRowStyle1 = workbook.createCellStyle();
+            bottomLastRowStyle1.setAlignment(HorizontalAlignment.LEFT);
+            bottomLastRowStyle1.setVerticalAlignment(VerticalAlignment.CENTER);
+            bottomLastRowStyle1.setBorderBottom(BorderStyle.THICK);
+            bottomLastRowStyle1.setBorderLeft(BorderStyle.THIN);
+            bottomLastRowStyle1.setBorderRight(BorderStyle.THIN);
+
+            markupBody(header, sheet);
+            fillBodyRows(header, sheet, bottomLastRowStyle, bottomLastRowStyle1, bottomBlockRowStyle, bottomBlockRowStyle1);
 
             FormulaEvaluator evaluator = workbook.getCreationHelper().createFormulaEvaluator();
             evaluator.evaluateAll();
@@ -137,215 +149,434 @@ public class ExcelServiceImpl implements ExcelService {
         }
     }
 
-    private void writeBody(InputHeader header, List<InputBody> bodies, Sheet sheet, int periods,
-                           CellStyle topRowCellsStyleAlign, CellStyle topRowCellsStyleAlign1) {
-        if (header.isSameEquipmentForAllDays() && periods == 1) {
-            int additionalRows = 0;
+    private void markupBody(InputHeader header, Sheet sheet) {
+        int startRowIndex = 9; // Начальный индекс строки для вставки
+        System.out.println("Начальный индекс строки для вставки: " + startRowIndex);
+        int inputBodiesCount = header.getInputBodies().size(); // Получаем реальное количество inputBodies
+        int[] neededRows = new int[inputBodiesCount];
 
-            Boolean sDevice = false;
-            Boolean pDevice = false;
-            Boolean switching = false;
-            Boolean network = false;
-            Boolean cam = false;
-            Boolean bar = false;
-            Boolean rfi = false;
-            Boolean tsd = false;
+        // Отладочная информация
+        System.out.println("Общее количество inputBodies: " + inputBodiesCount);
+        // Заполняем массив neededRows количеством девайсов в каждом inputBody
+        for (int i = 0; i < inputBodiesCount; i++) {
+            neededRows[i] = header.getInputBodies().get(i).getDevices().size();
+            System.out.println("InputBody " + i + " содержит " + neededRows[i] + " устройств.");
 
-            if (bodies.get(0).getSDeviceCount() != null && bodies.get(0).getSDevicePrice() != null) {
-                additionalRows++;
-                sDevice = true;
-            }
-            if (bodies.get(0).getPDeviceCount() != null && bodies.get(0).getPDevicePrice() != null) {
-                additionalRows++;
-                pDevice = true;
-            }
-            if (bodies.get(0).getSwitchingCount() != null && bodies.get(0).getSwitchingPrice() != null) {
-                additionalRows++;
-                switching = true;
-            }
-            if (bodies.get(0).getNetworkCount() != null && bodies.get(0).getNetworkPrice() != null) {
-                additionalRows++;
-                network = true;
-            }
-            if (bodies.get(0).getBarcodeDeviceCount() != null && bodies.get(0).getBarcodeDevicePrice() != null) {
-                additionalRows++;
-                bar = true;
-            }
-            if (bodies.get(0).getCameraDeviceCount() != null && bodies.get(0).getCameraDevicePrice() != null) {
-                additionalRows++;
-                cam = true;
-            }
-            if (bodies.get(0).getRfidReaderDeviceCount() != null && bodies.get(0).getRfidReaderDevicePrice() != null) {
-                additionalRows++;
-                rfi = true;
-            }
-            if (bodies.get(0).getTsdCount() != null && bodies.get(0).getTsdPrice() != null) {
-                additionalRows++;
-                tsd = true;
-            }
-            insertRowsWithShift(sheet, 9, additionalRows);
-            if (additionalRows > 1) {
-                mergeCells(sheet, 9, 9 + additionalRows - 1);
-            }
+        }
 
-            int currentRow = 9;
-            if (sDevice) {
-                fillRow(bodies.get(0).getSoftDevice().getName(), sheet, currentRow++, bodies.get(0).getSDeviceCount(), bodies.get(0).getSDevicePrice(), header.getWorkDays());
-            }
-            if (pDevice) {
-                fillRow(bodies.get(0).getPrinterDevice().getName(), sheet, currentRow++, bodies.get(0).getPDeviceCount(), bodies.get(0).getPDevicePrice(), header.getWorkDays());
-            }
-            if (switching) {
-                fillRow("Кабельная коммутация", sheet, currentRow++, bodies.get(0).getSwitchingCount(), bodies.get(0).getSwitchingPrice(), header.getWorkDays());
-            }
-            if (network) {
-                fillRow("Cетевое оборудование", sheet, currentRow++, bodies.get(0).getNetworkCount(), bodies.get(0).getNetworkPrice(), header.getWorkDays());
-            }
-            if (bar) {
-                fillRow("2D-Сканер", sheet, currentRow++, bodies.get(0).getBarcodeDeviceCount(), bodies.get(0).getBarcodeDevicePrice(), header.getWorkDays());
-            }
-            if (cam) {
-                fillRow("Web-камера", sheet, currentRow++, bodies.get(0).getCameraDeviceCount(), bodies.get(0).getCameraDevicePrice(), header.getWorkDays());
-            }
-            if (rfi) {
-                fillRow("RFID-считыватель", sheet, currentRow++, bodies.get(0).getRfidReaderDeviceCount(), bodies.get(0).getRfidReaderDevicePrice(), header.getWorkDays());
-            }
-            if (tsd) {
-                fillRow("ТСД", sheet, currentRow++, bodies.get(0).getTsdCount(), bodies.get(0).getTsdPrice(), header.getWorkDays());
-            }
-
-            Row periodsRow = sheet.getRow(9);
-            Cell cell = periodsRow.getCell(0);
-            cell.setCellValue(dateFormatterForDeviceCell(header.getEventStartDate(), header.getEventEndDate()));
-
-            Row formulaRow = sheet.getRow(currentRow);
-            Cell formulaCell = formulaRow.getCell(7);
-            formulaCell.setCellFormula("SUM(H" + 10 + ":H" + (9 + additionalRows) +")");
-
-        } else if (header.isSameEquipmentForAllDays() && periods > 1) {
-            int[] neededRows = new int[bodies.size()];
-            for (int i = 0; i < bodies.size(); i++) {
-
-                int rowsForEveryBody = 0;
-                if (bodies.get(i).getSDeviceCount() != null && bodies.get(i).getSDevicePrice() != null) {
-                    rowsForEveryBody++;
+        for (int i = 0; i < neededRows.length; i++) {
+            insertRowsWithShift(sheet, startRowIndex, neededRows[i]);
+            if(!header.isWithManyRegPoints()){
+                if (neededRows[i] > 1) {
+                    System.out.println("Объединяем ячейки для inputBody " + i + " с " + startRowIndex + " по " + (startRowIndex + neededRows[i] - 1));
+                    mergeCells(sheet, startRowIndex, startRowIndex + neededRows[i] - 1);
                 }
-                if (bodies.get(i).getPDeviceCount() != null && bodies.get(i).getPDevicePrice() != null) {
-                    rowsForEveryBody++;
+            } else {
+                if (neededRows[i] > 1) {
+                    mergeCellsForRegPoints(sheet, startRowIndex, startRowIndex + neededRows[i] - 1);
                 }
-                if (bodies.get(i).getSwitchingCount() != null && bodies.get(i).getSwitchingPrice() != null) {
-                    rowsForEveryBody++;
-                }
-                if (bodies.get(i).getNetworkCount() != null && bodies.get(i).getNetworkPrice() != null) {
-                    rowsForEveryBody++;
-                }
-                if (bodies.get(i).getBarcodeDeviceCount() != null && bodies.get(i).getBarcodeDevicePrice() != null) {
-                    rowsForEveryBody++;
-                }
-                if (bodies.get(i).getCameraDeviceCount() != null && bodies.get(i).getCameraDevicePrice() != null) {
-                    rowsForEveryBody++;
-                }
-                if (bodies.get(i).getRfidReaderDeviceCount() != null && bodies.get(i).getRfidReaderDevicePrice() != null) {
-                    rowsForEveryBody++;
-                }
-                if (bodies.get(i).getTsdCount() != null && bodies.get(i).getTsdPrice() != null) {
-                    rowsForEveryBody++;
-                }
-                neededRows[i] = rowsForEveryBody;
-                rowsForEveryBody = 0;
             }
 
-            int startRow = 9;
-            for (int i = 0; i < neededRows.length; i++) {
+            startRowIndex += neededRows[i];
+        }
 
-                insertRowsWithShift(sheet, startRow, neededRows[i]);//в
-                if(neededRows[i]>1) {
-                    mergeCells(sheet, startRow, startRow + neededRows[i] - 1);
-                }
-                Row rowForOtherPeriod = sheet.getRow(startRow);
-                Cell cellForOtherPeriod = rowForOtherPeriod.getCell(0);
-                cellForOtherPeriod.setCellValue(getHeaderPeriods(header).get(i));
-                startRow = startRow + neededRows[i];
+        if(header.isWithManyRegPoints()){
+            additionalMarkUpForManyRegPointsTemplate(sheet, header);
+        }
+    }
 
-                //между блоками двойную линию
-                for (int j = 0; j < 8; j++) {
-                    if (j == 1) {
-                        rowForOtherPeriod.getCell(j).setCellStyle(topRowCellsStyleAlign1); // Применяем другой стиль для j = 1
-                    } else {
-                        rowForOtherPeriod.getCell(j).setCellStyle(topRowCellsStyleAlign); // Применяем основной стиль для остальных ячеек
+    private void fillBodyRows(InputHeader header, Sheet sheet, CellStyle bottomLastRowStyle, CellStyle bottomLastRowStyle1,
+                              CellStyle bottomBlockRowStyle, CellStyle bottomBlockRowStyle1) {
+        int startIndex = 9;
+
+        if(header.isSameEquipmentForAllDays()){
+            List<String> stringPeriods = getPeriodsStrings(header);
+            List<Integer> workDaysInPeriods = getPeriodsDaysCount(header);
+            for(int i = 0; i < header.getInputBodies().size(); i++){
+                List<Device> devices = header.getInputBodies()
+                        .get(header.getInputBodies().size() - 1 - i) // Получаем InputBody с конца
+                        .getDevices();
+                int workDays = workDaysInPeriods.get(i);
+                String period = stringPeriods.get(i);
+
+                for(int j = 0; j < devices.size(); j++ ){
+                    Row row = sheet.getRow(startIndex);
+                    Cell cellPeriod = row.getCell(0);
+                    cellPeriod.setCellValue(period);
+                    Cell cellName = row.getCell(1);
+                    cellName.setCellValue(devices.get(j).getName());
+                    Cell cellDays = row.getCell(3);
+                    cellDays.setCellValue(workDays);
+                    Cell cellCount = row.getCell(4);
+                    cellCount.setCellValue(devices.get(j).getCount());
+                    Cell cellPrice = row.getCell(5);
+                    cellPrice.setCellValue(devices.get(j).getPriceFor1q());
+                    Cell cellSum = row.getCell(7);
+                    cellSum.setCellFormula("E" + (startIndex + 1) + "*F" + (startIndex + 1) + "*" + workDays);
+                    startIndex++;
+                    if (j == devices.size() - 1) {
+                        applyStyles(sheet.getRow(startIndex-1), bottomBlockRowStyle, bottomBlockRowStyle1);
                     }
                 }
-            }
-            checkTheBody(bodies, sheet, header);
-            int sum = Arrays.stream(neededRows).sum();
-            System.out.println(sum);
 
-            Row formulaRow = sheet.getRow(9 + sum);
-            Cell formulaCell = formulaRow.getCell(7);
-            formulaCell.setCellFormula("SUM(H" + 10 + ":H" + (9 + sum) +")");
+            }
+            applyStyles(sheet.getRow(startIndex-1), bottomLastRowStyle, bottomLastRowStyle1);
+            Row rowForFormula = sheet.getRow(startIndex);
+            Cell cellForFormula = rowForFormula.getCell(7);
+            cellForFormula.setCellFormula("SUM(H" + (10) + ":H" +
+                    (startIndex) + ")");
+            Row finalFormulaRow = sheet.getRow(findFirstRow(sheet, "Заказчик предоставляет:*") - 1);
+            Cell finalFormulaCell = finalFormulaRow.getCell(7);
+            finalFormulaCell.setCellFormula("SUM(H" + (rowForFormula.getRowNum()+1) + ")");
+
+        } else if(header.isWithManyRegPoints()) {
+            List<String> stringPeriods = getRegPointsDates(header);
+            List<String> regPoints = getRegPointsDescriptions(header);
+            List<Integer> workDaysInPeriods = getRegPointsDaysCount(header);
+            for(int i = 0; i < header.getInputBodies().size(); i++){
+                List<Device> devices = header.getInputBodies().get(i).getDevices();
+                int workDays = workDaysInPeriods.get(i);
+                String period = stringPeriods.get(i);
+                String regPoint = regPoints.get(i);
+                for(int j = 0; j < devices.size(); j++ ){
+                    Row row = sheet.getRow(startIndex);
+                    Cell cellPeriod = row.getCell(0);
+                    cellPeriod.setCellValue(period);
+                    Cell cellRegPoint = row.getCell(1);
+                    cellRegPoint.setCellValue(regPoint);
+                    Cell cellName = row.getCell(2);
+                    cellName.setCellValue(devices.get(j).getName());
+                    Cell cellDays = row.getCell(5);
+                    cellDays.setCellValue(workDays);
+                    Cell cellCount = row.getCell(4);
+                    cellCount.setCellValue(devices.get(j).getCount());
+                    Cell cellPrice = row.getCell(6);
+                    cellPrice.setCellValue(devices.get(j).getPriceFor1q());
+                    Cell cellSum = row.getCell(7);
+                    cellSum.setCellFormula("E" + (startIndex + 1) + "*F" + (startIndex + 1) + "*G" + (startIndex + 1));
+                    startIndex++;
+                    if (j == devices.size() - 1) {
+                        applyStylesWithRegPoints(sheet.getRow(startIndex-1), bottomBlockRowStyle, bottomBlockRowStyle1);
+                    }
+                }
+
+            }
+            applyStylesWithRegPoints(sheet.getRow(startIndex-1), bottomLastRowStyle, bottomLastRowStyle1);
+            Row rowForFormula = sheet.getRow(startIndex);
+            Cell cellForFormula = rowForFormula.getCell(7);
+            cellForFormula.setCellFormula("SUM(H" + (10) + ":H" +
+                    (startIndex) + ")");
+            Row finalFormulaRow = sheet.getRow(findFirstRow(sheet, "Заказчик предоставляет:*") - 1);
+            Cell finalFormulaCell = finalFormulaRow.getCell(7);
+            finalFormulaCell.setCellFormula("SUM(H" + (rowForFormula.getRowNum()+1) + ")");
 
         } else {
-            int[] neededRows = new int[bodies.size()];
-            for (int i = 0; i < bodies.size(); i++) {
-                int rowsForEveryBody = 0;
-                if (bodies.get(i).getSDeviceCount() != null && bodies.get(i).getSDevicePrice() != null) {
-                    rowsForEveryBody++;
-                }
-                if (bodies.get(i).getPDeviceCount() != null && bodies.get(i).getPDevicePrice() != null) {
-                    rowsForEveryBody++;
-                }
-                if (bodies.get(i).getSwitchingCount() != null && bodies.get(i).getSwitchingPrice() != null) {
-                    rowsForEveryBody++;
-                }
-                if (bodies.get(i).getNetworkCount() != null && bodies.get(i).getNetworkPrice() != null) {
-                    rowsForEveryBody++;
-                }
-                if (bodies.get(i).getBarcodeDeviceCount() != null && bodies.get(i).getBarcodeDevicePrice() != null) {
-                    rowsForEveryBody++;
-                }
-                if (bodies.get(i).getCameraDeviceCount() != null && bodies.get(i).getCameraDevicePrice() != null) {
-                    rowsForEveryBody++;
-                }
-                if (bodies.get(i).getRfidReaderDeviceCount() != null && bodies.get(i).getRfidReaderDevicePrice() != null) {
-                    rowsForEveryBody++;
-                }
-                if (bodies.get(i).getTsdCount() != null && bodies.get(i).getTsdPrice() != null) {
-                    rowsForEveryBody++;
-                }
-                neededRows[i] = rowsForEveryBody;
-                rowsForEveryBody = 0;
-            }
-
-            int startRow = 9;
-            for (int i = 0; i < neededRows.length; i++) {
-                insertRowsWithShift(sheet, startRow, neededRows[i]);
-                if(neededRows[i]>1) {
-                    mergeCells(sheet, startRow, startRow + neededRows[i]-1);
-                }
-                Row rowsForDates = sheet.getRow(startRow);
-                Cell cellForDates = rowsForDates.getCell(0);
-                cellForDates.setCellValue(header.getEventStartDate().plusDays(i).toString());
-
-                for (int j = 0; j < 8; j++) {
-                    if (j == 1) {
-                        rowsForDates.getCell(j).setCellStyle(topRowCellsStyleAlign1); // Применяем другой стиль для j = 1
-                    } else {
-                        rowsForDates.getCell(j).setCellStyle(topRowCellsStyleAlign); // Применяем основной стиль для остальных ячеек
+            List<String> workDates = getAllDaysBetweenPeriods(header);
+            for(int i = 0; i < header.getInputBodies().size(); i++){
+                List<Device> devices = header.getInputBodies().get(i).getDevices();
+                String date = workDates.get(i);
+                for(int j = 0; j < devices.size(); j++ ){
+                    Row row = sheet.getRow(startIndex);
+                    Cell cellPeriod = row.getCell(0);
+                    cellPeriod.setCellValue(date);
+                    Cell cellName = row.getCell(1);
+                    cellName.setCellValue(devices.get(j).getName());
+                    Cell cellCount = row.getCell(4);
+                    cellCount.setCellValue(devices.get(j).getCount());
+                    Cell cellPrice = row.getCell(5);
+                    cellPrice.setCellValue(devices.get(j).getPriceFor1q());
+                    Cell cellSum = row.getCell(7);
+                    cellSum.setCellFormula("E" + (startIndex + 1) + "*F" + (startIndex + 1));
+                    startIndex++;
+                    if (j == devices.size() - 1) {
+                        applyStyles(sheet.getRow(startIndex-1), bottomBlockRowStyle, bottomBlockRowStyle1);
                     }
                 }
 
-                startRow = startRow + neededRows[i];
             }
-            checkTheBody(bodies, sheet, header);
-            int sum = Arrays.stream(neededRows).sum();
-            System.out.println(sum);
+            applyStyles(sheet.getRow(startIndex-1), bottomLastRowStyle, bottomLastRowStyle1);
+            Row rowForFormula = sheet.getRow(startIndex);
+            Cell cellForFormula = rowForFormula.getCell(7);
+            cellForFormula.setCellFormula("SUM(H" + (10) + ":H" +
+                    (startIndex) + ")");
+            //TODO: запись стартиндекса для финальной формулы
+            Row finalFormulaRow = sheet.getRow(findFirstRow(sheet, "Заказчик предоставляет:*") - 1);
+            Cell finalFormulaCell = finalFormulaRow.getCell(7);
+            finalFormulaCell.setCellFormula("SUM(H" + (rowForFormula.getRowNum()+1) + ")");
+        }
 
-            Row formulaRow = sheet.getRow(9 + sum);
-            Cell formulaCell = formulaRow.getCell(7);
-            formulaCell.setCellFormula("SUM(H" + 10 + ":H" + (9 + sum) +")");
+    }
 
+    public List<String> getAllDaysBetweenPeriods(InputHeader header) {
+        List<String> allDays = new ArrayList<>();
+
+        // Добавляем все даты между prePrintStart и prePrintEnd
+        if (header.getPrePrintStart() != null && header.getPrePrintEnd() != null) {
+            LocalDate currentDate = header.getPrePrintStart();
+            while (!currentDate.isAfter(header.getPrePrintEnd())) {
+                allDays.add(currentDate.format(DateTimeFormatter.ofPattern("dd.MM.yyyy")));
+                currentDate = currentDate.plusDays(1);
+            }
+        }
+
+        // Добавляем все даты между EventStartDate и EventEndDate
+        if (header.getEventStartDate() != null && header.getEventEndDate() != null) {
+            LocalDate currentDate = header.getEventStartDate();
+            while (!currentDate.isAfter(header.getEventEndDate())) {
+                allDays.add(currentDate.format(DateTimeFormatter.ofPattern("dd.MM.yyyy")));
+                currentDate = currentDate.plusDays(1);
+            }
+        }
+
+        return allDays;
+    }
+
+    public List<String> getPeriodsStrings(InputHeader header) {
+        List<String> periodsStrings = new ArrayList<>();
+
+        if (header.getPrePrintStart() != null && header.getPrePrintEnd() != null) {
+            String prePrintPeriod = formatPeriod(header.getPrePrintStart(), header.getPrePrintEnd());
+            periodsStrings.add(prePrintPeriod);
+        }
+        if (header.getBoolStart1() != null && header.getBoolEnd1() != null) {
+            periodsStrings.add(formatPeriod(header.getBoolStart1(), header.getBoolEnd1()));
+        }
+        if (header.getBoolStart2() != null && header.getBoolEnd2() != null) {
+            periodsStrings.add(formatPeriod(header.getBoolStart2(), header.getBoolEnd2()));
+        }
+        if (header.getBoolStart3() != null && header.getBoolEnd3() != null) {
+            periodsStrings.add(formatPeriod(header.getBoolStart3(), header.getBoolEnd3()));
+        }
+        if (header.getBoolStart4() != null && header.getBoolEnd4() != null) {
+            periodsStrings.add(formatPeriod(header.getBoolStart4(), header.getBoolEnd4()));
+        }
+
+        return periodsStrings;
+    }
+
+    public List<Integer> getPeriodsDaysCount(InputHeader header) {
+        List<Integer> periodsDaysCount = new ArrayList<>();
+
+        // Добавляем период prePrint
+        if (header.getPrePrintStart() != null && header.getPrePrintEnd() != null) {
+            int days = calculateDaysBetween(header.getPrePrintStart(), header.getPrePrintEnd());
+            periodsDaysCount.add(days);
+        }
+
+        // Добавляем периоды boolStart - boolEnd
+        addPeriodDaysToList(periodsDaysCount, header.getBoolStart1(), header.getBoolEnd1());
+        addPeriodDaysToList(periodsDaysCount, header.getBoolStart2(), header.getBoolEnd2());
+        addPeriodDaysToList(periodsDaysCount, header.getBoolStart3(), header.getBoolEnd3());
+        addPeriodDaysToList(periodsDaysCount, header.getBoolStart4(), header.getBoolEnd4());
+
+        return periodsDaysCount;
+    }
+
+    private int calculateDaysBetween(LocalDate start, LocalDate end) {
+        return (int) ChronoUnit.DAYS.between(start, end) + 1; // Включаем начальную дату в подсчет
+    }
+
+    private void addPeriodDaysToList(List<Integer> periodsDaysCount, LocalDate start, LocalDate end) {
+        if (start != null && end != null) {
+            int days = calculateDaysBetween(start, end);
+            periodsDaysCount.add(days);
+        }
+    }
+
+    private void additionalMarkUpForManyRegPointsTemplate(Sheet sheet, InputHeader header) {
+        Cell firstCell = sheet.getRow(8).getCell(2);
+        CellStyle originalStyle = firstCell.getCellStyle();
+        String originalValue = firstCell.getStringCellValue();
+
+        // Удаление старого объединения
+        for (int i = 0; i < sheet.getNumMergedRegions(); i++) {
+            CellRangeAddress mergedRegion = sheet.getMergedRegion(i);
+            if (mergedRegion.getFirstRow() == 8 && mergedRegion.getLastRow() == 8 &&
+                    mergedRegion.getFirstColumn() == 2 && mergedRegion.getLastColumn() == 3) {
+                sheet.removeMergedRegion(i);
+                break;
+            }
+        }
+
+        // Добавляем новое объединение
+        sheet.addMergedRegion(new CellRangeAddress(8, 8, 1, 3));
+        Cell newFirstCell = sheet.getRow(8).getCell(1);
+        if (newFirstCell == null) {
+            newFirstCell = sheet.getRow(8).createCell(1);
+        }
+        newFirstCell.setCellStyle(originalStyle);
+        newFirstCell.setCellValue(originalValue);
+
+        // Создаем HashMap: даты -> ID InputBody
+        Map<String, List<Long>> dateToInputBodyMap = new LinkedHashMap<>();
+        List<String> sortedRegPoints = getRegPointsDates(header);
+
+        for (int i = 0; i < sortedRegPoints.size(); i++) {
+            String date = sortedRegPoints.get(i);
+            Long inputBodyId = header.getInputBodies().get(i).getId();
+
+            dateToInputBodyMap.computeIfAbsent(date, k -> new ArrayList<>()).add(inputBodyId);
+        }
+
+        // Инициализация firstRow для первого выполнения mergeCells
+        int firstRow = 9;
+
+        //отладка
+        for (Map.Entry<String, List<Long>> entry : dateToInputBodyMap.entrySet()) {
+            String date = entry.getKey();
+            List<Long> inputBodyIds = entry.getValue();
+
+            // Выводим дату
+            System.out.print("Дата: " + date + " -> InputBody IDs: ");
+
+            // Выводим все ID, связанные с этой датой
+            for (Long id : inputBodyIds) {
+                System.out.print(id + " ");
+            }
+            System.out.println(); // Переход на следующую строку
+        }
+        // Проходим по всем датам в HashMap и выполняем mergeCells
+        for (Map.Entry<String, List<Long>> entry : dateToInputBodyMap.entrySet()) {
+            String date = entry.getKey();
+            List<Long> inputBodyIds = entry.getValue();
+
+            // Суммируем количество устройств для всех InputBody, связанных с этой датой
+            int totalDeviceCount = 0;
+
+            for (Long inputBodyId : inputBodyIds) {
+                InputBody inputBody = getInputBodyById(header, inputBodyId);  // Метод для получения InputBody по ID
+                totalDeviceCount += inputBody.getDevices().size();  // Суммируем deviceCount
             }
 
+            // Вычисляем lastRow на основе общего количества устройств для всех InputBody
+            int lastRow = firstRow + totalDeviceCount - 1;
+
+            if (totalDeviceCount > 1) {
+                mergeCells(sheet, firstRow, lastRow);
+            }
+
+            firstRow = lastRow + 1;
+        }
+    }
+
+    private InputBody getInputBodyById(InputHeader header, Long inputBodyId) {
+        return header.getInputBodies().stream()
+                .filter(inputBody -> inputBody.getId().equals(inputBodyId))
+                .findFirst()
+                .orElse(null);
+    }
+
+    private InputStaff getInputStaffById(InputHeader header, Long inputStaffId) {
+        return header.getInputStaffs().stream()
+                .filter(inputStaff -> inputStaff.getId().equals(inputStaffId))
+                .findFirst()
+                .orElse(null);
+    }
+
+    public String formatPeriod(LocalDate start, LocalDate end) {
+        DateTimeFormatter fullFormatter = DateTimeFormatter.ofPattern("dd.MM.yyyy");
+        DateTimeFormatter shortFormatter = DateTimeFormatter.ofPattern("dd.MM");
+
+        if (start.equals(end)) {
+            // Если даты равны, выводим только одну дату
+            return start.format(fullFormatter);
+        } else if (start.getMonth().equals(end.getMonth()) && start.getYear() == end.getYear()) {
+            // Если месяц и год одинаковые, выводим формат dd-dd.MM.yyyy
+            return start.getDayOfMonth() + "-" + end.format(fullFormatter);
+        } else {
+            // Если даты разные по месяцу или году, выводим обе даты полностью
+            return start.format(shortFormatter) + "-" + end.format(fullFormatter);
+        }
+    }
+
+    public List<String> getRegPointsDates(InputHeader header) {
+        List<String> stringsRegPoints = new ArrayList<>();
+        List<RegPoint> regPointsForSort = sortRegPoints(header.getRegPoints());
+
+        for (RegPoint regPoint : regPointsForSort) {
+            // Применяем метод formatPeriod для форматирования дат
+            String dateRange = formatPeriod(regPoint.getStartRPDate(), regPoint.getEndRPDate());
+            stringsRegPoints.add(dateRange);
+        }
+
+        return stringsRegPoints;
+    }
+
+    private List<RegPoint> sortRegPoints(List<RegPoint> regPoints) {
+        // Задаём фиксированный порядок сортировки для поля "description"
+        List<String> descriptionOrder = Arrays.asList("Предрегистрация", "Аккредитация", "Контроль доступа");
+
+        // Сортируем список точек аккредитации по двум критериям
+        return regPoints.stream()
+                .sorted(Comparator
+                        .comparing(RegPoint::getStartRPDate) // Сначала сортировка по дате начала
+                        .thenComparing(rp -> descriptionOrder.indexOf(rp.getDescription())) // Затем по порядку значений description
+                )
+                .toList();
+    }
+
+    public List<String> getRegPointsDescriptions(InputHeader header) {
+        List<String> regPointsDescriptions = new ArrayList<>();
+        List<RegPoint> regPointsForSort = sortRegPoints(header.getRegPoints());
+
+        for (RegPoint regPoint : regPointsForSort) {
+            String formattedDescription = regPoint.getDescription() + "\n(" + regPoint.getName() + ")";
+            regPointsDescriptions.add(formattedDescription);
+        }
+
+        return regPointsDescriptions;
+    }
+
+    public List<Integer> getRegPointsDaysCount(InputHeader header) {
+        List<Integer> daysCounts = new ArrayList<>();
+        List<RegPoint> regPointsForSort = sortRegPoints(header.getRegPoints());
+
+        for (RegPoint regPoint : regPointsForSort) {
+            // Подсчитываем количество дней между датами
+            long daysBetween = ChronoUnit.DAYS.between(regPoint.getStartRPDate(), regPoint.getEndRPDate()) + 1; // +1 чтобы включить оба дня
+            daysCounts.add((int) daysBetween); // Преобразуем в int для добавления в список
+        }
+
+        return daysCounts;
+    }
+
+    private void mergeCellsForRegPoints(Sheet sheet, int firstRow, int lastRow) {
+        // Удаление существующих объединений, которые пересекаются с новыми объединениями
+        for (int i = 0; i < sheet.getNumMergedRegions(); i++) {
+            CellRangeAddress mergedRegion = sheet.getMergedRegion(i);
+            if (mergedRegion.getFirstRow() >= firstRow && mergedRegion.getLastRow() <= lastRow && mergedRegion.getFirstColumn() == 1) {
+                sheet.removeMergedRegion(i);
+                i--; // Обновляем индекс, поскольку список уменьшился
+            }
+        }
+
+        // Проверяем, что объединение имеет смысл (чтобы было больше одной строки для объединения)
+        if (firstRow != lastRow) {
+            CellRangeAddress cellRangeAddress = new CellRangeAddress(firstRow, lastRow, 1, 1);
+            sheet.addMergedRegion(cellRangeAddress);
+        }
+    }
+
+    private void insertRowsWithShift(Sheet sheet, int startRow, int numberOfRows) {
+        System.out.println("Вставка " + numberOfRows + " строк начиная с индекса " + startRow);
+
+        for (int i = 0; i < numberOfRows; i++) {
+            int currentRow = startRow + i;
+            System.out.println("Сдвигаем строки начиная с " + currentRow);
+            sheet.shiftRows(currentRow, sheet.getLastRowNum(), 1);
+
+            // Получаем строку-источник и создаем новую строку
+            Row sourceRow = sheet.getRow(currentRow - 1);
+            Row newRow = sheet.createRow(currentRow);
+
+            System.out.println("Копируем содержимое и стили из строки " + (currentRow - 1) + " в строку " + currentRow);
+            // Копирование стилей и значений ячеек
+            copyRow(sourceRow, newRow);
+
+            System.out.println("Копируем объединенные ячейки из строки " + (currentRow - 1) + " в строку " + currentRow);
+            // Копирование объединенных ячеек
+            copyMergedRegions(sheet, currentRow - 1, currentRow);
+        }
     }
 
     public static int findFirstRow(Sheet sheet, String cellContent) {
@@ -357,53 +588,6 @@ public class ExcelServiceImpl implements ExcelService {
             }
         }
         return -1;
-    }
-
-    private void fillRow(String deviceName, Sheet sheet, int rowIndex, Integer deviceCount, Integer devicePrice, int workDays) {
-        Row row = sheet.getRow(rowIndex);
-
-        Cell cellName = row.getCell(1);
-        cellName.setCellValue(deviceName);
-
-        Cell cellDays = row.getCell(3);
-        cellDays.setCellValue(workDays);
-
-        Cell cellCount = row.getCell(4);
-        cellCount.setCellValue(deviceCount);
-
-        Cell cellPrice = row.getCell(5);
-        cellPrice.setCellValue(devicePrice);
-
-        Cell cellSum = row.getCell(7);
-        cellSum.setCellFormula("E" + (rowIndex + 1) + "*F" + (rowIndex + 1) + "*" + workDays);
-    }
-
-    private String dateFormatterForCell(LocalDate start, LocalDate end) {
-
-        String prettyDate = null;
-        Period period = Period.between(start, end);
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy");
-        DateTimeFormatter formatter2 = DateTimeFormatter.ofPattern("dd");
-        if (period.getDays() == 0) {
-            prettyDate = start.format(formatter);
-        } else if (period.getDays() > 0) {
-            prettyDate = start.format(formatter2) + " - " + end.format(formatter);
-        }
-        return prettyDate;
-    }
-
-    private String dateFormatterForDeviceCell(LocalDate start, LocalDate end) {
-
-        String prettyDate = null;
-        Period period = Period.between(start, end);
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd.MM");
-        DateTimeFormatter formatter2 = DateTimeFormatter.ofPattern("dd");
-        if (period.getDays() == 0) {
-            prettyDate = start.format(formatter);
-        } else if (period.getDays() > 0) {
-            prettyDate = start.format(formatter2) + " - " + end.format(formatter);
-        }
-        return prettyDate;
     }
 
     private String dateFormatterForFileName(LocalDate start, LocalDate end) {
@@ -421,268 +605,20 @@ public class ExcelServiceImpl implements ExcelService {
     }
 
     private String chooseTemplate(InputHeader header) {
-        if (header.isSameEquipmentForAllDays()) {
+        if (header.isWithManyRegPoints()){
+            return "classpath:smeta2.xlsx";
+        } else if (header.isSameEquipmentForAllDays()) {
             return "classpath:smeta1.xlsx";
         } else {
             return "classpath:smeta.xlsx";
         }
     }
 
-    private void checkTheBody(List<InputBody> bodies, Sheet sheet, InputHeader header) {
-        int currentRow = 9;
-        for (int i = 0; i < bodies.size(); i++) {
-            if (bodies.get(i).getSDeviceCount() != null && bodies.get(i).getSDevicePrice() != null) {
-                Row rowDevice = sheet.getRow(currentRow);
-                Cell cellSDName = rowDevice.getCell(1);
-                cellSDName.setCellValue(bodies.get(i).getSoftDevice().getName());
-                Cell cellSDCount = rowDevice.getCell(4);
-                cellSDCount.setCellValue(bodies.get(i).getSDeviceCount());
-                Cell cellSDPrice = rowDevice.getCell(5);
-                cellSDPrice.setCellValue(bodies.get(i).getSDevicePrice());
-                Cell cellSum = rowDevice.getCell(7);
-                Cell cellWorkDays = rowDevice.getCell(3);
-                if (header.isSameEquipmentForAllDays()) {
-                    cellSum.setCellFormula("E" + (currentRow + 1) + "*F" + (currentRow + 1) + "*D" + (currentRow + 1));
-                    cellWorkDays.setCellValue(getDaysInPeriods(header).get(i));
-                } else {
-                    cellSum.setCellFormula("E" + (currentRow + 1) + "*F" + (currentRow + 1));
-                }
-                currentRow++;
-            }
-            if (bodies.get(i).getPDeviceCount() != null && bodies.get(i).getPDevicePrice() != null) {
-                Row rowPrinter = sheet.getRow(currentRow);
-                Cell cellPDName = rowPrinter.getCell(1);
-                cellPDName.setCellValue(bodies.get(i).getPrinterDevice().getName());
-                Cell cellPDCount = rowPrinter.getCell(4);
-                cellPDCount.setCellValue(bodies.get(i).getPDeviceCount());
-                Cell cellPDPrice = rowPrinter.getCell(5);
-                cellPDPrice.setCellValue(bodies.get(i).getPDevicePrice());
-                Cell cellSum = rowPrinter.getCell(7);
-                Cell cellWorkDays = rowPrinter.getCell(3);
-                if (header.isSameEquipmentForAllDays()) {
-                    cellSum.setCellFormula("E" + (currentRow + 1) + "*F" + (currentRow + 1) + "*D" + (currentRow + 1));
-                    cellWorkDays.setCellValue(getDaysInPeriods(header).get(i));
-                } else {
-                    cellSum.setCellFormula("E" + (currentRow + 1) + "*F" + (currentRow + 1));
-                }
-                currentRow++;
-            }
-            if (bodies.get(i).getSwitchingCount() != null && bodies.get(i).getSwitchingPrice() != null) {
-                Row rowSwitching = sheet.getRow(currentRow);
-                Cell cellSWName = rowSwitching.getCell(1);
-                cellSWName.setCellValue("Кабельная коммутация");
-                Cell cellSWCount = rowSwitching.getCell(4);
-                cellSWCount.setCellValue(bodies.get(i).getSwitchingCount());
-                Cell cellSWPrice = rowSwitching.getCell(5);
-                cellSWPrice.setCellValue(bodies.get(i).getSwitchingPrice());
-                Cell cellSum = rowSwitching.getCell(7);
-                Cell cellWorkDays = rowSwitching.getCell(3);
-                if (header.isSameEquipmentForAllDays()) {
-                    cellSum.setCellFormula("E" + (currentRow + 1) + "*F" + (currentRow + 1) + "*D" + (currentRow + 1));
-                    cellWorkDays.setCellValue(getDaysInPeriods(header).get(i));
-                } else {
-                    cellSum.setCellFormula("E" + (currentRow + 1) + "*F" + (currentRow + 1));
-                }
-                currentRow++;
-            }
-            if (bodies.get(i).getNetworkCount() != null && bodies.get(i).getNetworkPrice() != null) {
-                Row rowNetwork = sheet.getRow(currentRow);
-                Cell cellNWName = rowNetwork.getCell(1);
-                cellNWName.setCellValue("Cетевое оборудование");
-                Cell cellNWCount = rowNetwork.getCell(4);
-                cellNWCount.setCellValue(bodies.get(i).getNetworkCount());
-                Cell cellNWPrice = rowNetwork.getCell(5);
-                cellNWPrice.setCellValue(bodies.get(i).getNetworkPrice());
-                Cell cellSum = rowNetwork.getCell(7);
-                Cell cellWorkDays = rowNetwork.getCell(3);
-                if (header.isSameEquipmentForAllDays()) {
-                    cellSum.setCellFormula("E" + (currentRow + 1) + "*F" + (currentRow + 1) + "*D" + (currentRow + 1));
-                    cellWorkDays.setCellValue(getDaysInPeriods(header).get(i));
-                } else {
-                    cellSum.setCellFormula("E" + (currentRow + 1) + "*F" + (currentRow + 1));
-                }
-                currentRow++;
-            }
-            if (bodies.get(i).getBarcodeDeviceCount() != null && bodies.get(i).getBarcodeDevicePrice() != null) {
-                Row rowBarcode = sheet.getRow(currentRow);
-                Cell cellBCName = rowBarcode.getCell(1);
-                cellBCName.setCellValue("2D-сканер");
-                Cell cellBCCount = rowBarcode.getCell(4);
-                cellBCCount.setCellValue(bodies.get(i).getBarcodeDeviceCount());
-                Cell cellBCPrice = rowBarcode.getCell(5);
-                cellBCPrice.setCellValue(bodies.get(i).getBarcodeDevicePrice());
-                Cell cellSum = rowBarcode.getCell(7);
-                Cell cellWorkDays = rowBarcode.getCell(3);
-                if (header.isSameEquipmentForAllDays()) {
-                    cellSum.setCellFormula("E" + (currentRow + 1) + "*F" + (currentRow + 1) + "*D" + (currentRow + 1));
-                    cellWorkDays.setCellValue(getDaysInPeriods(header).get(i));
-                } else {
-                    cellSum.setCellFormula("E" + (currentRow + 1) + "*F" + (currentRow + 1));
-                }
-                currentRow++;
-            }
-            if (bodies.get(i).getCameraDeviceCount() != null && bodies.get(i).getCameraDevicePrice() != null) {
-                Row rowCamera = sheet.getRow(currentRow);
-                Cell cellCMName = rowCamera.getCell(1);
-                cellCMName.setCellValue("Web-камера");
-                Cell cellCMCount = rowCamera.getCell(4);
-                cellCMCount.setCellValue(bodies.get(i).getCameraDeviceCount());
-                Cell cellCMPrice = rowCamera.getCell(5);
-                cellCMPrice.setCellValue(bodies.get(i).getCameraDevicePrice());
-                Cell cellSum = rowCamera.getCell(7);
-                Cell cellWorkDays = rowCamera.getCell(3);
-                if (header.isSameEquipmentForAllDays()) {
-                    cellSum.setCellFormula("E" + (currentRow + 1) + "*F" + (currentRow + 1) + "*D" + (currentRow + 1));
-                    cellWorkDays.setCellValue(getDaysInPeriods(header).get(i));
-                } else {
-                    cellSum.setCellFormula("E" + (currentRow + 1) + "*F" + (currentRow + 1));
-                }
-                currentRow++;
-            }
-            if (bodies.get(i).getRfidReaderDeviceCount() != null && bodies.get(i).getRfidReaderDevicePrice() != null) {
-                Row rowRfid = sheet.getRow(currentRow);
-                Cell cellRFName = rowRfid.getCell(1);
-                cellRFName.setCellValue("RFID-считыватель");
-                Cell cellRFCount = rowRfid.getCell(4);
-                cellRFCount.setCellValue(bodies.get(i).getRfidReaderDeviceCount());
-                Cell cellRFPrice = rowRfid.getCell(5);
-                cellRFPrice.setCellValue(bodies.get(i).getRfidReaderDevicePrice());
-                Cell cellSum = rowRfid.getCell(7);
-                Cell cellWorkDays = rowRfid.getCell(3);
-                if (header.isSameEquipmentForAllDays()) {
-                    cellSum.setCellFormula("E" + (currentRow + 1) + "*F" + (currentRow + 1) + "*D" + (currentRow + 1));
-                    cellWorkDays.setCellValue(getDaysInPeriods(header).get(i));
-                } else {
-                    cellSum.setCellFormula("E" + (currentRow + 1) + "*F" + (currentRow + 1));
-                }
-                currentRow++;
-            }
-            if (bodies.get(i).getTsdCount() != null && bodies.get(i).getTsdPrice() != null) {
-                Row rowTsd = sheet.getRow(currentRow);
-                Cell cellTSDName = rowTsd.getCell(1);
-                cellTSDName.setCellValue("ТСД");
-                Cell cellTSDCount = rowTsd.getCell(4);
-                cellTSDCount.setCellValue(bodies.get(i).getTsdCount());
-                Cell cellTSDPrice = rowTsd.getCell(5);
-                cellTSDPrice.setCellValue(bodies.get(i).getTsdPrice());
-                Cell cellSum = rowTsd.getCell(7);
-                Cell cellWorkDays = rowTsd.getCell(3);
-                if (header.isSameEquipmentForAllDays()) {
-                    cellSum.setCellFormula("E" + (currentRow + 1) + "*F" + (currentRow + 1) + "*D" + (currentRow + 1));
-                    cellWorkDays.setCellValue(getDaysInPeriods(header).get(i));
-                } else {
-                    cellSum.setCellFormula("E" + (currentRow + 1) + "*F" + (currentRow + 1));
-                }
-                currentRow++;
-            }
-        }
-    }
-
-    public List<String> getHeaderPeriods(InputHeader header) {
-        List<String> periods = new ArrayList<>();
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd.MMM");
-
-        // Проверяем первый период
-        if (header.getBoolStart1() != null && header.getBoolEnd1() != null) {
-            if (header.getBoolStart1().isEqual(header.getBoolEnd1())) {
-                periods.add(header.getBoolStart1().format(formatter));
-            } else {
-                periods.add(header.getBoolStart1().format(formatter) + " - " + header.getBoolEnd1().format(formatter));
-            }
-        }
-
-        // Проверяем второй период
-        if (header.getBoolStart2() != null && header.getBoolEnd2() != null) {
-            if (header.getBoolStart2().isEqual(header.getBoolEnd2())) {
-                periods.add(header.getBoolStart2().format(formatter));
-            } else {
-                periods.add(header.getBoolStart2().format(formatter) + " - " + header.getBoolEnd2().format(formatter));
-            }
-        }
-
-        // Проверяем третий период
-        if (header.getBoolStart3() != null && header.getBoolEnd3() != null) {
-            if (header.getBoolStart3().isEqual(header.getBoolEnd3())) {
-                periods.add(header.getBoolStart3().format(formatter));
-            } else {
-                periods.add(header.getBoolStart3().format(formatter) + " - " + header.getBoolEnd3().format(formatter));
-            }
-        }
-
-        // Проверяем, остались ли неохваченные даты между последним периодом и eventEndDate
-        LocalDate lastPeriodEnd = header.getEventStartDate().minusDays(1);
-
-        if (header.getBoolEnd3() != null) {
-            lastPeriodEnd = header.getBoolEnd3();
-        } else if (header.getBoolEnd2() != null) {
-            lastPeriodEnd = header.getBoolEnd2();
-        } else if (header.getBoolEnd1() != null) {
-            lastPeriodEnd = header.getBoolEnd1();
-        }
-
-        if (lastPeriodEnd.isBefore(header.getEventEndDate())) {
-            if (lastPeriodEnd.plusDays(1).isEqual(header.getEventEndDate())) {
-                periods.add(header.getEventEndDate().format(formatter));
-            } else {
-                periods.add(lastPeriodEnd.plusDays(1).format(formatter) + " - " + header.getEventEndDate().format(formatter));
-            }
-        }
-
-        return periods;
-    }
-
-    public static List<Integer> getDaysInPeriods(InputHeader header) {
-        List<Integer> daysInPeriods = new ArrayList<>();
-
-        // Проверяем первый период
-        if (header.getBoolStart1() != null && header.getBoolEnd1() != null) {
-            long days = ChronoUnit.DAYS.between(header.getBoolStart1(), header.getBoolEnd1()) + 1;
-            daysInPeriods.add((int) days);
-        }
-
-        // Проверяем второй период
-        if (header.getBoolStart2() != null && header.getBoolEnd2() != null) {
-            long days = ChronoUnit.DAYS.between(header.getBoolStart2(), header.getBoolEnd2()) + 1;
-            daysInPeriods.add((int) days);
-        }
-
-        // Проверяем третий период
-        if (header.getBoolStart3() != null && header.getBoolEnd3() != null) {
-            long days = ChronoUnit.DAYS.between(header.getBoolStart3(), header.getBoolEnd3()) + 1;
-            daysInPeriods.add((int) days);
-        }
-
-        // Проверяем, остались ли неохваченные дни между последним периодом и eventEndDate
-        LocalDate lastPeriodEnd = getLastPeriodEnd(header);
-        if (lastPeriodEnd.isBefore(header.getEventEndDate())) {
-            long remainingDays = ChronoUnit.DAYS.between(lastPeriodEnd.plusDays(1), header.getEventEndDate()) + 1;
-            daysInPeriods.add((int) remainingDays);
-        }
-
-        return daysInPeriods;
-    }
-
-    private static LocalDate getLastPeriodEnd(InputHeader header) {
-        LocalDate lastPeriodEnd = header.getEventStartDate().minusDays(1); // Начнем с даты перед началом события
-
-        if (header.getBoolEnd1() != null) {
-            lastPeriodEnd = header.getBoolEnd1();
-        }
-        if (header.getBoolEnd2() != null && header.getBoolEnd2().isAfter(lastPeriodEnd)) {
-            lastPeriodEnd = header.getBoolEnd2();
-        }
-        if (header.getBoolEnd3() != null && header.getBoolEnd3().isAfter(lastPeriodEnd)) {
-            lastPeriodEnd = header.getBoolEnd3();
-        }
-
-        return lastPeriodEnd;
-    }
-
     public void updateFileWithSuppliesData(InputHeader header, Supplies supplies) {
 
         try {
             String fileName = dateFormatterForFileName(header.getEventStartDate(), header.getEventEndDate())
-                    + " " + header.getCustomer() + " СМЕТА РЕГИСТРАЦИИ Ver1";
+                    + " " + header.getEventName() + " СМЕТА РЕГИСТРАЦИИ Ver1";
             String filePath = excelFilesDirectory + File.separator + fileName + ".xlsx";
             File file = new File(filePath);
 
@@ -693,21 +629,21 @@ public class ExcelServiceImpl implements ExcelService {
             Workbook workbook = new XSSFWorkbook(new FileInputStream(file));
             Sheet sheet = workbook.getSheetAt(0);
 
-            CellStyle topRowStyle = workbook.createCellStyle();
-            topRowStyle.setAlignment(HorizontalAlignment.CENTER);
-            topRowStyle.setVerticalAlignment(VerticalAlignment.CENTER);
-            topRowStyle.setBorderTop(BorderStyle.DOUBLE);
-            topRowStyle.setBorderLeft(BorderStyle.THIN);
-            topRowStyle.setBorderRight(BorderStyle.THIN);
+            CellStyle bottomLastRowStyle = workbook.createCellStyle();
+            bottomLastRowStyle.setAlignment(HorizontalAlignment.CENTER);
+            bottomLastRowStyle.setVerticalAlignment(VerticalAlignment.CENTER);
+            bottomLastRowStyle.setBorderBottom(BorderStyle.THICK);
+            bottomLastRowStyle.setBorderLeft(BorderStyle.THIN);
+            bottomLastRowStyle.setBorderRight(BorderStyle.THIN);
 
-            CellStyle topRowStyle1 = workbook.createCellStyle();
-            topRowStyle1.setAlignment(HorizontalAlignment.LEFT);
-            topRowStyle1.setVerticalAlignment(VerticalAlignment.CENTER);
-            topRowStyle1.setBorderTop(BorderStyle.DOUBLE);
-            topRowStyle1.setBorderLeft(BorderStyle.THIN);
-            topRowStyle1.setBorderRight(BorderStyle.THIN);
+            CellStyle bottomLastRowStyle1 = workbook.createCellStyle();
+            bottomLastRowStyle1.setAlignment(HorizontalAlignment.LEFT);
+            bottomLastRowStyle1.setVerticalAlignment(VerticalAlignment.CENTER);
+            bottomLastRowStyle1.setBorderBottom(BorderStyle.THICK);
+            bottomLastRowStyle1.setBorderLeft(BorderStyle.THIN);
+            bottomLastRowStyle1.setBorderRight(BorderStyle.THIN);
 
-            writeSupplies(header, supplies, sheet);
+            writeSupplies(supplies, sheet, bottomLastRowStyle, bottomLastRowStyle1);
 
             FormulaEvaluator evaluator = workbook.getCreationHelper().createFormulaEvaluator();
             evaluator.evaluateAll();
@@ -721,7 +657,8 @@ public class ExcelServiceImpl implements ExcelService {
         }
     }
 
-    private void writeSupplies(InputHeader header, Supplies supplies, Sheet sheet) {
+    private void writeSupplies(Supplies supplies, Sheet sheet,
+                               CellStyle bottomLastRowStyle, CellStyle bottomLastRowStyle1) {
         // Подсчитываем количество строк для каждого типа расходников
         int[] mass = new int[8];
         mass[0] = (int) supplies.getBadges().stream()
@@ -779,18 +716,13 @@ public class ExcelServiceImpl implements ExcelService {
             Row formulaRow = sheet.getRow(startRow+1 + neededRows);
             Cell formulaCell = formulaRow.getCell(7);
             formulaCell.setCellFormula("SUM(H" + (startRow+2) + ":H" + (startRow + neededRows + 1) +")");
-
-            int formulaRowIndex = formulaRow.getRowNum();
-            String fileName = dateFormatterForFileName(header.getEventStartDate(), header.getEventEndDate())
-                    + " " + header.getCustomer() + " СМЕТА РЕГИСТРАЦИИ Ver1";
-            //отладка
-            System.out.println("Вот" + formulaRowIndex);
-            if (formulaMap.containsKey(fileName)) {
-                formulaMap.get(fileName).add(formulaRowIndex);
-            } else {
-                // Логирование ошибки, если файл не был инициализирован
-                log.error("File {} not found in formulaMap", fileName);
-            }
+            applyStyles(sheet.getRow(formulaRow.getRowNum()-1), bottomLastRowStyle, bottomLastRowStyle1);
+            Row finalFormulaRow = sheet.getRow(findFirstRow(sheet, "Заказчик предоставляет:*") - 1);
+            Cell finalFormulaCell = finalFormulaRow.getCell(7);
+            String forUpdateFinalFormula = finalFormulaCell.getCellFormula();
+            System.out.println("T<FYF" + forUpdateFinalFormula);
+            finalFormulaCell.setCellFormula(forUpdateFinalFormula.substring(0, forUpdateFinalFormula.length() - 1) + ",H"
+                    + (formulaRow.getRowNum()+1) + ")");
         }
 
     }
@@ -894,11 +826,11 @@ public class ExcelServiceImpl implements ExcelService {
         }
     }
 
-    public void updateFileWithStaff(InputHeader header, List<Staff> staffs, Mounting mounting, int periods) {
+    public void updateFileWithStaff(InputHeader header) {
 
         try {
             String fileName = dateFormatterForFileName(header.getEventStartDate(), header.getEventEndDate())
-                    + " " + header.getCustomer() + " СМЕТА РЕГИСТРАЦИИ Ver1";
+                    + " " + header.getEventName() + " СМЕТА РЕГИСТРАЦИИ Ver1";
             String filePath = excelFilesDirectory + File.separator + fileName + ".xlsx";
             File file = new File(filePath);
 
@@ -937,8 +869,26 @@ public class ExcelServiceImpl implements ExcelService {
             bottomLastRowStyle1.setBorderLeft(BorderStyle.THIN);
             bottomLastRowStyle1.setBorderRight(BorderStyle.THIN);
 
-            writeStaff2(header, staffs, mounting, sheet, periods,
-                    bottomBlockRowStyle, bottomBlockRowStyle1, bottomLastRowStyle, bottomLastRowStyle1);
+            if(header.getInputStaffs().size() != 0 && header.getMountings().size() != 0) {
+                markupOtherService(header, sheet);
+                fillMountingRows(header,sheet, bottomLastRowStyle, bottomLastRowStyle1, bottomBlockRowStyle, bottomBlockRowStyle1);
+                fillStaffRows(header, sheet, bottomLastRowStyle, bottomLastRowStyle1, bottomBlockRowStyle, bottomBlockRowStyle1);
+
+                Row finalFormulaRow = sheet.getRow(findFirstRow(sheet, "Заказчик предоставляет:*") - 1);
+                Row blockFormulaRow = sheet.getRow(findFirstRow(sheet, "ЛОГИСТИКА") - 1);
+                Cell finalFormulaCell = finalFormulaRow.getCell(7);
+                String forUpdateFinalFormula = finalFormulaCell.getCellFormula();
+                System.out.println("T<FYF" + forUpdateFinalFormula);
+                finalFormulaCell.setCellFormula(forUpdateFinalFormula.substring(0, forUpdateFinalFormula.length() - 1) + ",H"
+                        + (blockFormulaRow.getRowNum()+1) + ")");
+            } else {
+                int removeRowIndex = findFirstRow(sheet, "ПРОЧИЕ УСЛУГИ");
+                removeMergedRegions(sheet, removeRowIndex+1);
+                removeRow(sheet, removeRowIndex+1);
+                removeMergedRegions(sheet, removeRowIndex);
+                removeRow(sheet, removeRowIndex);
+            }
+
 
             FormulaEvaluator evaluator = workbook.getCreationHelper().createFormulaEvaluator();
             evaluator.evaluateAll();
@@ -952,1225 +902,322 @@ public class ExcelServiceImpl implements ExcelService {
         }
     }
 
-    private void writeStaff2(InputHeader header, List<Staff> staffs, Mounting mounting, Sheet sheet, int periods,
-                            CellStyle bottomBlockRowStyle, CellStyle bottomBlockRowStyle1,
-                            CellStyle bottomLastRowStyle, CellStyle bottomLastRowStyle1) {
+    private void markupOtherService(InputHeader header, Sheet sheet) {
 
-        int startRow = findFirstRow(sheet, "ПРОЧИЕ УСЛУГИ");
+        boolean hasMontage = false;
+        boolean hasStaff = false;
 
-        int[] neededRows = new int[6];//массив на 6 блоков
-        int maxBlockCount = header.isSameEquipmentForAllDays() ? periods : header.getWorkDays();//понимаем на сколько сотрудников блок
+        int startRowIndex = findFirstRow(sheet, "ПРОЧИЕ УСЛУГИ") + 1;
+        System.out.println("Начальный индекс строки для вставки: " + startRowIndex);
 
-        for (int i = 0; i < maxBlockCount; i++) {
-            int startIndex = i * (header.isSameEquipmentForAllDays() ? 7 : 6);
-            int endIndex = startIndex + (header.isSameEquipmentForAllDays() ? 7 : 6);
-            neededRows[i] = countNeededRows(staffs, startIndex, endIndex);
-        }
 
-        int newStartRow = startRow + 1;
-        boolean hasMontage = mounting.getQPrice() != 0 && mounting.getHours() != 0 && mounting.getQStaff() != 0;
-        boolean hasStaff = Arrays.stream(neededRows).sum() > 0;
+        if(header.getInputStaffs().size() != 0){
+            hasStaff = true;
+            int inputStaffsCount = header.getInputStaffs().size();
+            int[] neededRows = new int[inputStaffsCount];
 
-        if (hasMontage) {
-            insertRowsWithShift(sheet, startRow + 1, 1);
-            fillMountingRow(sheet.getRow(startRow + 1), mounting, bottomBlockRowStyle, bottomBlockRowStyle1,
-                    bottomLastRowStyle, bottomLastRowStyle1, hasStaff);
-            newStartRow = startRow + 2;
-        }
+            for (int i = 0; i < inputStaffsCount; i++) {
+                neededRows[i] = header.getInputStaffs().get(i).getStaffs().size();
+                System.out.println("InputStaff " + i + " содержит " + neededRows[i] + " устройств.");
+            }
 
-        //отладка
-        System.out.println(newStartRow);
-        int formulaStartRow = newStartRow;
-
-        if(hasStaff) {
-            //валидация на шаблоне
-            if (header.isSameEquipmentForAllDays() && periods == 1) {
-                insertRowsWithShift(sheet, newStartRow, neededRows[0]);
-                if (neededRows[0] > 1) {
-                    mergeCells2(sheet, newStartRow, newStartRow + neededRows[0] - 1);
-                }
-                Row lastRowInBlock = sheet.getRow(newStartRow + neededRows[0] - 1);
-                Row formulaRow = sheet.getRow(newStartRow + neededRows[0]);
-                //сначала получаем стартовую строку, затем берем список стафф и проходим по индексам из neededRowsForFirstBlock
-                for (int i = 0; i < neededRows[0]; i++) {
-                    Row rowForStaff = sheet.getRow(newStartRow);
-                    Cell cellForDates = rowForStaff.getCell(0);
-                    cellForDates.setCellValue(dateFormatterForCell(header.getEventStartDate(), header.getEventEndDate()));
-                    Cell cellForKind = rowForStaff.getCell(1);
-                    cellForKind.setCellValue(staffs.get(i).getKindOfStaff());
-                    Cell cellForWorkTime = rowForStaff.getCell(3);
-                    cellForWorkTime.setCellValue(staffs.get(i).getStartTime().toString() + " - " + staffs.get(i).getEndTime().toString());
-                    Cell cellForWorkHours = rowForStaff.getCell(4);
-                    cellForWorkHours.setCellValue(ChronoUnit.HOURS.between(staffs.get(i).getStartTime(), staffs.get(i).getEndTime()));
-                    //возможен такой сценарий startTime = 23:00, а endTime = 02:00
-                    Cell cellForStaffQuantity = rowForStaff.getCell(5);
-                    cellForStaffQuantity.setCellValue(staffs.get(i).getStaffQuantity());
-                    Cell cellForBetPerHour = rowForStaff.getCell(6);
-                    cellForBetPerHour.setCellValue(staffs.get(i).getBetPerHour());
-                    Cell cellForFormula = rowForStaff.getCell(7);
-                    String formula = "E" + (newStartRow + 1) + "*F" + (newStartRow + 1) + "*G" + (newStartRow + 1) + "*" + header.getWorkDays();
-                    cellForFormula.setCellFormula(formula);
-                    newStartRow++;
+            for (int i = 0; i < neededRows.length; i++) {
+                insertRowsWithShift(sheet, startRowIndex, neededRows[i]);
+                if (!header.isWithManyRegPoints()) {
+                    if (neededRows[i] > 1) {
+                        System.out.println("Объединяем ячейки для inputBody " + i + " с " + startRowIndex + " по " + (startRowIndex + neededRows[i] - 1));
+                        mergeCells(sheet, startRowIndex, startRowIndex + neededRows[i] - 1);
+                    }
+                } else {
+                    if (neededRows[i] > 1) {
+                        mergeCellsForRegPoints(sheet, startRowIndex, startRowIndex + neededRows[i] - 1);
+                    }
                 }
 
-                applyStyles(lastRowInBlock, bottomLastRowStyle, bottomLastRowStyle1);
-
-                //отладка
-                System.out.println(newStartRow);
-                Cell formulaCell = formulaRow.getCell(7);
-                formulaCell.setCellFormula("SUM(H" + (formulaStartRow) + ":H" + (formulaStartRow + neededRows[1]) + ")");
-
-            } else if (header.isSameEquipmentForAllDays() && periods > 1) {
-                if (periods == 4) {
-                    insertRowsWithShift(sheet, newStartRow, neededRows[0] + neededRows[1] +
-                            neededRows[2] + neededRows[3]);
-                    if (neededRows[0] > 1) {
-                        mergeCells2(sheet, newStartRow, newStartRow + neededRows[0] - 1);
-                    }
-                    if (neededRows[1] > 1) {
-                        mergeCells(sheet, newStartRow + neededRows[0],
-                                newStartRow + neededRows[0] + neededRows[1] - 1);
-                    }
-                    if (neededRows[2] > 1) {
-                        mergeCells(sheet, newStartRow + neededRows[0] + neededRows[1],
-                                newStartRow + neededRows[0] + neededRows[1] + neededRows[2] - 1);
-                    }
-                    if (neededRows[3] > 1) {
-                        mergeCells(sheet, newStartRow + neededRows[0] + neededRows[1] + neededRows[2],
-                                newStartRow + neededRows[0] + neededRows[1] + neededRows[2] + neededRows[3] - 1);
-                    }
-                    Row lastRowInBlock1 = sheet.getRow(newStartRow + neededRows[0] - 1);
-                    Row lastRowInBlock2 = sheet.getRow(newStartRow + neededRows[0] + neededRows[1] - 1);
-                    Row lastRowInBlock3 = sheet.getRow(newStartRow + neededRows[0] + neededRows[1]
-                            + neededRows[2] - 1);
-                    Row lastRowInBlock4 = sheet.getRow(newStartRow + neededRows[0] + neededRows[1]
-                            + neededRows[2] + neededRows[3] - 1);
-                    Row formulaRow = sheet.getRow(newStartRow + neededRows[0] + neededRows[1]
-                            + neededRows[2] + neededRows[3]);
-                    for (int i = 0; i < neededRows[0]; i++) {
-                        Row rowForStaff = sheet.getRow(newStartRow);
-                        Cell cellForDates = rowForStaff.getCell(0);
-                        cellForDates.setCellValue(staffs.get(i).getHeader().getBoolStart1().toString() + " - " +
-                                staffs.get(i).getHeader().getBoolEnd1().toString());
-                        Cell cellForKind = rowForStaff.getCell(1);
-                        cellForKind.setCellValue(staffs.get(i).getKindOfStaff());
-                        Cell cellForWorkTime = rowForStaff.getCell(3);
-                        cellForWorkTime.setCellValue(staffs.get(i).getStartTime().toString() + "-" + staffs.get(i).getEndTime().toString());
-                        Cell cellForWorkHours = rowForStaff.getCell(4);
-                        cellForWorkHours.setCellValue(ChronoUnit.HOURS.between(staffs.get(i).getStartTime(), staffs.get(i).getEndTime()));
-                        //возможен такой сценарий startTime = 23:00, а endTime = 02:00 - хотя у меня на входе есть валидация - откладываем
-                        Cell cellForStaffQuantity = rowForStaff.getCell(5);
-                        cellForStaffQuantity.setCellValue(staffs.get(i).getStaffQuantity());
-                        Cell cellForBetPerHour = rowForStaff.getCell(6);
-                        cellForBetPerHour.setCellValue(staffs.get(i).getBetPerHour());
-                        Cell cellForFormula = rowForStaff.getCell(7);
-                        String formula = "E" + (newStartRow + 1) + "*F" + (newStartRow + 1) + "*G" + (newStartRow + 1) + "*" +
-                                (ChronoUnit.DAYS.between(staffs.get(i).getHeader().getBoolStart1(), staffs.get(i).getHeader().getBoolEnd1()) + 1);
-                        cellForFormula.setCellFormula(formula);
-                        newStartRow++;
-                    }
-
-                    applyStyles(lastRowInBlock1, bottomBlockRowStyle, bottomBlockRowStyle1);
-
-                    for (int j = 7; j < neededRows[1] + 7; j++) {
-                        Row rowForStaff2 = sheet.getRow(newStartRow);
-                        Cell cellForDates = rowForStaff2.getCell(0);
-                        cellForDates.setCellValue(staffs.get(j).getHeader().getBoolStart2().toString() + " - " +
-                                staffs.get(j).getHeader().getBoolEnd2().toString());
-                        Cell cellForKind = rowForStaff2.getCell(1);
-                        cellForKind.setCellValue(staffs.get(j).getKindOfStaff());
-                        Cell cellForWorkTime = rowForStaff2.getCell(3);
-                        cellForWorkTime.setCellValue(staffs.get(j).getStartTime().toString() + "-" + staffs.get(j).getEndTime().toString());
-                        Cell cellForWorkHours = rowForStaff2.getCell(4);
-                        cellForWorkHours.setCellValue(ChronoUnit.HOURS.between(staffs.get(j).getStartTime(), staffs.get(j).getEndTime()));
-                        //возможен такой сценарий startTime = 23:00, а endTime = 02:00 - хотя у меня на входе есть валидация - откладываем
-                        Cell cellForStaffQuantity = rowForStaff2.getCell(5);
-                        cellForStaffQuantity.setCellValue(staffs.get(j).getStaffQuantity());
-                        Cell cellForBetPerHour = rowForStaff2.getCell(6);
-                        cellForBetPerHour.setCellValue(staffs.get(j).getBetPerHour());
-                        Cell cellForFormula = rowForStaff2.getCell(7);
-                        String formula = "E" + (newStartRow + 1) + "*F" + (newStartRow + 1) + "*G" + (newStartRow + 1) + "*" +
-                                (ChronoUnit.DAYS.between(staffs.get(j).getHeader().getBoolStart2(), staffs.get(j).getHeader().getBoolEnd2()) + 1);
-                        cellForFormula.setCellFormula(formula);
-                        newStartRow++;
-                    }
-                    applyStyles(lastRowInBlock2, bottomBlockRowStyle, bottomBlockRowStyle1);
-
-                    for (int j = 14; j < neededRows[2] + 14; j++) {
-                        Row rowForStaff3 = sheet.getRow(newStartRow);
-                        Cell cellForDates = rowForStaff3.getCell(0);
-                        cellForDates.setCellValue(staffs.get(j).getHeader().getBoolStart3().toString() + " - " +
-                                staffs.get(j).getHeader().getBoolEnd3().toString());
-                        Cell cellForKind = rowForStaff3.getCell(1);
-                        cellForKind.setCellValue(staffs.get(j).getKindOfStaff());
-                        Cell cellForWorkTime = rowForStaff3.getCell(3);
-                        cellForWorkTime.setCellValue(staffs.get(j).getStartTime().toString() + "-" + staffs.get(j).getEndTime().toString());
-                        Cell cellForWorkHours = rowForStaff3.getCell(4);
-                        cellForWorkHours.setCellValue(ChronoUnit.HOURS.between(staffs.get(j).getStartTime(), staffs.get(j).getEndTime()));
-                        //возможен такой сценарий startTime = 23:00, а endTime = 02:00 - хотя у меня на входе есть валидация - откладываем
-                        Cell cellForStaffQuantity = rowForStaff3.getCell(5);
-                        cellForStaffQuantity.setCellValue(staffs.get(j).getStaffQuantity());
-                        Cell cellForBetPerHour = rowForStaff3.getCell(6);
-                        cellForBetPerHour.setCellValue(staffs.get(j).getBetPerHour());
-                        Cell cellForFormula = rowForStaff3.getCell(7);
-                        String formula = "E" + (newStartRow + 1) + "*F" + (newStartRow + 1) + "*G" + (newStartRow + 1) + "*" +
-                                (ChronoUnit.DAYS.between(staffs.get(j).getHeader().getBoolStart3(), staffs.get(j).getHeader().getBoolEnd3()) + 1);
-                        cellForFormula.setCellFormula(formula);
-                        newStartRow++;
-                    }
-                    applyStyles(lastRowInBlock3, bottomBlockRowStyle, bottomBlockRowStyle1);
-
-
-                    for (int j = 21; j < neededRows[3] + 21; j++) {
-                        Row rowForStaff3 = sheet.getRow(newStartRow);
-                        Cell cellForDates = rowForStaff3.getCell(0);
-                        cellForDates.setCellValue(staffs.get(j).getHeader().getBoolStart4().toString() + " - " +
-                                staffs.get(j).getHeader().getBoolEnd4().toString());
-                        Cell cellForKind = rowForStaff3.getCell(1);
-                        cellForKind.setCellValue(staffs.get(j).getKindOfStaff());
-                        Cell cellForWorkTime = rowForStaff3.getCell(3);
-                        cellForWorkTime.setCellValue(staffs.get(j).getStartTime().toString() + "-" + staffs.get(j).getEndTime().toString());
-                        Cell cellForWorkHours = rowForStaff3.getCell(4);
-                        cellForWorkHours.setCellValue(ChronoUnit.HOURS.between(staffs.get(j).getStartTime(), staffs.get(j).getEndTime()));
-                        //возможен такой сценарий startTime = 23:00, а endTime = 02:00 - хотя у меня на входе есть валидация - откладываем
-                        Cell cellForStaffQuantity = rowForStaff3.getCell(5);
-                        cellForStaffQuantity.setCellValue(staffs.get(j).getStaffQuantity());
-                        Cell cellForBetPerHour = rowForStaff3.getCell(6);
-                        cellForBetPerHour.setCellValue(staffs.get(j).getBetPerHour());
-                        Cell cellForFormula = rowForStaff3.getCell(7);
-                        String formula = "E" + (newStartRow + 1) + "*F" + (newStartRow + 1) + "*G" + (newStartRow + 1) + "*" +
-                                (ChronoUnit.DAYS.between(staffs.get(j).getHeader().getBoolStart4(), staffs.get(j).getHeader().getBoolEnd4()) + 1);
-                        cellForFormula.setCellFormula(formula);
-                        newStartRow++;
-                    }
-                    applyStyles(lastRowInBlock4, bottomLastRowStyle, bottomLastRowStyle1);
-
-                    Cell formulaCell = formulaRow.getCell(7);
-                    formulaCell.setCellFormula("SUM(H" + (formulaStartRow) + ":H" +
-                            (formulaStartRow + neededRows[0] + neededRows[1] +
-                                    neededRows[2] + neededRows[3]) + ")");
-
-                }
-                if (periods == 3) {
-
-                    insertRowsWithShift(sheet, newStartRow, neededRows[0] + neededRows[1] +
-                            neededRows[2]);
-                    if (neededRows[0] > 1) {
-                        mergeCells2(sheet, newStartRow, newStartRow + neededRows[0] - 1);
-                    }
-                    if (neededRows[1] > 1) {
-                        mergeCells(sheet, newStartRow + neededRows[0],
-                                newStartRow + neededRows[0] + neededRows[1] - 1);
-                    }
-                    if (neededRows[2] > 1) {
-                        mergeCells(sheet, newStartRow + neededRows[0] + neededRows[1],
-                                newStartRow + neededRows[0] + neededRows[1] + neededRows[2] - 1);
-                    }
-                    Row lastRowInBlock1 = sheet.getRow(newStartRow + neededRows[0] - 1);
-                    Row lastRowInBlock2 = sheet.getRow(newStartRow + neededRows[0] + neededRows[1] - 1);
-                    Row lastRowInBlock3 = sheet.getRow(newStartRow + neededRows[0] + neededRows[1]
-                            + neededRows[2] - 1);
-                    Row formulaRow = sheet.getRow(newStartRow + neededRows[0] + neededRows[1]
-                            + neededRows[2]);
-                    for (int i = 0; i < neededRows[0]; i++) {
-                        Row rowForStaff = sheet.getRow(newStartRow);
-                        Cell cellForDates = rowForStaff.getCell(0);
-                        cellForDates.setCellValue(staffs.get(i).getHeader().getBoolStart1().toString() + " - " +
-                                staffs.get(i).getHeader().getBoolEnd1().toString());
-                        Cell cellForKind = rowForStaff.getCell(1);
-                        cellForKind.setCellValue(staffs.get(i).getKindOfStaff());
-                        Cell cellForWorkTime = rowForStaff.getCell(3);
-                        cellForWorkTime.setCellValue(staffs.get(i).getStartTime().toString() + "-" + staffs.get(i).getEndTime().toString());
-                        Cell cellForWorkHours = rowForStaff.getCell(4);
-                        cellForWorkHours.setCellValue(ChronoUnit.HOURS.between(staffs.get(i).getStartTime(), staffs.get(i).getEndTime()));
-                        //возможен такой сценарий startTime = 23:00, а endTime = 02:00 - хотя у меня на входе есть валидация - откладываем
-                        Cell cellForStaffQuantity = rowForStaff.getCell(5);
-                        cellForStaffQuantity.setCellValue(staffs.get(i).getStaffQuantity());
-                        Cell cellForBetPerHour = rowForStaff.getCell(6);
-                        cellForBetPerHour.setCellValue(staffs.get(i).getBetPerHour());
-                        Cell cellForFormula = rowForStaff.getCell(7);
-                        String formula = "E" + (newStartRow + 1) + "*F" + (newStartRow + 1) + "*G" + (newStartRow + 1) + "*" +
-                                (ChronoUnit.DAYS.between(staffs.get(i).getHeader().getBoolStart1(), staffs.get(i).getHeader().getBoolEnd1()) + 1);
-                        cellForFormula.setCellFormula(formula);
-                        newStartRow++;
-                    }
-                    applyStyles(lastRowInBlock1, bottomBlockRowStyle, bottomBlockRowStyle1);
-
-                    for (int j = 7; j < neededRows[1] + 7; j++) {
-                        Row rowForStaff2 = sheet.getRow(newStartRow);
-                        Cell cellForDates = rowForStaff2.getCell(0);
-                        cellForDates.setCellValue(staffs.get(j).getHeader().getBoolStart2().toString() + " - " +
-                                staffs.get(j).getHeader().getBoolEnd2().toString());
-                        Cell cellForKind = rowForStaff2.getCell(1);
-                        cellForKind.setCellValue(staffs.get(j).getKindOfStaff());
-                        Cell cellForWorkTime = rowForStaff2.getCell(3);
-                        cellForWorkTime.setCellValue(staffs.get(j).getStartTime().toString() + "-" + staffs.get(j).getEndTime().toString());
-                        Cell cellForWorkHours = rowForStaff2.getCell(4);
-                        cellForWorkHours.setCellValue(ChronoUnit.HOURS.between(staffs.get(j).getStartTime(), staffs.get(j).getEndTime()));
-                        //возможен такой сценарий startTime = 23:00, а endTime = 02:00 - хотя у меня на входе есть валидация - откладываем
-                        Cell cellForStaffQuantity = rowForStaff2.getCell(5);
-                        cellForStaffQuantity.setCellValue(staffs.get(j).getStaffQuantity());
-                        Cell cellForBetPerHour = rowForStaff2.getCell(6);
-                        cellForBetPerHour.setCellValue(staffs.get(j).getBetPerHour());
-                        Cell cellForFormula = rowForStaff2.getCell(7);
-                        String formula = "E" + (newStartRow + 1) + "*F" + (newStartRow + 1) + "*G" + (newStartRow + 1) + "*" +
-                                (ChronoUnit.DAYS.between(staffs.get(j).getHeader().getBoolStart2(), staffs.get(j).getHeader().getBoolEnd2()) + 1);
-                        cellForFormula.setCellFormula(formula);
-                        newStartRow++;
-                    }
-
-                    applyStyles(lastRowInBlock2, bottomBlockRowStyle, bottomBlockRowStyle1);
-
-
-                    for (int j = 14; j < neededRows[2] + 14; j++) {
-                        Row rowForStaff3 = sheet.getRow(newStartRow);
-                        Cell cellForDates = rowForStaff3.getCell(0);
-                        if (staffs.get(j).getHeader().getBoolStart2() != null && staffs.get(j).getHeader().getBoolEnd3() != null) {
-                            cellForDates.setCellValue(staffs.get(j).getHeader().getBoolStart3().toString() + " - " +
-                                    staffs.get(j).getHeader().getBoolEnd2().toString());
-                        } else {
-                            cellForDates.setCellValue(staffs.get(j).getHeader().getBoolStart4().toString() + " - " +
-                                    staffs.get(j).getHeader().getBoolEnd4().toString());
-                        }
-                        Cell cellForKind = rowForStaff3.getCell(1);
-                        cellForKind.setCellValue(staffs.get(j).getKindOfStaff());
-                        Cell cellForWorkTime = rowForStaff3.getCell(3);
-                        cellForWorkTime.setCellValue(staffs.get(j).getStartTime().toString() + "-" + staffs.get(j).getEndTime().toString());
-                        Cell cellForWorkHours = rowForStaff3.getCell(4);
-                        cellForWorkHours.setCellValue(ChronoUnit.HOURS.between(staffs.get(j).getStartTime(), staffs.get(j).getEndTime()));
-                        //возможен такой сценарий startTime = 23:00, а endTime = 02:00 - хотя у меня на входе есть валидация - откладываем
-                        Cell cellForStaffQuantity = rowForStaff3.getCell(5);
-                        cellForStaffQuantity.setCellValue(staffs.get(j).getStaffQuantity());
-                        Cell cellForBetPerHour = rowForStaff3.getCell(6);
-                        cellForBetPerHour.setCellValue(staffs.get(j).getBetPerHour());
-                        Cell cellForFormula = rowForStaff3.getCell(7);
-                        String formula;
-                        if (staffs.get(j).getHeader().getBoolStart3() != null && staffs.get(j).getHeader().getBoolEnd3() != null) {
-                            formula = "E" + (newStartRow + 1) + "*F" + (newStartRow + 1) + "*G" + (newStartRow + 1) + "*" +
-                                    (ChronoUnit.DAYS.between(staffs.get(j).getHeader().getBoolStart3(), staffs.get(j).getHeader().getBoolEnd3()) + 1);
-                        } else {
-                            formula = "E" + (newStartRow + 1) + "*F" + (newStartRow + 1) + "*G" + (newStartRow + 1) + "*" +
-                                    (ChronoUnit.DAYS.between(staffs.get(j).getHeader().getBoolStart4(), staffs.get(j).getHeader().getBoolEnd4()) + 1);
-                        }
-                        cellForFormula.setCellFormula(formula);
-                        newStartRow++;
-                    }
-
-                    applyStyles(lastRowInBlock3, bottomLastRowStyle, bottomLastRowStyle1);
-
-                    Cell formulaCell = formulaRow.getCell(7);
-                    formulaCell.setCellFormula("SUM(H" + (formulaStartRow) + ":H" +
-                            (formulaStartRow + neededRows[0] + neededRows[1] + neededRows[2]) + ")");
-                }
-                if (periods == 2) {
-
-                    insertRowsWithShift(sheet, newStartRow, neededRows[0] + neededRows[1]);
-                    if (neededRows[0] > 1) {
-                        mergeCells2(sheet, newStartRow, newStartRow + neededRows[0] - 1);
-                    }
-
-                    if (neededRows[1] > 1) {
-                        mergeCells(sheet, newStartRow + neededRows[0],
-                                newStartRow + neededRows[0] + neededRows[1] - 1);
-                    }
-                    Row lastRowInBlock1 = sheet.getRow(newStartRow + neededRows[0] - 1);
-                    Row lastRowInBlock2 = sheet.getRow(newStartRow + neededRows[0] + neededRows[1] - 1);
-                    Row formulaRow = sheet.getRow(newStartRow + neededRows[0] + neededRows[1]);
-                    for (int i = 0; i < neededRows[0]; i++) {
-                        Row rowForStaff = sheet.getRow(newStartRow);
-                        Cell cellForDates = rowForStaff.getCell(0);
-                        cellForDates.setCellValue(staffs.get(i).getHeader().getBoolStart1().toString() + " - " +
-                                staffs.get(i).getHeader().getBoolEnd1().toString());
-                        Cell cellForKind = rowForStaff.getCell(1);
-                        cellForKind.setCellValue(staffs.get(i).getKindOfStaff());
-                        Cell cellForWorkTime = rowForStaff.getCell(3);
-                        cellForWorkTime.setCellValue(staffs.get(i).getStartTime().toString() + "-" + staffs.get(i).getEndTime().toString());
-                        Cell cellForWorkHours = rowForStaff.getCell(4);
-                        cellForWorkHours.setCellValue(ChronoUnit.HOURS.between(staffs.get(i).getStartTime(), staffs.get(i).getEndTime()));
-                        //возможен такой сценарий startTime = 23:00, а endTime = 02:00 - хотя у меня на входе есть валидация - откладываем
-                        Cell cellForStaffQuantity = rowForStaff.getCell(5);
-                        cellForStaffQuantity.setCellValue(staffs.get(i).getStaffQuantity());
-                        Cell cellForBetPerHour = rowForStaff.getCell(6);
-                        cellForBetPerHour.setCellValue(staffs.get(i).getBetPerHour());
-                        Cell cellForFormula = rowForStaff.getCell(7);
-                        String formula = "E" + (newStartRow + 1) + "*F" + (newStartRow + 1) + "*G" + (newStartRow + 1) + "*" +
-                                (ChronoUnit.DAYS.between(staffs.get(i).getHeader().getBoolStart1(), staffs.get(i).getHeader().getBoolEnd1()) + 1);
-                        cellForFormula.setCellFormula(formula);
-                        newStartRow++;
-
-                    }
-
-                    applyStyles(lastRowInBlock1, bottomBlockRowStyle, bottomBlockRowStyle1);
-
-                    for (int j = 7; j < neededRows[1] + 7; j++) {
-                        Row rowForStaff2 = sheet.getRow(newStartRow);
-
-                        Cell cellForDates = rowForStaff2.getCell(0);
-                        if (staffs.get(j).getHeader().getBoolStart2() != null && staffs.get(j).getHeader().getBoolEnd2() != null) {
-                            cellForDates.setCellValue(staffs.get(j).getHeader().getBoolStart2().toString() + " - " +
-                                    staffs.get(j).getHeader().getBoolEnd2().toString());
-                        } else {
-                            cellForDates.setCellValue(staffs.get(j).getHeader().getBoolStart4().toString() + " - " +
-                                    staffs.get(j).getHeader().getBoolEnd4().toString());
-                        }
-
-                        Cell cellForKind = rowForStaff2.getCell(1);
-                        cellForKind.setCellValue(staffs.get(j).getKindOfStaff());
-                        Cell cellForWorkTime = rowForStaff2.getCell(3);
-                        cellForWorkTime.setCellValue(staffs.get(j).getStartTime().toString() + "-" + staffs.get(j).getEndTime().toString());
-                        Cell cellForWorkHours = rowForStaff2.getCell(4);
-                        cellForWorkHours.setCellValue(ChronoUnit.HOURS.between(staffs.get(j).getStartTime(), staffs.get(j).getEndTime()));
-                        //возможен такой сценарий startTime = 23:00, а endTime = 02:00 - хотя у меня на входе есть валидация - откладываем
-                        Cell cellForStaffQuantity = rowForStaff2.getCell(5);
-                        cellForStaffQuantity.setCellValue(staffs.get(j).getStaffQuantity());
-                        Cell cellForBetPerHour = rowForStaff2.getCell(6);
-                        cellForBetPerHour.setCellValue(staffs.get(j).getBetPerHour());
-                        Cell cellForFormula = rowForStaff2.getCell(7);
-                        String formula;
-                        if (staffs.get(j).getHeader().getBoolStart2() != null && staffs.get(j).getHeader().getBoolEnd2() != null) {
-                            formula = "E" + (newStartRow + 1) + "*F" + (newStartRow + 1) + "*G" + (newStartRow + 1) + "*" +
-                                    (ChronoUnit.DAYS.between(staffs.get(j).getHeader().getBoolStart2(), staffs.get(j).getHeader().getBoolEnd2()) + 1);
-                        } else {
-                            formula = "E" + (newStartRow + 1) + "*F" + (newStartRow + 1) + "*G" + (newStartRow + 1) + "*" +
-                                    (ChronoUnit.DAYS.between(staffs.get(j).getHeader().getBoolStart4(), staffs.get(j).getHeader().getBoolEnd4()) + 1);
-                        }
-                        cellForFormula.setCellFormula(formula);
-                        newStartRow++;
-                        //Формат границ
-                    }
-
-                    applyStyles(lastRowInBlock2, bottomLastRowStyle, bottomLastRowStyle1);
-
-                    Cell formulaCell = formulaRow.getCell(7);
-                    formulaCell.setCellFormula("SUM(H" + (formulaStartRow) + ":H" +
-                            (formulaStartRow + neededRows[0] + neededRows[1]) + ")");
-                }
-
-            } else {
-                if (header.getWorkDays() == 6) {
-                    insertRowsWithShift(sheet, newStartRow, neededRows[0] + neededRows[1] +
-                            neededRows[2] + neededRows[3] + neededRows[4] + neededRows[5]);
-                    if (neededRows[0] > 1) {
-                        mergeCells2(sheet, newStartRow, newStartRow + neededRows[0] - 1);
-                    }
-                    if (neededRows[1] > 1) {
-                        mergeCells(sheet, newStartRow + neededRows[0],
-                                newStartRow + neededRows[0] + neededRows[1] - 1);
-                    }
-                    if (neededRows[2] > 1) {
-                        mergeCells(sheet, newStartRow + neededRows[0] + neededRows[1],
-                                newStartRow + neededRows[0] + neededRows[1] + neededRows[2] - 1);
-                    }
-                    if (neededRows[3] > 1) {
-                        mergeCells(sheet, newStartRow + neededRows[0] + neededRows[1] + neededRows[2],
-                                newStartRow + neededRows[0] + neededRows[1] + neededRows[2] + neededRows[3] - 1);
-                    }
-                    if (neededRows[4] > 1) {
-                        mergeCells(sheet, newStartRow + neededRows[0] + neededRows[1] + neededRows[2] + neededRows[3],
-                                newStartRow + neededRows[0] + neededRows[1] + neededRows[2] + neededRows[3] + neededRows[4] - 1);
-                    }
-                    if (neededRows[5] > 1) {
-                        mergeCells(sheet, newStartRow + neededRows[0] + neededRows[1] + neededRows[2] + neededRows[3] + neededRows[4],
-                                newStartRow + neededRows[0] + neededRows[1] + neededRows[2] + neededRows[3] + neededRows[4] + neededRows[5] - 1);
-                    }
-
-                    Row lastRowInBlock1 = sheet.getRow(newStartRow + neededRows[0] - 1);
-                    Row lastRowInBlock2 = sheet.getRow(newStartRow + neededRows[0] + neededRows[1] - 1);
-                    Row lastRowInBlock3 = sheet.getRow(newStartRow + neededRows[0] + neededRows[1] +
-                            neededRows[2] - 1);
-                    Row lastRowInBlock4 = sheet.getRow(newStartRow + neededRows[0] + neededRows[1] +
-                            neededRows[2] + neededRows[3] - 1);
-                    Row lastRowInBlock5 = sheet.getRow(newStartRow + neededRows[0] + neededRows[1] +
-                            neededRows[2] + neededRows[3] + neededRows[4] - 1);
-                    Row lastRowInBlock6 = sheet.getRow(newStartRow + neededRows[0] + neededRows[1] +
-                            neededRows[2] + neededRows[3] + neededRows[4] + neededRows[5] - 1);
-                    Row formulaRow = sheet.getRow(newStartRow + neededRows[0] + neededRows[1] +
-                            neededRows[2] + neededRows[3] + neededRows[4] + neededRows[5]);
-
-                    for (int i = 0; i < neededRows[0]; i++) {
-                        Row rowForStaff = sheet.getRow(newStartRow);
-                        Cell cellForDates = rowForStaff.getCell(0);
-                        cellForDates.setCellValue(header.getEventStartDate().toString());//Дата первого дня
-                        Cell cellForKind = rowForStaff.getCell(1);
-                        cellForKind.setCellValue(staffs.get(i).getKindOfStaff());
-                        Cell cellForWorkTime = rowForStaff.getCell(3);
-                        cellForWorkTime.setCellValue(staffs.get(i).getStartTime().toString() + "-" + staffs.get(i).getEndTime().toString());
-                        Cell cellForWorkHours = rowForStaff.getCell(4);
-                        cellForWorkHours.setCellValue(ChronoUnit.HOURS.between(staffs.get(i).getStartTime(), staffs.get(i).getEndTime()));
-                        //возможен такой сценарий startTime = 23:00, а endTime = 02:00 - хотя у меня на входе есть валидация - откладываем
-                        Cell cellForStaffQuantity = rowForStaff.getCell(5);
-                        cellForStaffQuantity.setCellValue(staffs.get(i).getStaffQuantity());
-                        Cell cellForBetPerHour = rowForStaff.getCell(6);
-                        cellForBetPerHour.setCellValue(staffs.get(i).getBetPerHour());
-                        Cell cellForFormula = rowForStaff.getCell(7);
-                        String formula = "E" + (newStartRow + 1) + "*F" + (newStartRow + 1) + "*G" + (newStartRow + 1);
-                        cellForFormula.setCellFormula(formula);
-                        newStartRow++;
-
-                    }
-                    applyStyles(lastRowInBlock1, bottomBlockRowStyle, bottomBlockRowStyle1);
-
-                    for (int j = 6; j < neededRows[1] + 6; j++) {
-                        Row rowForStaff2 = sheet.getRow(newStartRow);
-
-                        Cell cellForDates = rowForStaff2.getCell(0);
-                        cellForDates.setCellValue(header.getEventStartDate().plusDays(1).toString());
-                        Cell cellForKind = rowForStaff2.getCell(1);
-                        cellForKind.setCellValue(staffs.get(j).getKindOfStaff());
-                        Cell cellForWorkTime = rowForStaff2.getCell(3);
-                        cellForWorkTime.setCellValue(staffs.get(j).getStartTime().toString() + "-" + staffs.get(j).getEndTime().toString());
-                        Cell cellForWorkHours = rowForStaff2.getCell(4);
-                        cellForWorkHours.setCellValue(ChronoUnit.HOURS.between(staffs.get(j).getStartTime(), staffs.get(j).getEndTime()));
-                        //возможен такой сценарий startTime = 23:00, а endTime = 02:00 - хотя у меня на входе есть валидация - откладываем
-                        Cell cellForStaffQuantity = rowForStaff2.getCell(5);
-                        cellForStaffQuantity.setCellValue(staffs.get(j).getStaffQuantity());
-                        Cell cellForBetPerHour = rowForStaff2.getCell(6);
-                        cellForBetPerHour.setCellValue(staffs.get(j).getBetPerHour());
-                        Cell cellForFormula = rowForStaff2.getCell(7);
-                        String formula = "E" + (newStartRow + 1) + "*F" + (newStartRow + 1) + "*G" + (newStartRow + 1);
-                        cellForFormula.setCellFormula(formula);
-                        newStartRow++;
-                    }
-                    applyStyles(lastRowInBlock2, bottomBlockRowStyle, bottomBlockRowStyle1);
-
-                    for (int j = 12; j < neededRows[2] + 12; j++) {
-                        Row rowForStaff2 = sheet.getRow(newStartRow);
-
-                        Cell cellForDates = rowForStaff2.getCell(0);
-                        cellForDates.setCellValue(header.getEventStartDate().plusDays(2).toString());
-                        Cell cellForKind = rowForStaff2.getCell(1);
-                        cellForKind.setCellValue(staffs.get(j).getKindOfStaff());
-                        Cell cellForWorkTime = rowForStaff2.getCell(3);
-                        cellForWorkTime.setCellValue(staffs.get(j).getStartTime().toString() + "-" + staffs.get(j).getEndTime().toString());
-                        Cell cellForWorkHours = rowForStaff2.getCell(4);
-                        cellForWorkHours.setCellValue(ChronoUnit.HOURS.between(staffs.get(j).getStartTime(), staffs.get(j).getEndTime()));
-                        //возможен такой сценарий startTime = 23:00, а endTime = 02:00 - хотя у меня на входе есть валидация - откладываем
-                        Cell cellForStaffQuantity = rowForStaff2.getCell(5);
-                        cellForStaffQuantity.setCellValue(staffs.get(j).getStaffQuantity());
-                        Cell cellForBetPerHour = rowForStaff2.getCell(6);
-                        cellForBetPerHour.setCellValue(staffs.get(j).getBetPerHour());
-                        Cell cellForFormula = rowForStaff2.getCell(7);
-                        String formula = "E" + (newStartRow + 1) + "*F" + (newStartRow + 1) + "*G" + (newStartRow + 1);
-                        cellForFormula.setCellFormula(formula);
-                        newStartRow++;
-                    }
-                    applyStyles(lastRowInBlock3, bottomBlockRowStyle, bottomBlockRowStyle1);
-
-
-                    for (int j = 18; j < neededRows[3] + 18; j++) {
-                        Row rowForStaff2 = sheet.getRow(newStartRow);
-
-                        Cell cellForDates = rowForStaff2.getCell(0);
-                        cellForDates.setCellValue(header.getEventStartDate().plusDays(3).toString());
-                        Cell cellForKind = rowForStaff2.getCell(1);
-                        cellForKind.setCellValue(staffs.get(j).getKindOfStaff());
-                        Cell cellForWorkTime = rowForStaff2.getCell(3);
-                        cellForWorkTime.setCellValue(staffs.get(j).getStartTime().toString() + "-" + staffs.get(j).getEndTime().toString());
-                        Cell cellForWorkHours = rowForStaff2.getCell(4);
-                        cellForWorkHours.setCellValue(ChronoUnit.HOURS.between(staffs.get(j).getStartTime(), staffs.get(j).getEndTime()));
-                        //возможен такой сценарий startTime = 23:00, а endTime = 02:00 - хотя у меня на входе есть валидация - откладываем
-                        Cell cellForStaffQuantity = rowForStaff2.getCell(5);
-                        cellForStaffQuantity.setCellValue(staffs.get(j).getStaffQuantity());
-                        Cell cellForBetPerHour = rowForStaff2.getCell(6);
-                        cellForBetPerHour.setCellValue(staffs.get(j).getBetPerHour());
-                        Cell cellForFormula = rowForStaff2.getCell(7);
-                        String formula = "E" + (newStartRow + 1) + "*F" + (newStartRow + 1) + "*G" + (newStartRow + 1);
-                        cellForFormula.setCellFormula(formula);
-                        newStartRow++;
-                    }
-                    applyStyles(lastRowInBlock4, bottomBlockRowStyle, bottomBlockRowStyle1);
-
-
-                    for (int j = 24; j < neededRows[4] + 24; j++) {
-                        Row rowForStaff2 = sheet.getRow(newStartRow);
-
-                        Cell cellForDates = rowForStaff2.getCell(0);
-                        cellForDates.setCellValue(header.getEventStartDate().plusDays(4).toString());
-                        Cell cellForKind = rowForStaff2.getCell(1);
-                        cellForKind.setCellValue(staffs.get(j).getKindOfStaff());
-                        Cell cellForWorkTime = rowForStaff2.getCell(3);
-                        cellForWorkTime.setCellValue(staffs.get(j).getStartTime().toString() + "-" + staffs.get(j).getEndTime().toString());
-                        Cell cellForWorkHours = rowForStaff2.getCell(4);
-                        cellForWorkHours.setCellValue(ChronoUnit.HOURS.between(staffs.get(j).getStartTime(), staffs.get(j).getEndTime()));
-                        //возможен такой сценарий startTime = 23:00, а endTime = 02:00 - хотя у меня на входе есть валидация - откладываем
-                        Cell cellForStaffQuantity = rowForStaff2.getCell(5);
-                        cellForStaffQuantity.setCellValue(staffs.get(j).getStaffQuantity());
-                        Cell cellForBetPerHour = rowForStaff2.getCell(6);
-                        cellForBetPerHour.setCellValue(staffs.get(j).getBetPerHour());
-                        Cell cellForFormula = rowForStaff2.getCell(7);
-                        String formula = "E" + (newStartRow + 1) + "*F" + (newStartRow + 1) + "*G" + (newStartRow + 1);
-                        cellForFormula.setCellFormula(formula);
-                        newStartRow++;
-                    }
-                    applyStyles(lastRowInBlock5, bottomBlockRowStyle, bottomBlockRowStyle1);
-
-                    for (int j = 30; j < neededRows[5] + 30; j++) {
-                        Row rowForStaff2 = sheet.getRow(newStartRow);
-
-                        Cell cellForDates = rowForStaff2.getCell(0);
-                        cellForDates.setCellValue(header.getEventStartDate().plusDays(5).toString());
-                        Cell cellForKind = rowForStaff2.getCell(1);
-                        cellForKind.setCellValue(staffs.get(j).getKindOfStaff());
-                        Cell cellForWorkTime = rowForStaff2.getCell(3);
-                        cellForWorkTime.setCellValue(staffs.get(j).getStartTime().toString() + "-" + staffs.get(j).getEndTime().toString());
-                        Cell cellForWorkHours = rowForStaff2.getCell(4);
-                        cellForWorkHours.setCellValue(ChronoUnit.HOURS.between(staffs.get(j).getStartTime(), staffs.get(j).getEndTime()));
-                        //возможен такой сценарий startTime = 23:00, а endTime = 02:00 - хотя у меня на входе есть валидация - откладываем
-                        Cell cellForStaffQuantity = rowForStaff2.getCell(5);
-                        cellForStaffQuantity.setCellValue(staffs.get(j).getStaffQuantity());
-                        Cell cellForBetPerHour = rowForStaff2.getCell(6);
-                        cellForBetPerHour.setCellValue(staffs.get(j).getBetPerHour());
-                        Cell cellForFormula = rowForStaff2.getCell(7);
-                        String formula = "E" + (newStartRow + 1) + "*F" + (newStartRow + 1) + "*G" + (newStartRow + 1);
-                        cellForFormula.setCellFormula(formula);
-                        newStartRow++;
-                    }
-                    applyStyles(lastRowInBlock6, bottomLastRowStyle, bottomLastRowStyle1);
-
-                    Cell formulaCell = formulaRow.getCell(7);
-                    formulaCell.setCellFormula("SUM(H" + (formulaStartRow) + ":H" +
-                            (formulaStartRow + neededRows[0] + neededRows[1] + neededRows[2] +
-                                    neededRows[3] + neededRows[4] + neededRows[5]) + ")");
-
-
-                }
-                if (header.getWorkDays() == 5) {
-                    insertRowsWithShift(sheet, newStartRow, neededRows[0] + neededRows[1] +
-                            neededRows[2] + neededRows[3] + neededRows[4]);
-                    if (neededRows[0] > 1) {
-                        mergeCells2(sheet, newStartRow, newStartRow + neededRows[0] - 1);
-                    }
-                    if (neededRows[1] > 1) {
-                        mergeCells(sheet, newStartRow + neededRows[0],
-                                newStartRow + neededRows[0] + neededRows[1] - 1);
-                    }
-                    if (neededRows[2] > 1) {
-                        mergeCells(sheet, newStartRow + neededRows[0] + neededRows[1],
-                                newStartRow + neededRows[0] + neededRows[1] + neededRows[2] - 1);
-                    }
-                    if (neededRows[3] > 1) {
-                        mergeCells(sheet, newStartRow + neededRows[0] + neededRows[1] + neededRows[2],
-                                newStartRow + neededRows[0] + neededRows[1] + neededRows[2] + neededRows[3] - 1);
-                    }
-                    if (neededRows[4] > 1) {
-                        mergeCells(sheet, newStartRow + neededRows[0] + neededRows[1] + neededRows[2] + neededRows[3],
-                                newStartRow + neededRows[0] + neededRows[1] + neededRows[2] + neededRows[3] + neededRows[4] - 1);
-                    }
-
-                    Row lastRowInBlock1 = sheet.getRow(newStartRow + neededRows[0] - 1);
-                    Row lastRowInBlock2 = sheet.getRow(newStartRow + neededRows[0] + neededRows[1] - 1);
-                    Row lastRowInBlock3 = sheet.getRow(newStartRow + neededRows[0] + neededRows[1] +
-                            neededRows[2] - 1);
-                    Row lastRowInBlock4 = sheet.getRow(newStartRow + neededRows[0] + neededRows[1] +
-                            neededRows[2] + neededRows[3] - 1);
-                    Row lastRowInBlock5 = sheet.getRow(newStartRow + neededRows[0] + neededRows[1] +
-                            neededRows[2] + neededRows[3] + neededRows[4] - 1);
-                    Row formulaRow = sheet.getRow(newStartRow + neededRows[0] + neededRows[1] +
-                            neededRows[2] + neededRows[3] + neededRows[4]);
-
-                    for (int i = 0; i < neededRows[0]; i++) {
-                        Row rowForStaff = sheet.getRow(newStartRow);
-                        Cell cellForDates = rowForStaff.getCell(0);
-                        cellForDates.setCellValue(header.getEventStartDate().toString());//Дата первого дня
-                        Cell cellForKind = rowForStaff.getCell(1);
-                        cellForKind.setCellValue(staffs.get(i).getKindOfStaff());
-                        Cell cellForWorkTime = rowForStaff.getCell(3);
-                        cellForWorkTime.setCellValue(staffs.get(i).getStartTime().toString() + "-" + staffs.get(i).getEndTime().toString());
-                        Cell cellForWorkHours = rowForStaff.getCell(4);
-                        cellForWorkHours.setCellValue(ChronoUnit.HOURS.between(staffs.get(i).getStartTime(), staffs.get(i).getEndTime()));
-                        //возможен такой сценарий startTime = 23:00, а endTime = 02:00 - хотя у меня на входе есть валидация - откладываем
-                        Cell cellForStaffQuantity = rowForStaff.getCell(5);
-                        cellForStaffQuantity.setCellValue(staffs.get(i).getStaffQuantity());
-                        Cell cellForBetPerHour = rowForStaff.getCell(6);
-                        cellForBetPerHour.setCellValue(staffs.get(i).getBetPerHour());
-                        Cell cellForFormula = rowForStaff.getCell(7);
-                        String formula = "E" + (newStartRow + 1) + "*F" + (newStartRow + 1) + "*G" + (newStartRow + 1);
-                        cellForFormula.setCellFormula(formula);
-                        newStartRow++;
-
-                    }
-                    applyStyles(lastRowInBlock1, bottomBlockRowStyle, bottomBlockRowStyle1);
-
-                    for (int j = 6; j < neededRows[1] + 6; j++) {
-                        Row rowForStaff2 = sheet.getRow(newStartRow);
-
-                        Cell cellForDates = rowForStaff2.getCell(0);
-                        cellForDates.setCellValue(header.getEventStartDate().plusDays(1).toString());
-                        Cell cellForKind = rowForStaff2.getCell(1);
-                        cellForKind.setCellValue(staffs.get(j).getKindOfStaff());
-                        Cell cellForWorkTime = rowForStaff2.getCell(3);
-                        cellForWorkTime.setCellValue(staffs.get(j).getStartTime().toString() + "-" + staffs.get(j).getEndTime().toString());
-                        Cell cellForWorkHours = rowForStaff2.getCell(4);
-                        cellForWorkHours.setCellValue(ChronoUnit.HOURS.between(staffs.get(j).getStartTime(), staffs.get(j).getEndTime()));
-                        //возможен такой сценарий startTime = 23:00, а endTime = 02:00 - хотя у меня на входе есть валидация - откладываем
-                        Cell cellForStaffQuantity = rowForStaff2.getCell(5);
-                        cellForStaffQuantity.setCellValue(staffs.get(j).getStaffQuantity());
-                        Cell cellForBetPerHour = rowForStaff2.getCell(6);
-                        cellForBetPerHour.setCellValue(staffs.get(j).getBetPerHour());
-                        Cell cellForFormula = rowForStaff2.getCell(7);
-                        String formula = "E" + (newStartRow + 1) + "*F" + (newStartRow + 1) + "*G" + (newStartRow + 1);
-                        cellForFormula.setCellFormula(formula);
-                        newStartRow++;
-                    }
-                    applyStyles(lastRowInBlock2, bottomBlockRowStyle, bottomBlockRowStyle1);
-
-                    for (int j = 12; j < neededRows[2] + 12; j++) {
-                        Row rowForStaff2 = sheet.getRow(newStartRow);
-
-                        Cell cellForDates = rowForStaff2.getCell(0);
-                        cellForDates.setCellValue(header.getEventStartDate().plusDays(2).toString());
-                        Cell cellForKind = rowForStaff2.getCell(1);
-                        cellForKind.setCellValue(staffs.get(j).getKindOfStaff());
-                        Cell cellForWorkTime = rowForStaff2.getCell(3);
-                        cellForWorkTime.setCellValue(staffs.get(j).getStartTime().toString() + "-" + staffs.get(j).getEndTime().toString());
-                        Cell cellForWorkHours = rowForStaff2.getCell(4);
-                        cellForWorkHours.setCellValue(ChronoUnit.HOURS.between(staffs.get(j).getStartTime(), staffs.get(j).getEndTime()));
-                        //возможен такой сценарий startTime = 23:00, а endTime = 02:00 - хотя у меня на входе есть валидация - откладываем
-                        Cell cellForStaffQuantity = rowForStaff2.getCell(5);
-                        cellForStaffQuantity.setCellValue(staffs.get(j).getStaffQuantity());
-                        Cell cellForBetPerHour = rowForStaff2.getCell(6);
-                        cellForBetPerHour.setCellValue(staffs.get(j).getBetPerHour());
-                        Cell cellForFormula = rowForStaff2.getCell(7);
-                        String formula = "E" + (newStartRow + 1) + "*F" + (newStartRow + 1) + "*G" + (newStartRow + 1);
-                        cellForFormula.setCellFormula(formula);
-                        newStartRow++;
-                    }
-                    applyStyles(lastRowInBlock3, bottomBlockRowStyle, bottomBlockRowStyle1);
-
-                    for (int j = 18; j < neededRows[3] + 18; j++) {
-                        Row rowForStaff2 = sheet.getRow(newStartRow);
-
-                        Cell cellForDates = rowForStaff2.getCell(0);
-                        cellForDates.setCellValue(header.getEventStartDate().plusDays(3).toString());
-                        Cell cellForKind = rowForStaff2.getCell(1);
-                        cellForKind.setCellValue(staffs.get(j).getKindOfStaff());
-                        Cell cellForWorkTime = rowForStaff2.getCell(3);
-                        cellForWorkTime.setCellValue(staffs.get(j).getStartTime().toString() + "-" + staffs.get(j).getEndTime().toString());
-                        Cell cellForWorkHours = rowForStaff2.getCell(4);
-                        cellForWorkHours.setCellValue(ChronoUnit.HOURS.between(staffs.get(j).getStartTime(), staffs.get(j).getEndTime()));
-                        //возможен такой сценарий startTime = 23:00, а endTime = 02:00 - хотя у меня на входе есть валидация - откладываем
-                        Cell cellForStaffQuantity = rowForStaff2.getCell(5);
-                        cellForStaffQuantity.setCellValue(staffs.get(j).getStaffQuantity());
-                        Cell cellForBetPerHour = rowForStaff2.getCell(6);
-                        cellForBetPerHour.setCellValue(staffs.get(j).getBetPerHour());
-                        Cell cellForFormula = rowForStaff2.getCell(7);
-                        String formula = "E" + (newStartRow + 1) + "*F" + (newStartRow + 1) + "*G" + (newStartRow + 1);
-                        cellForFormula.setCellFormula(formula);
-                        newStartRow++;
-                    }
-                    applyStyles(lastRowInBlock4, bottomBlockRowStyle, bottomBlockRowStyle1);
-
-
-                    for (int j = 24; j < neededRows[4] + 24; j++) {
-                        Row rowForStaff2 = sheet.getRow(newStartRow);
-
-                        Cell cellForDates = rowForStaff2.getCell(0);
-                        cellForDates.setCellValue(header.getEventStartDate().plusDays(4).toString());
-                        Cell cellForKind = rowForStaff2.getCell(1);
-                        cellForKind.setCellValue(staffs.get(j).getKindOfStaff());
-                        Cell cellForWorkTime = rowForStaff2.getCell(3);
-                        cellForWorkTime.setCellValue(staffs.get(j).getStartTime().toString() + "-" + staffs.get(j).getEndTime().toString());
-                        Cell cellForWorkHours = rowForStaff2.getCell(4);
-                        cellForWorkHours.setCellValue(ChronoUnit.HOURS.between(staffs.get(j).getStartTime(), staffs.get(j).getEndTime()));
-                        //возможен такой сценарий startTime = 23:00, а endTime = 02:00 - хотя у меня на входе есть валидация - откладываем
-                        Cell cellForStaffQuantity = rowForStaff2.getCell(5);
-                        cellForStaffQuantity.setCellValue(staffs.get(j).getStaffQuantity());
-                        Cell cellForBetPerHour = rowForStaff2.getCell(6);
-                        cellForBetPerHour.setCellValue(staffs.get(j).getBetPerHour());
-                        Cell cellForFormula = rowForStaff2.getCell(7);
-                        String formula = "E" + (newStartRow + 1) + "*F" + (newStartRow + 1) + "*G" + (newStartRow + 1);
-                        cellForFormula.setCellFormula(formula);
-                        newStartRow++;
-                    }
-                    applyStyles(lastRowInBlock5, bottomLastRowStyle, bottomLastRowStyle1);
-
-                    Cell formulaCell = formulaRow.getCell(7);
-                    formulaCell.setCellFormula("SUM(H" + (formulaStartRow) + ":H" +
-                            (formulaStartRow + neededRows[0] + neededRows[1] + neededRows[2] +
-                                    neededRows[3] + neededRows[4]) + ")");
-
-                }
-                if (header.getWorkDays() == 4) {
-                    insertRowsWithShift(sheet, newStartRow, neededRows[0] + neededRows[1] +
-                            neededRows[2] + neededRows[3]);
-                    if (neededRows[0] > 1) {
-                        mergeCells2(sheet, newStartRow, newStartRow + neededRows[0] - 1);
-                    }
-                    if (neededRows[1] > 1) {
-                        mergeCells(sheet, newStartRow + neededRows[0],
-                                newStartRow + neededRows[0] + neededRows[1] - 1);
-                    }
-                    if (neededRows[2] > 1) {
-                        mergeCells(sheet, newStartRow + neededRows[0] + neededRows[1],
-                                newStartRow + neededRows[0] + neededRows[1] + neededRows[2] - 1);
-                    }
-                    if (neededRows[3] > 1) {
-                        mergeCells(sheet, newStartRow + neededRows[0] + neededRows[1] + neededRows[2],
-                                newStartRow + neededRows[0] + neededRows[1] + neededRows[2] + neededRows[3] - 1);
-                    }
-                    Row lastRowInBlock1 = sheet.getRow(newStartRow + neededRows[0] - 1);
-                    Row lastRowInBlock2 = sheet.getRow(newStartRow + neededRows[0] + neededRows[1] - 1);
-                    Row lastRowInBlock3 = sheet.getRow(newStartRow + neededRows[0] + neededRows[1] +
-                            neededRows[2] - 1);
-                    Row lastRowInBlock4 = sheet.getRow(newStartRow + neededRows[0] + neededRows[1] +
-                            neededRows[2] + neededRows[3] - 1);
-                    Row formulaRow = sheet.getRow(newStartRow + neededRows[0] + neededRows[1] +
-                            neededRows[2] + neededRows[3]);
-                    for (int i = 0; i < neededRows[0]; i++) {
-                        Row rowForStaff = sheet.getRow(newStartRow);
-                        Cell cellForDates = rowForStaff.getCell(0);
-                        cellForDates.setCellValue(header.getEventStartDate().toString());//Дата первого дня
-                        Cell cellForKind = rowForStaff.getCell(1);
-                        cellForKind.setCellValue(staffs.get(i).getKindOfStaff());
-                        Cell cellForWorkTime = rowForStaff.getCell(3);
-                        cellForWorkTime.setCellValue(staffs.get(i).getStartTime().toString() + "-" + staffs.get(i).getEndTime().toString());
-                        Cell cellForWorkHours = rowForStaff.getCell(4);
-                        cellForWorkHours.setCellValue(ChronoUnit.HOURS.between(staffs.get(i).getStartTime(), staffs.get(i).getEndTime()));
-                        //возможен такой сценарий startTime = 23:00, а endTime = 02:00 - хотя у меня на входе есть валидация - откладываем
-                        Cell cellForStaffQuantity = rowForStaff.getCell(5);
-                        cellForStaffQuantity.setCellValue(staffs.get(i).getStaffQuantity());
-                        Cell cellForBetPerHour = rowForStaff.getCell(6);
-                        cellForBetPerHour.setCellValue(staffs.get(i).getBetPerHour());
-                        Cell cellForFormula = rowForStaff.getCell(7);
-                        String formula = "E" + (newStartRow + 1) + "*F" + (newStartRow + 1) + "*G" + (newStartRow + 1);
-                        cellForFormula.setCellFormula(formula);
-                        newStartRow++;
-
-                    }
-                    applyStyles(lastRowInBlock1, bottomBlockRowStyle, bottomBlockRowStyle1);
-
-                    for (int j = 6; j < neededRows[1] + 6; j++) {
-                        Row rowForStaff2 = sheet.getRow(newStartRow);
-
-                        Cell cellForDates = rowForStaff2.getCell(0);
-                        cellForDates.setCellValue(header.getEventStartDate().plusDays(1).toString());
-                        Cell cellForKind = rowForStaff2.getCell(1);
-                        cellForKind.setCellValue(staffs.get(j).getKindOfStaff());
-                        Cell cellForWorkTime = rowForStaff2.getCell(3);
-                        cellForWorkTime.setCellValue(staffs.get(j).getStartTime().toString() + "-" + staffs.get(j).getEndTime().toString());
-                        Cell cellForWorkHours = rowForStaff2.getCell(4);
-                        cellForWorkHours.setCellValue(ChronoUnit.HOURS.between(staffs.get(j).getStartTime(), staffs.get(j).getEndTime()));
-                        //возможен такой сценарий startTime = 23:00, а endTime = 02:00 - хотя у меня на входе есть валидация - откладываем
-                        Cell cellForStaffQuantity = rowForStaff2.getCell(5);
-                        cellForStaffQuantity.setCellValue(staffs.get(j).getStaffQuantity());
-                        Cell cellForBetPerHour = rowForStaff2.getCell(6);
-                        cellForBetPerHour.setCellValue(staffs.get(j).getBetPerHour());
-                        Cell cellForFormula = rowForStaff2.getCell(7);
-                        String formula = "E" + (newStartRow + 1) + "*F" + (newStartRow + 1) + "*G" + (newStartRow + 1);
-                        cellForFormula.setCellFormula(formula);
-                        newStartRow++;
-                    }
-                    applyStyles(lastRowInBlock2, bottomBlockRowStyle, bottomBlockRowStyle1);
-
-                    for (int j = 12; j < neededRows[2] + 12; j++) {
-                        Row rowForStaff2 = sheet.getRow(newStartRow);
-
-                        Cell cellForDates = rowForStaff2.getCell(0);
-                        cellForDates.setCellValue(header.getEventStartDate().plusDays(2).toString());
-                        Cell cellForKind = rowForStaff2.getCell(1);
-                        cellForKind.setCellValue(staffs.get(j).getKindOfStaff());
-                        Cell cellForWorkTime = rowForStaff2.getCell(3);
-                        cellForWorkTime.setCellValue(staffs.get(j).getStartTime().toString() + "-" + staffs.get(j).getEndTime().toString());
-                        Cell cellForWorkHours = rowForStaff2.getCell(4);
-                        cellForWorkHours.setCellValue(ChronoUnit.HOURS.between(staffs.get(j).getStartTime(), staffs.get(j).getEndTime()));
-                        //возможен такой сценарий startTime = 23:00, а endTime = 02:00 - хотя у меня на входе есть валидация - откладываем
-                        Cell cellForStaffQuantity = rowForStaff2.getCell(5);
-                        cellForStaffQuantity.setCellValue(staffs.get(j).getStaffQuantity());
-                        Cell cellForBetPerHour = rowForStaff2.getCell(6);
-                        cellForBetPerHour.setCellValue(staffs.get(j).getBetPerHour());
-                        Cell cellForFormula = rowForStaff2.getCell(7);
-                        String formula = "E" + (newStartRow + 1) + "*F" + (newStartRow + 1) + "*G" + (newStartRow + 1);
-                        cellForFormula.setCellFormula(formula);
-                        newStartRow++;
-                    }
-                    applyStyles(lastRowInBlock3, bottomBlockRowStyle, bottomBlockRowStyle1);
-
-                    for (int j = 18; j < neededRows[3] + 18; j++) {
-                        Row rowForStaff2 = sheet.getRow(newStartRow);
-
-                        Cell cellForDates = rowForStaff2.getCell(0);
-                        cellForDates.setCellValue(header.getEventStartDate().plusDays(3).toString());
-                        Cell cellForKind = rowForStaff2.getCell(1);
-                        cellForKind.setCellValue(staffs.get(j).getKindOfStaff());
-                        Cell cellForWorkTime = rowForStaff2.getCell(3);
-                        cellForWorkTime.setCellValue(staffs.get(j).getStartTime().toString() + "-" + staffs.get(j).getEndTime().toString());
-                        Cell cellForWorkHours = rowForStaff2.getCell(4);
-                        cellForWorkHours.setCellValue(ChronoUnit.HOURS.between(staffs.get(j).getStartTime(), staffs.get(j).getEndTime()));
-                        //возможен такой сценарий startTime = 23:00, а endTime = 02:00 - хотя у меня на входе есть валидация - откладываем
-                        Cell cellForStaffQuantity = rowForStaff2.getCell(5);
-                        cellForStaffQuantity.setCellValue(staffs.get(j).getStaffQuantity());
-                        Cell cellForBetPerHour = rowForStaff2.getCell(6);
-                        cellForBetPerHour.setCellValue(staffs.get(j).getBetPerHour());
-                        Cell cellForFormula = rowForStaff2.getCell(7);
-                        String formula = "E" + (newStartRow + 1) + "*F" + (newStartRow + 1) + "*G" + (newStartRow + 1);
-                        cellForFormula.setCellFormula(formula);
-                        newStartRow++;
-                    }
-                    applyStyles(lastRowInBlock4, bottomLastRowStyle, bottomLastRowStyle1);
-
-                    Cell formulaCell = formulaRow.getCell(7);
-                    formulaCell.setCellFormula("SUM(H" + (formulaStartRow) + ":H" +
-                            (formulaStartRow + neededRows[0] + neededRows[1] + neededRows[2] +
-                                    neededRows[3]) + ")");
-                }
-                if (header.getWorkDays() == 3) {
-                    insertRowsWithShift(sheet, newStartRow, neededRows[0] + neededRows[1] +
-                            neededRows[2]);
-                    if (neededRows[0] > 1) {
-                        mergeCells2(sheet, newStartRow, newStartRow + neededRows[0] - 1);
-                    }
-                    if (neededRows[1] > 1) {
-                        mergeCells(sheet, newStartRow + neededRows[0],
-                                newStartRow + neededRows[0] + neededRows[1] - 1);
-                    }
-                    if (neededRows[2] > 1) {
-                        mergeCells(sheet, newStartRow + neededRows[0] + neededRows[1],
-                                newStartRow + neededRows[0] + neededRows[1] + neededRows[2] - 1);
-                    }
-                    Row lastRowInBlock1 = sheet.getRow(newStartRow + neededRows[0] - 1);
-                    Row lastRowInBlock2 = sheet.getRow(newStartRow + neededRows[0] + neededRows[1] - 1);
-                    Row lastRowInBlock3 = sheet.getRow(newStartRow + neededRows[0] + neededRows[1] +
-                            neededRows[2] - 1);
-                    Row formulaRow = sheet.getRow(newStartRow + neededRows[0] + neededRows[1] +
-                            neededRows[2]);
-                    for (int i = 0; i < neededRows[0]; i++) {
-                        Row rowForStaff = sheet.getRow(newStartRow);
-                        Cell cellForDates = rowForStaff.getCell(0);
-                        cellForDates.setCellValue(header.getEventStartDate().toString());//Дата первого дня
-                        Cell cellForKind = rowForStaff.getCell(1);
-                        cellForKind.setCellValue(staffs.get(i).getKindOfStaff());
-                        Cell cellForWorkTime = rowForStaff.getCell(3);
-                        cellForWorkTime.setCellValue(staffs.get(i).getStartTime().toString() + "-" + staffs.get(i).getEndTime().toString());
-                        Cell cellForWorkHours = rowForStaff.getCell(4);
-                        cellForWorkHours.setCellValue(ChronoUnit.HOURS.between(staffs.get(i).getStartTime(), staffs.get(i).getEndTime()));
-                        //возможен такой сценарий startTime = 23:00, а endTime = 02:00 - хотя у меня на входе есть валидация - откладываем
-                        Cell cellForStaffQuantity = rowForStaff.getCell(5);
-                        cellForStaffQuantity.setCellValue(staffs.get(i).getStaffQuantity());
-                        Cell cellForBetPerHour = rowForStaff.getCell(6);
-                        cellForBetPerHour.setCellValue(staffs.get(i).getBetPerHour());
-                        Cell cellForFormula = rowForStaff.getCell(7);
-                        String formula = "E" + (newStartRow + 1) + "*F" + (newStartRow + 1) + "*G" + (newStartRow + 1);
-                        cellForFormula.setCellFormula(formula);
-                        newStartRow++;
-
-                    }
-                    applyStyles(lastRowInBlock1, bottomBlockRowStyle, bottomBlockRowStyle1);
-
-                    for (int j = 6; j < neededRows[1] + 6; j++) {
-                        Row rowForStaff2 = sheet.getRow(newStartRow);
-
-                        Cell cellForDates = rowForStaff2.getCell(0);
-                        cellForDates.setCellValue(header.getEventStartDate().plusDays(1).toString());
-                        Cell cellForKind = rowForStaff2.getCell(1);
-                        cellForKind.setCellValue(staffs.get(j).getKindOfStaff());
-                        Cell cellForWorkTime = rowForStaff2.getCell(3);
-                        cellForWorkTime.setCellValue(staffs.get(j).getStartTime().toString() + "-" + staffs.get(j).getEndTime().toString());
-                        Cell cellForWorkHours = rowForStaff2.getCell(4);
-                        cellForWorkHours.setCellValue(ChronoUnit.HOURS.between(staffs.get(j).getStartTime(), staffs.get(j).getEndTime()));
-                        //возможен такой сценарий startTime = 23:00, а endTime = 02:00 - хотя у меня на входе есть валидация - откладываем
-                        Cell cellForStaffQuantity = rowForStaff2.getCell(5);
-                        cellForStaffQuantity.setCellValue(staffs.get(j).getStaffQuantity());
-                        Cell cellForBetPerHour = rowForStaff2.getCell(6);
-                        cellForBetPerHour.setCellValue(staffs.get(j).getBetPerHour());
-                        Cell cellForFormula = rowForStaff2.getCell(7);
-                        String formula = "E" + (newStartRow + 1) + "*F" + (newStartRow + 1) + "*G" + (newStartRow + 1);
-                        cellForFormula.setCellFormula(formula);
-                        newStartRow++;
-                    }
-                    applyStyles(lastRowInBlock2, bottomBlockRowStyle, bottomBlockRowStyle1);
-
-                    for (int j = 12; j < neededRows[2] + 12; j++) {
-                        Row rowForStaff2 = sheet.getRow(newStartRow);
-
-                        Cell cellForDates = rowForStaff2.getCell(0);
-                        cellForDates.setCellValue(header.getEventStartDate().plusDays(2).toString());
-                        Cell cellForKind = rowForStaff2.getCell(1);
-                        cellForKind.setCellValue(staffs.get(j).getKindOfStaff());
-                        Cell cellForWorkTime = rowForStaff2.getCell(3);
-                        cellForWorkTime.setCellValue(staffs.get(j).getStartTime().toString() + "-" + staffs.get(j).getEndTime().toString());
-                        Cell cellForWorkHours = rowForStaff2.getCell(4);
-                        cellForWorkHours.setCellValue(ChronoUnit.HOURS.between(staffs.get(j).getStartTime(), staffs.get(j).getEndTime()));
-                        //возможен такой сценарий startTime = 23:00, а endTime = 02:00 - хотя у меня на входе есть валидация - откладываем
-                        Cell cellForStaffQuantity = rowForStaff2.getCell(5);
-                        cellForStaffQuantity.setCellValue(staffs.get(j).getStaffQuantity());
-                        Cell cellForBetPerHour = rowForStaff2.getCell(6);
-                        cellForBetPerHour.setCellValue(staffs.get(j).getBetPerHour());
-                        Cell cellForFormula = rowForStaff2.getCell(7);
-                        String formula = "E" + (newStartRow + 1) + "*F" + (newStartRow + 1) + "*G" + (newStartRow + 1);
-                        cellForFormula.setCellFormula(formula);
-                        newStartRow++;
-                    }
-                    applyStyles(lastRowInBlock1, bottomLastRowStyle, bottomLastRowStyle1);
-
-                    Cell formulaCell = formulaRow.getCell(7);
-                    formulaCell.setCellFormula("SUM(H" + (formulaStartRow) + ":H" +
-                            (formulaStartRow + neededRows[0] + neededRows[1] + neededRows[2]) + ")");
-                }
-                if (header.getWorkDays() == 2) {
-                    insertRowsWithShift(sheet, newStartRow, neededRows[0] + neededRows[1]);
-                    if (neededRows[0] > 1) {
-                        mergeCells2(sheet, newStartRow, newStartRow + neededRows[0] - 1);
-                    }
-                    if (neededRows[1] > 1) {
-                        mergeCells(sheet, newStartRow + neededRows[0],
-                                newStartRow + neededRows[0] + neededRows[1] - 1);
-                    }
-
-                    Row lastRowInBlock1 = sheet.getRow(newStartRow + neededRows[0] - 1);
-                    Row lastRowInBlock2 = sheet.getRow(newStartRow + neededRows[0] + neededRows[1] - 1);
-                    Row formulaRow = sheet.getRow(newStartRow + neededRows[0] + neededRows[1]);
-
-                    for (int i = 0; i < neededRows[0]; i++) {
-                        Row rowForStaff = sheet.getRow(newStartRow);
-                        Cell cellForDates = rowForStaff.getCell(0);
-                        cellForDates.setCellValue(header.getEventStartDate().toString());//Дата первого дня
-                        Cell cellForKind = rowForStaff.getCell(1);
-                        cellForKind.setCellValue(staffs.get(i).getKindOfStaff());
-                        Cell cellForWorkTime = rowForStaff.getCell(3);
-                        cellForWorkTime.setCellValue(staffs.get(i).getStartTime().toString() + "-" + staffs.get(i).getEndTime().toString());
-                        Cell cellForWorkHours = rowForStaff.getCell(4);
-                        cellForWorkHours.setCellValue(ChronoUnit.HOURS.between(staffs.get(i).getStartTime(), staffs.get(i).getEndTime()));
-                        //возможен такой сценарий startTime = 23:00, а endTime = 02:00 - хотя у меня на входе есть валидация - откладываем
-                        Cell cellForStaffQuantity = rowForStaff.getCell(5);
-                        cellForStaffQuantity.setCellValue(staffs.get(i).getStaffQuantity());
-                        Cell cellForBetPerHour = rowForStaff.getCell(6);
-                        cellForBetPerHour.setCellValue(staffs.get(i).getBetPerHour());
-                        Cell cellForFormula = rowForStaff.getCell(7);
-                        String formula = "E" + (newStartRow + 1) + "*F" + (newStartRow + 1) + "*G" + (newStartRow + 1);
-                        cellForFormula.setCellFormula(formula);
-                        newStartRow++;
-
-                    }
-                    applyStyles(lastRowInBlock1, bottomBlockRowStyle, bottomBlockRowStyle1);
-
-                    for (int j = 6; j < neededRows[1] + 6; j++) {
-                        Row rowForStaff2 = sheet.getRow(newStartRow);
-
-                        Cell cellForDates = rowForStaff2.getCell(0);
-                        cellForDates.setCellValue(header.getEventStartDate().plusDays(1).toString());
-                        Cell cellForKind = rowForStaff2.getCell(1);
-                        cellForKind.setCellValue(staffs.get(j).getKindOfStaff());
-                        Cell cellForWorkTime = rowForStaff2.getCell(3);
-                        cellForWorkTime.setCellValue(staffs.get(j).getStartTime().toString() + "-" + staffs.get(j).getEndTime().toString());
-                        Cell cellForWorkHours = rowForStaff2.getCell(4);
-                        cellForWorkHours.setCellValue(ChronoUnit.HOURS.between(staffs.get(j).getStartTime(), staffs.get(j).getEndTime()));
-                        //возможен такой сценарий startTime = 23:00, а endTime = 02:00 - хотя у меня на входе есть валидация - откладываем
-                        Cell cellForStaffQuantity = rowForStaff2.getCell(5);
-                        cellForStaffQuantity.setCellValue(staffs.get(j).getStaffQuantity());
-                        Cell cellForBetPerHour = rowForStaff2.getCell(6);
-                        cellForBetPerHour.setCellValue(staffs.get(j).getBetPerHour());
-                        Cell cellForFormula = rowForStaff2.getCell(7);
-                        String formula = "E" + (newStartRow + 1) + "*F" + (newStartRow + 1) + "*G" + (newStartRow + 1);
-                        cellForFormula.setCellFormula(formula);
-                        newStartRow++;
-                    }
-                    applyStyles(lastRowInBlock2, bottomLastRowStyle, bottomLastRowStyle1);
-
-                    Cell formulaCell = formulaRow.getCell(7);
-                    formulaCell.setCellFormula("SUM(H" + (formulaStartRow) + ":H" +
-                            (formulaStartRow + neededRows[0] + neededRows[1]) + ")");
-
-
-                }
-                if (header.getWorkDays() == 1) {
-                    insertRowsWithShift(sheet, newStartRow, neededRows[0]);
-                    if (neededRows[0] > 1) {
-                        mergeCells2(sheet, newStartRow, newStartRow + neededRows[0] - 1);
-                    }
-                    Row lastRowInBlock1 = sheet.getRow(newStartRow + neededRows[0] - 1);
-                    Row formulaRow = sheet.getRow(newStartRow + neededRows[0]);
-
-                    for (int i = 0; i < neededRows[0]; i++) {
-                        Row rowForStaff = sheet.getRow(newStartRow);
-                        Cell cellForDates = rowForStaff.getCell(0);
-                        cellForDates.setCellValue(header.getEventStartDate().toString());//Дата первого дня
-                        Cell cellForKind = rowForStaff.getCell(1);
-                        cellForKind.setCellValue(staffs.get(i).getKindOfStaff());
-                        Cell cellForWorkTime = rowForStaff.getCell(3);
-                        cellForWorkTime.setCellValue(staffs.get(i).getStartTime().toString() + "-" + staffs.get(i).getEndTime().toString());
-                        Cell cellForWorkHours = rowForStaff.getCell(4);
-                        cellForWorkHours.setCellValue(ChronoUnit.HOURS.between(staffs.get(i).getStartTime(), staffs.get(i).getEndTime()));
-                        //возможен такой сценарий startTime = 23:00, а endTime = 02:00 - хотя у меня на входе есть валидация - откладываем
-                        Cell cellForStaffQuantity = rowForStaff.getCell(5);
-                        cellForStaffQuantity.setCellValue(staffs.get(i).getStaffQuantity());
-                        Cell cellForBetPerHour = rowForStaff.getCell(6);
-                        cellForBetPerHour.setCellValue(staffs.get(i).getBetPerHour());
-                        Cell cellForFormula = rowForStaff.getCell(7);
-                        String formula = "E" + (newStartRow + 1) + "*F" + (newStartRow + 1) + "*G" + (newStartRow + 1);
-                        cellForFormula.setCellFormula(formula);
-                        newStartRow++;
-
-                    }
-                    applyStyles(lastRowInBlock1, bottomLastRowStyle, bottomLastRowStyle1);
-
-                    Cell formulaCell = formulaRow.getCell(7);
-                    formulaCell.setCellFormula("SUM(H" + (formulaStartRow) + ":H" +
-                            (formulaStartRow + neededRows[0]) + ")");
-
-                }
+                startRowIndex += neededRows[i];
+            }
+            if(header.isWithManyRegPoints()){
+                additionalMarkUpForManyRegPointsTemplate2(sheet, header);
             }
         }
 
-        handleEmptyBlocks(sheet, startRow, hasMontage, hasStaff);
+        if(header.getMountings().size() != 0){
+            hasMontage = true;
+            int start =  findFirstRow(sheet, "ПРОЧИЕ УСЛУГИ") + 1;
+
+            if(header.isWithManyRegPoints() && !hasStaff){
+                int startRowHead = findFirstRow(sheet, "ПРОЧИЕ УСЛУГИ");
+                Cell firstCell = sheet.getRow(startRowHead).getCell(2);
+                CellStyle originalStyle = firstCell.getCellStyle();
+                String originalValue = firstCell.getStringCellValue();
+
+                // Удаление старого объединения
+                for (int i = 0; i < sheet.getNumMergedRegions(); i++) {
+                    CellRangeAddress mergedRegion = sheet.getMergedRegion(i);
+                    if (mergedRegion.getFirstRow() == startRowHead && mergedRegion.getLastRow() == startRowHead &&
+                            mergedRegion.getFirstColumn() == 2 && mergedRegion.getLastColumn() == 3) {
+                        sheet.removeMergedRegion(i);
+                        break;
+                    }
+                }
+                sheet.addMergedRegion(new CellRangeAddress(startRowHead, startRowHead, 1, 3));
+                Cell newFirstCell = sheet.getRow(startRowHead).getCell(1);
+                if (newFirstCell == null) {
+                    newFirstCell = sheet.getRow(startRowHead).createCell(1);
+                }
+                newFirstCell.setCellStyle(originalStyle);
+                newFirstCell.setCellValue(originalValue);
+            }
+
+            int mSize = header.getMountings().size(); // Получаем реальное количество m строк
+            insertRowsWithShift(sheet, start, mSize);
+            if(mSize > 1){
+                mergeCells(sheet, start, start + mSize - 1);
+            }
+        }
+
     }
 
-//    private void writeStaff(InputHeader header, List<Staff> staffs, Mounting mounting, Sheet sheet, int periods,
-//                            CellStyle bottomBlockRowStyle, CellStyle bottomBlockRowStyle1,
-//                            CellStyle bottomLastRowStyle, CellStyle bottomLastRowStyle1) {
-//
-//        int startRow = findFirstRow(sheet, "ПРОЧИЕ УСЛУГИ");
-//
-//        int[] neededRows = new int[6];//массив на 6 блоков
-//        int maxBlockCount = header.isSameEquipmentForAllDays() ? periods : header.getWorkDays();//понимаем на сколько сотрудников блок
-//
-//        for (int i = 0; i < maxBlockCount; i++) {
-//            int startIndex = i * (header.isSameEquipmentForAllDays() ? 7 : 6);
-//            int endIndex = startIndex + (header.isSameEquipmentForAllDays() ? 7 : 6);
-//            neededRows[i] = countNeededRows(staffs, startIndex, endIndex);
-//        }
-//
-//        int newStartRow = startRow + 1;
-//        boolean hasMontage = mounting.getQPrice() != 0 && mounting.getHours() != 0 && mounting.getQStaff() != 0;
-//        boolean hasStaff = Arrays.stream(neededRows).sum() > 0;
-//
-//        if (hasMontage) {
-//            insertRowsWithShift(sheet, startRow + 1, 1);
-//            fillMountingRow(sheet.getRow(startRow + 1), mounting, bottomBlockRowStyle, bottomBlockRowStyle1);
-//            newStartRow = startRow + 2;
-//        }
-//
-//        if (hasStaff) {
-//            processStaffBlocks(header, staffs, sheet, neededRows, newStartRow, maxBlockCount,
-//                    bottomBlockRowStyle, bottomBlockRowStyle1, bottomLastRowStyle, bottomLastRowStyle1);
-//        }
-//
-//        handleEmptyBlocks(sheet, startRow, hasMontage, hasStaff);
-//    }
+    private void additionalMarkUpForManyRegPointsTemplate2(Sheet sheet, InputHeader header) {
+        int startRowIndex = findFirstRow(sheet, "ПРОЧИЕ УСЛУГИ");
+        Cell firstCell = sheet.getRow(startRowIndex).getCell(2);
+        CellStyle originalStyle = firstCell.getCellStyle();
+        String originalValue = firstCell.getStringCellValue();
 
-    private void handleEmptyBlocks(Sheet sheet, int startRow, boolean hasMontage, boolean hasStaff) {
-        if (!hasMontage && !hasStaff) {
-            int rowForDelete = findFirstRow(sheet, "ПРОЧИЕ УСЛУГИ");
-            removeMergedRegions(sheet, rowForDelete + 1);
-            removeRow(sheet, rowForDelete + 1);
-            removeMergedRegions(sheet, rowForDelete);
-            removeRow(sheet, rowForDelete);
-        } else if (hasMontage && !hasStaff) {
-            // Логика обработки случая, когда есть монтаж, но нет стаффов
-            // Если требуется, можно выполнить другие действия здесь, например, очистить или объединить ячейки
-        } else if (!hasMontage && hasStaff) {
-            // Логика обработки случая, когда есть стаффы, но нет монтажа
-            // Если требуется, можно выполнить другие действия здесь, например, очистить или объединить ячейки
+        // Удаление старого объединения
+        for (int i = 0; i < sheet.getNumMergedRegions(); i++) {
+            CellRangeAddress mergedRegion = sheet.getMergedRegion(i);
+            if (mergedRegion.getFirstRow() == startRowIndex && mergedRegion.getLastRow() == startRowIndex &&
+                    mergedRegion.getFirstColumn() == 2 && mergedRegion.getLastColumn() == 2) {
+                sheet.removeMergedRegion(i);
+                break;
+            }
+        }
+
+        // Добавляем новое объединение
+        sheet.addMergedRegion(new CellRangeAddress(startRowIndex, startRowIndex, 1, 2));
+        Cell newFirstCell = sheet.getRow(startRowIndex).getCell(1);
+        if (newFirstCell == null) {
+            newFirstCell = sheet.getRow(startRowIndex).createCell(1);
+        }
+        newFirstCell.setCellStyle(originalStyle);
+        newFirstCell.setCellValue(originalValue);
+
+        // Создаем HashMap: даты -> ID InputBody
+        Map<String, List<Long>> dateToInputStaffMap = new LinkedHashMap<>();
+        List<String> sortedRegPoints = getRegPointsDates(header);
+
+        for (int i = 0; i < sortedRegPoints.size(); i++) {
+            String date = sortedRegPoints.get(i);
+            Long inputStaffId = header.getInputStaffs().get(i).getId();
+
+            dateToInputStaffMap.computeIfAbsent(date, k -> new ArrayList<>()).add(inputStaffId);
+        }
+
+        // Инициализация firstRow для первого выполнения mergeCells
+        int firstRow = startRowIndex+1;
+
+        //отладка
+        for (Map.Entry<String, List<Long>> entry : dateToInputStaffMap.entrySet()) {
+            String date = entry.getKey();
+            List<Long> inputStaffIds = entry.getValue();
+
+            // Выводим дату
+            System.out.print("Дата: " + date + " -> inputStaffIds IDs: ");
+
+            // Выводим все ID, связанные с этой датой
+            for (Long id : inputStaffIds) {
+                System.out.print(id + " ");
+            }
+            System.out.println(); // Переход на следующую строку
+        }
+        // Проходим по всем датам в HashMap и выполняем mergeCells
+        for (Map.Entry<String, List<Long>> entry : dateToInputStaffMap.entrySet()) {
+            String date = entry.getKey();
+            List<Long> inputStaffIds = entry.getValue();
+
+            // Суммируем количество устройств для всех InputBody, связанных с этой датой
+            int totalStaffCount = 0;
+
+            for (Long inputBodyId : inputStaffIds) {
+                InputStaff inputStaff = getInputStaffById(header, inputBodyId);  // Метод для получения InputBody по ID
+                totalStaffCount += inputStaff.getStaffs().size();  // Суммируем deviceCount
+            }
+
+            // Вычисляем lastRow на основе общего количества устройств для всех InputBody
+            int lastRow = firstRow + totalStaffCount - 1;
+
+            if (totalStaffCount > 1) {
+                mergeCells(sheet, firstRow, lastRow);
+            }
+            firstRow = lastRow + 1;
         }
     }
 
-    private void fillMountingRow(Row mountingRow, Mounting mounting, CellStyle bottomBlockRowStyle, CellStyle bottomBlockRowStyle1,
-                                 CellStyle bottomLastRowStyle, CellStyle bottomLastRowStyle1, boolean hasStaff) {
-        Cell descriptionCell = mountingRow.getCell(1);
-        descriptionCell.setCellValue("Услуга монтаж/демонтаж + настройка оборудования");
+    private void fillMountingRows(InputHeader header, Sheet sheet, CellStyle bottomLastRowStyle, CellStyle bottomLastRowStyle1,
+                               CellStyle bottomBlockRowStyle, CellStyle bottomBlockRowStyle1) {
+        int startIndex = findFirstRow(sheet, "ПРОЧИЕ УСЛУГИ")+1;
+        List<Mounting> mountings = header.getMountings();
+        for(int j = 0; j < mountings.size(); j++ ){
+            Row row = sheet.getRow(startIndex);
+            Cell cellForBlank = row.getCell(0);
+            cellForBlank.setBlank();
+            Cell cellName = row.getCell(1);
+            cellName.setCellValue(mountings.get(j).getKindOfService());
+            Cell cellHours = row.getCell(4);
+            cellHours.setCellValue(mountings.get(j).getWorkHours());
+            Cell cellWorkPeriod = row.getCell(3);
+            cellWorkPeriod.setCellValue("-");
+            Cell cellQuantity = row.getCell(5);
+            cellQuantity.setCellValue(mountings.get(j).getAgentCount());
+            Cell cellPriceForHour = row.getCell(6);
+            cellPriceForHour.setCellValue(mountings.get(j).getPriceForHour());
 
-        Cell timeCell = mountingRow.getCell(3);
-        timeCell.setCellValue("-");
+            Cell cellSum = row.getCell(7);
+            cellSum.setCellFormula("E" + (startIndex + 1) + "*F" + (startIndex + 1) + "*G" + (startIndex + 1));
+            startIndex++;
+            if (j == mountings.size() - 1) {
+                applyStyles(sheet.getRow(startIndex-1), bottomBlockRowStyle, bottomBlockRowStyle1);
+            }
 
-        Cell cellQHours = mountingRow.getCell(4);
-        cellQHours.setCellValue(mounting.getHours());
+        }
 
-        Cell cellQStaff = mountingRow.getCell(5);
-        cellQStaff.setCellValue(mounting.getQStaff());
+    }
 
-        Cell cellQPrice = mountingRow.getCell(6);
-        cellQPrice.setCellValue(mounting.getQPrice());
+    private void fillStaffRows(InputHeader header, Sheet sheet, CellStyle bottomLastRowStyle, CellStyle bottomLastRowStyle1,
+                              CellStyle bottomBlockRowStyle, CellStyle bottomBlockRowStyle1) {
+        int startIndex = findFirstRow(sheet, "ПРОЧИЕ УСЛУГИ") + header.getMountings().size() + 1;
+        int startFormula = findFirstRow(sheet, "ПРОЧИЕ УСЛУГИ") + header.getMountings().size() + 1;
+        if(header.isSameEquipmentForAllDays()){
+            List<String> stringPeriods = getPeriodsStrings(header);
+            List<Integer> workDaysInPeriods = getPeriodsDaysCount(header);
+            for(int i = 0; i < header.getInputStaffs().size(); i++){
+                List<Staff> staffs = header.getInputStaffs().get(i).getStaffs();
+                int workDays = workDaysInPeriods.get(i);
+                String period = stringPeriods.get(i);
 
-        Cell cellForBlank = mountingRow.getCell(0);
-        cellForBlank.setCellType(CellType.BLANK);
+                for(int j = 0; j < staffs.size(); j++ ){
+                    Row row = sheet.getRow(startIndex);
+                    Cell cellPeriod = row.getCell(0);
+                    cellPeriod.setCellValue(period);
+                    Cell cellName = row.getCell(1);
+                    cellName.setCellValue(staffs.get(j).getKindOfStaff());
+                    Cell cellHours = row.getCell(4);
+                    cellHours.setCellValue(Duration.between(staffs.get(j).getStartTime(),staffs.get(j).getEndTime()).toHours());
+                    Cell cellWorkPeriod = row.getCell(3);
+                    cellWorkPeriod.setCellValue(staffs.get(j).getStartTime().toString() + "-" + staffs.get(j).getEndTime().toString());
+                    Cell cellQuantity = row.getCell(5);
+                    cellQuantity.setCellValue(staffs.get(j).getStaffQuantity());
+                    Cell cellPriceForHour = row.getCell(6);
+                    cellPriceForHour.setCellValue(staffs.get(j).getBetPerHour());
 
-        Cell cellForFormula = mountingRow.getCell(7);
-        String formula = "E" + (mountingRow.getRowNum() + 1) + "*F" + (mountingRow.getRowNum() + 1) + "*G" + (mountingRow.getRowNum() + 1);
-        cellForFormula.setCellFormula(formula);
+                    Cell cellSum = row.getCell(7);
+                    cellSum.setCellFormula("E" + (startIndex + 1) + "*F" + (startIndex + 1) + "*G" + (startIndex + 1) + "*" + workDays);
+                    startIndex++;
+                    if (j == staffs.size() - 1) {
+                        applyStyles(sheet.getRow(startIndex-1), bottomBlockRowStyle, bottomBlockRowStyle1);
+                    }
+                }
+            }
+            applyStyles(sheet.getRow(startIndex-1), bottomLastRowStyle, bottomLastRowStyle1);
+            Row rowForFormula = sheet.getRow(startIndex);
+            Cell cellForFormula = rowForFormula.getCell(7);
+            cellForFormula.setCellFormula("SUM(H" + (findFirstRow(sheet, "ПРОЧИЕ УСЛУГИ")+1) + ":H" +
+                    (startIndex) + ")");
 
-        if(hasStaff) {
-            applyStyles(mountingRow, bottomBlockRowStyle, bottomBlockRowStyle1);
+
+
+        } else if(header.isWithManyRegPoints()) {
+            List<String> stringPeriods = getRegPointsDates(header);
+            List<String> regPoints = getRegPointsDescriptions(header);
+            List<Integer> workDaysInPeriods = getRegPointsDaysCount(header);
+            for(int i = 0; i < header.getInputStaffs().size(); i++){
+                List<Staff> staffs = header.getInputStaffs().get(i).getStaffs();
+                int workDays = workDaysInPeriods.get(i);
+                String period = stringPeriods.get(i);
+                String regPoint = regPoints.get(i);
+                for(int j = 0; j < staffs.size(); j++ ){
+                    Row row = sheet.getRow(startIndex);
+                    Cell cellPeriod = row.getCell(0);
+                    cellPeriod.setCellValue(period);
+                    Cell cellRegPoint = row.getCell(1);
+                    cellRegPoint.setCellValue(regPoint);
+                    Cell cellName = row.getCell(2);
+                    cellName.setCellValue(staffs.get(j).getKindOfStaff());
+                    Cell cellHours = row.getCell(4);
+                    cellHours.setCellValue(Duration.between(staffs.get(j).getStartTime(),staffs.get(j).getEndTime()).toHours());
+                    Cell cellWorkPeriod = row.getCell(3);
+                    cellWorkPeriod.setCellValue(staffs.get(j).getStartTime().toString() + "-" + staffs.get(j).getEndTime().toString());
+                    Cell cellQuantity = row.getCell(5);
+                    cellQuantity.setCellValue(staffs.get(j).getStaffQuantity());
+                    Cell cellPriceForHour = row.getCell(6);
+                    cellPriceForHour.setCellValue(staffs.get(j).getBetPerHour());
+                    Cell cellSum = row.getCell(7);
+                    cellSum.setCellFormula("E" + (startIndex + 1) + "*F" + (startIndex + 1) + "*G" + (startIndex + 1) + "*" + workDays);
+                    startIndex++;
+                    if (j == staffs.size() - 1) {
+                        applyStylesWithRegPoints(sheet.getRow(startIndex-1), bottomBlockRowStyle, bottomBlockRowStyle1);
+                    }
+                }
+
+            }
+            applyStylesWithRegPoints(sheet.getRow(startIndex-1), bottomLastRowStyle, bottomLastRowStyle1);
+            Row rowForFormula = sheet.getRow(startIndex);
+            Cell cellForFormula = rowForFormula.getCell(7);
+            cellForFormula.setCellFormula("SUM(H" + (findFirstRow(sheet, "ПРОЧИЕ УСЛУГИ")+1) + ":H" +
+                    (startIndex) + ")");
+
+//            Row finalFormulaRow = sheet.getRow(findFirstRow(sheet, "Заказчик предоставляет:*") - 1);
+//            Cell finalFormulaCell = finalFormulaRow.getCell(7);
+//            String forUpdateFinalFormula = finalFormulaCell.getCellFormula();
+//            System.out.println("T<FYF" + forUpdateFinalFormula);
+//            finalFormulaCell.setCellFormula(forUpdateFinalFormula.substring(0, forUpdateFinalFormula.length() - 1) + ",H"
+//                    + startIndex+1 + ")");
+
         } else {
-            applyStyles(mountingRow, bottomLastRowStyle, bottomLastRowStyle1);
+            List<String> workDates = getAllDaysBetweenPeriods(header);
+            for(int i = 0; i < header.getInputStaffs().size(); i++){
+                List<Staff> staffs = header.getInputStaffs().get(i).getStaffs();
+                String date = workDates.get(i);
+                for(int j = 0; j < staffs.size(); j++ ){
+                    Row row = sheet.getRow(startIndex);
+                    Cell cellPeriod = row.getCell(0);
+                    cellPeriod.setCellValue(date);
+                    Cell cellName = row.getCell(1);
+                    cellName.setCellValue(staffs.get(j).getKindOfStaff());
+                    Cell cellHours = row.getCell(4);
+                    cellHours.setCellValue(Duration.between(staffs.get(j).getStartTime(),staffs.get(j).getEndTime()).toHours());
+                    Cell cellWorkPeriod = row.getCell(3);
+                    cellWorkPeriod.setCellValue(staffs.get(j).getStartTime().toString() + "-" + staffs.get(j).getEndTime().toString());
+                    Cell cellQuantity = row.getCell(5);
+                    cellQuantity.setCellValue(staffs.get(j).getStaffQuantity());
+                    Cell cellPriceForHour = row.getCell(6);
+                    cellPriceForHour.setCellValue(staffs.get(j).getBetPerHour());
+                    Cell cellSum = row.getCell(7);
+                    cellSum.setCellFormula("E" + (startIndex + 1) + "*F" + (startIndex + 1) + "*G" + (startIndex + 1));
+                    startIndex++;
+                    if (j == staffs.size() - 1) {
+                        applyStyles(sheet.getRow(startIndex-1), bottomBlockRowStyle, bottomBlockRowStyle1);
+                    }
+                }
+
+            }
+            applyStyles(sheet.getRow(startIndex-1), bottomLastRowStyle, bottomLastRowStyle1);
+            Row rowForFormula = sheet.getRow(startIndex);
+            Cell cellForFormula = rowForFormula.getCell(7);
+            cellForFormula.setCellFormula("SUM(H" + (findFirstRow(sheet, "ПРОЧИЕ УСЛУГИ")+1) + ":H" +
+                    (startIndex) + ")");
+
+//            Row finalFormulaRow = sheet.getRow(findFirstRow(sheet, "Заказчик предоставляет:*") - 1);
+//            Cell finalFormulaCell = finalFormulaRow.getCell(7);
+//            String forUpdateFinalFormula = finalFormulaCell.getCellFormula();
+//            System.out.println("T<FYF" + forUpdateFinalFormula);
+//            finalFormulaCell.setCellFormula(forUpdateFinalFormula.substring(0, forUpdateFinalFormula.length() - 1) + ",H"
+//                    + startIndex+1 + ")");
+            //TODO: запись стартиндекса для финальной формулы
         }
+
     }
-
-//    private void processStaffBlocks(InputHeader header, List<Staff> staffs, Sheet sheet, int[] neededRows, int startRow, int maxBlockCount,
-//                                    CellStyle bottomBlockRowStyle, CellStyle bottomBlockRowStyle1,
-//                                    CellStyle bottomLastRowStyle, CellStyle bottomLastRowStyle1) {
-//
-//        int currentRow = startRow;
-//        int formulaStartRow = currentRow;
-//
-//        for (int block = 0; block < maxBlockCount; block++) {
-//            if (neededRows[block] > 0) {
-//                insertRowsWithShift(sheet, currentRow, neededRows[block]);
-//                if (neededRows[block] > 1) {
-//                    mergeCells(sheet, currentRow, currentRow + neededRows[block] - 1);
-//                }
-//
-//                fillStaffRows(header, staffs, sheet, currentRow, block, neededRows[block]);
-//
-//                currentRow += neededRows[block];
-//                applyStyles(sheet, currentRow - 1, bottomBlockRowStyle, bottomBlockRowStyle1, bottomLastRowStyle, bottomLastRowStyle1, block == maxBlockCount - 1);
-//            }
-//        }
-//
-//        Row formulaRow = sheet.getRow(currentRow);
-//        Cell formulaCell = formulaRow.getCell(7);
-//        formulaCell.setCellFormula("SUM(H" + formulaStartRow + ":H" + currentRow + ")");
-//    }
-
-//    private void fillStaffRows(InputHeader header, List<Staff> staffs, Sheet sheet, int startRow, int block, int rowsCount) {
-//        for (int i = 0; i < rowsCount; i++) {
-//            Row rowForStaff = sheet.getRow(startRow + i);
-//            Cell cellForDates = rowForStaff.getCell(0);
-//            cellForDates.setCellValue(dateFormatterForCell(header.getEventStartDate(), header.getEventEndDate()));
-//
-//            Cell cellForKind = rowForStaff.getCell(1);
-//            cellForKind.setCellValue(staffs.get(block * (header.isSameEquipmentForAllDays() ? 7 : 6) + i).getKindOfStaff());
-//
-//            Cell cellForWorkTime = rowForStaff.getCell(3);
-//            cellForWorkTime.setCellValue(staffs.get(block * (header.isSameEquipmentForAllDays() ? 7 : 6) + i).getStartTime().toString()
-//                    + " - " + staffs.get(block * (header.isSameEquipmentForAllDays() ? 7 : 6) + i).getEndTime().toString());
-//
-//            Cell cellForWorkHours = rowForStaff.getCell(4);
-//            cellForWorkHours.setCellValue(ChronoUnit.HOURS.between(staffs.get(block * (header.isSameEquipmentForAllDays() ? 7 : 6) + i).getStartTime(),
-//                    staffs.get(block * (header.isSameEquipmentForAllDays() ? 7 : 6) + i).getEndTime()));
-//
-//            Cell cellForStaffQuantity = rowForStaff.getCell(5);
-//            cellForStaffQuantity.setCellValue(staffs.get(block * (header.isSameEquipmentForAllDays() ? 7 : 6) + i).getStaffQuantity());
-//
-//            Cell cellForBetPerHour = rowForStaff.getCell(6);
-//            cellForBetPerHour.setCellValue(staffs.get(block * (header.isSameEquipmentForAllDays() ? 7 : 6) + i).getBetPerHour());
-//
-//            Cell cellForFormula = rowForStaff.getCell(7);
-//            String formula;
-//            if (staffs.get(block * (header.isSameEquipmentForAllDays() ? 7 : 6) + i).getHeader().getBoolStart1() != null
-//                    && staffs.get(block * (header.isSameEquipmentForAllDays() ? 7 : 6) + i).getHeader().getBoolEnd1() != null) {
-//                formula = "E" + (startRow + i + 1) + "*F" + (startRow + i + 1) + "*G" + (startRow + i + 1) + "*" +
-//                        (ChronoUnit.DAYS.between(staffs.get(block * (header.isSameEquipmentForAllDays() ? 7 : 6) + i).getHeader().getBoolStart1(),
-//                                staffs.get(block * (header.isSameEquipmentForAllDays() ? 7 : 6) + i).getHeader().getBoolEnd1()) + 1);
-//            } else if (staffs.get(block * (header.isSameEquipmentForAllDays() ? 7 : 6) + i).getHeader().getBoolStart2() != null
-//                    && staffs.get(block * (header.isSameEquipmentForAllDays() ? 7 : 6) + i).getHeader().getBoolEnd2() != null) {
-//                formula = "E" + (startRow + i + 1) + "*F" + (startRow + i + 1) + "*G" + (startRow + i + 1) + "*" +
-//                        (ChronoUnit.DAYS.between(staffs.get(block * (header.isSameEquipmentForAllDays() ? 7 : 6) + i).getHeader().getBoolStart2(),
-//                                staffs.get(block * (header.isSameEquipmentForAllDays() ? 7 : 6) + i).getHeader().getBoolEnd2()) + 1);
-//            } else if (staffs.get(block * (header.isSameEquipmentForAllDays() ? 7 : 6) + i).getHeader().getBoolStart3() != null
-//                    && staffs.get(block * (header.isSameEquipmentForAllDays() ? 7 : 6) + i).getHeader().getBoolEnd3() != null) {
-//                formula = "E" + (startRow + i + 1) + "*F" + (startRow + i + 1) + "*G" + (startRow + i + 1) + "*" +
-//                        (ChronoUnit.DAYS.between(staffs.get(block * (header.isSameEquipmentForAllDays() ? 7 : 6) + i).getHeader().getBoolStart3(),
-//                                staffs.get(block * (header.isSameEquipmentForAllDays() ? 7 : 6) + i).getHeader().getBoolEnd3()) + 1);
-//            } else if (staffs.get(block * (header.isSameEquipmentForAllDays() ? 7 : 6) + i).getHeader().getBoolStart4() != null
-//                    && staffs.get(block * (header.isSameEquipmentForAllDays() ? 7 : 6) + i).getHeader().getBoolEnd4() != null) {
-//                formula = "E" + (startRow + i + 1) + "*F" + (startRow + i + 1) + "*G" + (startRow + i + 1) + "*" +
-//                        (ChronoUnit.DAYS.between(staffs.get(block * (header.isSameEquipmentForAllDays() ? 7 : 6) + i).getHeader().getBoolStart4(),
-//                                staffs.get(block * (header.isSameEquipmentForAllDays() ? 7 : 6) + i).getHeader().getBoolEnd4()) + 1);
-//            } else {
-//                // Если даты не указаны, можно задать значение по умолчанию или оставить ячейку пустой
-//                formula = "E" + (startRow + i + 1) + "*F" + (startRow + i + 1) + "*G" + (startRow + i + 1);
-//            }
-//        }
-//    }
 
     private void applyStyles(Row row, CellStyle cellStyle, CellStyle cellStyle1) {
         for (int j = 0; j < 8; j++) {
@@ -2182,18 +1229,14 @@ public class ExcelServiceImpl implements ExcelService {
         }
     }
 
-
-
-    private int countNeededRows(List<Staff> staffs, int start, int end) {
-        int neededRows = 0;
-        // Убедитесь, что 'end' не превышает размер списка
-        end = Math.min(end, staffs.size());
-        for (int i = start; i < end; i++) {
-            if (!staffs.get(i).getKindOfStaff().isEmpty()) {
-                neededRows++;
+    private void applyStylesWithRegPoints(Row row, CellStyle cellStyle, CellStyle cellStyle1) {
+        for (int j = 0; j < 8; j++) {
+            if (j == 2) {
+                row.getCell(j).setCellStyle(cellStyle1);
+            } else {
+                row.getCell(j).setCellStyle(cellStyle);
             }
         }
-        return neededRows;
     }
 
     private void mergeCells2(Sheet sheet, int firstRow, int lastRow) {
@@ -2225,22 +1268,6 @@ public class ExcelServiceImpl implements ExcelService {
         // Объединение ячеек
         CellRangeAddress cellRangeAddress = new CellRangeAddress(firstRow, lastRow, 0, 0);
         sheet.addMergedRegion(cellRangeAddress);
-    }
-
-    private void insertRowsWithShift(Sheet sheet, int startRow, int numberOfRows) {
-        for (int i = 0; i < numberOfRows; i++) {
-            int currentRow = startRow + i;
-            sheet.shiftRows(currentRow, sheet.getLastRowNum(), 1);
-
-            Row sourceRow = sheet.getRow(currentRow - 1);
-            Row newRow = sheet.createRow(currentRow);
-
-            // Копирование стилей и значений ячеек
-            copyRow(sourceRow, newRow);
-
-            // Копирование объединенных ячеек
-            copyMergedRegions(sheet, currentRow - 1, currentRow);
-        }
     }
 
     private void copyRow(Row sourceRow, Row newRow) {
@@ -2332,7 +1359,7 @@ public class ExcelServiceImpl implements ExcelService {
 
         try {
             String fileName = dateFormatterForFileName(header.getEventStartDate(), header.getEventEndDate())
-                    + " " + header.getCustomer() + " СМЕТА РЕГИСТРАЦИИ Ver1";
+                    + " " + header.getEventName() + " СМЕТА РЕГИСТРАЦИИ Ver1";
             String filePath = excelFilesDirectory + File.separator + fileName + ".xlsx";
             File file = new File(filePath);
 
@@ -2372,16 +1399,7 @@ public class ExcelServiceImpl implements ExcelService {
             bottomLastRowStyle1.setBorderRight(BorderStyle.THIN);
 
             writeLogistic(header, logistics, sheet, bottomBlockRowStyle, bottomBlockRowStyle1, bottomLastRowStyle, bottomLastRowStyle1);
-            if (formulaMap.containsKey(fileName)) {
-                List<Integer> indices = formulaMap.get(fileName);
-                // Проверяем, не пустой ли список
-                if (indices != null && !indices.isEmpty()) {
-                    System.out.println("Indices for file " + fileName + ":");
-                    for (Integer index : indices) {
-                        System.out.println(index);
-                    }
-                }
-            }
+
             FormulaEvaluator evaluator = workbook.getCreationHelper().createFormulaEvaluator();
             evaluator.evaluateAll();
 
@@ -2445,18 +1463,12 @@ public class ExcelServiceImpl implements ExcelService {
             formulaCell.setCellFormula("SUM(H" + (formulaStartRow + 1) + ":H" +
                     (formulaStartRow + neededRowsForLogistics) + ")");
 
-            int formulaRowIndex = formulaRow.getRowNum();
-            String fileName = dateFormatterForFileName(header.getEventStartDate(), header.getEventEndDate())
-                    + " " + header.getCustomer() + " СМЕТА РЕГИСТРАЦИИ Ver1";
-            //отладка
-            System.out.println("Вот" + formulaRowIndex);
-            if (formulaMap.containsKey(fileName)) {
-                formulaMap.get(fileName).add(formulaRowIndex);
-            } else {
-                // Логирование ошибки, если файл не был инициализирован
-                log.error("File {} not found in formulaMap", fileName);
-            }
-            //Собираем финальную формулу
+            Row finalFormulaRow = sheet.getRow(findFirstRow(sheet, "Заказчик предоставляет:*") - 1);
+            Cell finalFormulaCell = finalFormulaRow.getCell(7);
+            String forUpdateFinalFormula = finalFormulaCell.getCellFormula();
+            System.out.println("T<FYF" + forUpdateFinalFormula);
+            finalFormulaCell.setCellFormula(forUpdateFinalFormula.substring(0, forUpdateFinalFormula.length() - 1) + ",H"
+                    + (formulaStartRow + neededRowsForLogistics + 1) + ")");
 
 
         } else {
@@ -2469,18 +1481,4 @@ public class ExcelServiceImpl implements ExcelService {
 
     }
 
-
-
 }
-
-//    int formulaRowIndex = formulaRow.getRowNum();
-//    String fileName = dateFormatterForFileName(header.getEventStartDate(), header.getEventEndDate())
-//            + " " + header.getCustomer() + " СМЕТА РЕГИСТРАЦИИ Ver1";
-////отладка
-//            System.out.println("Вот" + formulaRowIndex);
-//                    if (formulaMap.containsKey(fileName)) {
-//                    formulaMap.get(fileName).add(formulaRowIndex);
-//                    } else {
-//                    // Логирование ошибки, если файл не был инициализирован
-//                    log.error("File {} not found in formulaMap", fileName);
-//                    }

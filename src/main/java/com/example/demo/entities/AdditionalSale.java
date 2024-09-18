@@ -1,35 +1,35 @@
 package com.example.demo.entities;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.*;
 
 @Getter
 @Setter
-@Builder
 @AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PUBLIC)
-@Entity(name = "device")
-public class Device {
+@Entity(name = "asale")
+public class AdditionalSale {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    private String name;
-    private Integer priceFor1q;
+    private String description;
+    private Integer price;
     private Integer count;
 
+    @JsonBackReference
     @ManyToOne
-    @JoinColumn(name = "input_body_id")
-    private InputBody body;
+    private InputHeader header;
 
     @Override
     public String toString() {
-        return "Device{" +
+        return "AdditionalSale{" +
                 "id=" + id +
-                ", name='" + name + '\'' +
-                ", priceFor1q=" + priceFor1q +
+                ", description='" + description + '\'' +
+                ", price=" + price +
                 ", count=" + count +
-                ", body=" + body +
+                ", header=" + header +
                 '}';
     }
 }

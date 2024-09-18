@@ -1,0 +1,741 @@
+<!--<!DOCTYPE html>-->
+<!--<html xmlns:th="http://www.thymeleaf.org">-->
+<!--<head>-->
+<!--    <meta charset="UTF-8"/>-->
+<!--    <title>Логистика</title>-->
+<!--    <meta name="viewport" content="width=device-width, initial-scale=1">-->
+<!--    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">-->
+
+<!--    <style>-->
+<!--        body {-->
+<!--            font-family: 'Inter', sans-serif;-->
+<!--        }-->
+
+<!--        h1 {-->
+<!--            font-size: 2rem;-->
+<!--            color: #333;-->
+<!--            margin-bottom: 30px;-->
+<!--            text-align: center;-->
+<!--        }-->
+
+<!--        label {-->
+<!--            font-weight: 600;-->
+<!--            color: #555;-->
+<!--        }-->
+
+<!--        input, select {-->
+<!--            border: 1px solid #ccc;-->
+<!--            border-radius: 8px;-->
+<!--            padding: 10px;-->
+<!--            font-size: 14px;-->
+<!--        }-->
+
+<!--        .device-card {-->
+<!--            background-color: #f5f5f5;-->
+<!--            border-radius: 10px;-->
+<!--            padding: 20px;-->
+<!--            margin-bottom: 20px;-->
+<!--            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);-->
+<!--        }-->
+
+<!--        .section-card {-->
+<!--            background-color: #f9f9f9;-->
+<!--            border-radius: 10px;-->
+<!--            padding: 20px;-->
+<!--            margin-bottom: 20px;-->
+<!--            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);-->
+<!--        }-->
+
+<!--        .container {-->
+<!--            max-width: 1000px;-->
+<!--            margin: 0 auto;-->
+<!--        }-->
+
+<!--        .form-row {-->
+<!--            display: flex;-->
+<!--            align-items: center;-->
+<!--            gap: 10px;-->
+<!--        }-->
+
+<!--        .form-group {-->
+<!--            margin-bottom: 15px;-->
+<!--        }-->
+
+<!--        .form-group input[type="number"] {-->
+<!--            width: 150px;-->
+<!--        }-->
+
+<!--        .remove-logistic-btn {-->
+<!--            color: red;-->
+<!--            cursor: pointer;-->
+<!--            font-size: 1.5em;-->
+<!--            margin-left: 10px;-->
+<!--            line-height: 1.5;-->
+<!--        }-->
+
+<!--        /* Стиль для кнопок */-->
+<!--        .btn-add, .btn-primary {-->
+<!--            background-color: #7ED6A6;-->
+<!--            color: white;-->
+<!--            border: none;-->
+<!--            border-radius: 50px;-->
+<!--            padding: 10px 20px;-->
+<!--            font-size: 14px;-->
+<!--            transition: background 0.3s ease, transform 0.3s ease;-->
+<!--        }-->
+
+<!--        .btn-add:hover, .btn-primary:hover {-->
+<!--            background-color: #6CC497;-->
+<!--            box-shadow: 0 5px 10px rgba(0, 0, 0, 0.1);-->
+<!--        }-->
+
+<!--        .btn-primary {-->
+<!--            font-size: 16px;-->
+<!--        }-->
+
+<!--        .btn-add {-->
+<!--            float: right;-->
+<!--        }-->
+
+<!--        .btn-container {-->
+<!--            display: flex;-->
+<!--            justify-content: flex-end;-->
+<!--        }-->
+
+<!--        /* Центрируем кнопку сохранения */-->
+<!--        .form-section {-->
+<!--            text-align: center;-->
+<!--        }-->
+
+<!--        @media (max-width: 768px) {-->
+<!--            .form-row {-->
+<!--                flex-direction: column;-->
+<!--                gap: 10px;-->
+<!--            }-->
+
+<!--            .btn-add {-->
+<!--                float: none;-->
+<!--                width: 100%;-->
+<!--                text-align: center;-->
+<!--            }-->
+
+<!--            .form-group input[type="number"],-->
+<!--            .remove-logistic-btn {-->
+<!--                width: 100%;-->
+<!--            }-->
+<!--        }-->
+<!--    </style>-->
+
+<!--    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>-->
+<!--    <script>-->
+<!--        $(document).ready(function () {-->
+<!--            // Показываем только первый блок, остальные скрываем-->
+<!--            $('.logistic-item:gt(0)').hide();-->
+
+<!--            let logisticCount = 1;-->
+
+<!--            // Добавление логистики-->
+<!--            $('#add-logistic-btn').click(function (e) {-->
+<!--                e.preventDefault();-->
+<!--                if (logisticCount < 10) { // Ограничиваем добавление до 10-->
+<!--                    $('.logistic-item:hidden').first().show();-->
+<!--                    logisticCount++;-->
+<!--                    updateRemoveButtons();-->
+<!--                }-->
+<!--            });-->
+
+<!--            // Удаление логистики-->
+<!--            $(document).on('click', '.remove-logistic-btn', function () {-->
+<!--                let logisticContainer = $(this).closest('.logistic-item');-->
+<!--                resetFields(logisticContainer);-->
+<!--                logisticContainer.hide();-->
+<!--                logisticCount&#45;&#45;;-->
+<!--                updateRemoveButtons();-->
+<!--            });-->
+
+<!--            // Сброс полей до значений по умолчанию-->
+<!--            function resetFields(container) {-->
+<!--                container.find('input').val('');-->
+<!--                container.find('select').val('');-->
+<!--            }-->
+
+<!--            // Показываем кнопку удаления только для последнего видимого элемента-->
+<!--            function updateRemoveButtons() {-->
+<!--                $('.remove-logistic-btn').hide();-->
+<!--                $('.logistic-item:visible').last().find('.remove-logistic-btn').show();-->
+<!--            }-->
+
+<!--            // Обновляем видимость кнопок при загрузке-->
+<!--            updateRemoveButtons();-->
+<!--        });-->
+<!--    </script>-->
+<!--</head>-->
+<!--<body>-->
+<!--<div class="container">-->
+<!--    <h1>Логистика</h1>-->
+<!--    <div class="section-card">-->
+<!--        <div class="btn-container">-->
+<!--            <button id="add-logistic-btn" class="btn btn-add">Добавить логистику</button>-->
+<!--        </div>-->
+
+<!--        <form th:action="@{/input/saveLogisticAndASalesInput}" method="post">-->
+<!--            <input type="hidden" name="headerId" th:value="${headerId}"/>-->
+
+<!--            &lt;!&ndash; Перебор списка логистики &ndash;&gt;-->
+<!--            <div th:each="logistic, iterStat : ${logistics}">-->
+<!--                <div class="logistic-item">-->
+<!--                    <div class="form-row">-->
+<!--                        <div class="form-group">-->
+<!--                            <label th:for="|logistics[${iterStat.index}].description|">Описание:</label>-->
+<!--                            <input type="text" th:name="|logistics[${iterStat.index}].description|" th:value="${logistic.description}" class="form-control"/>-->
+<!--                        </div>-->
+<!--                        <div class="form-group">-->
+<!--                            <label th:for="|logistics[${iterStat.index}].price|">Стоимость:</label>-->
+<!--                            <input type="number" th:name="|logistics[${iterStat.index}].price|" th:value="${logistic.price}" class="form-control"/>-->
+<!--                        </div>-->
+<!--                        <div class="form-group">-->
+<!--                            <label th:for="|logistics[${iterStat.index}].count|">Количество:</label>-->
+<!--                            <input type="number" th:name="|logistics[${iterStat.index}].count|" th:value="${logistic.count}" class="form-control"/>-->
+<!--                        </div>-->
+<!--                        <span class="remove-logistic-btn">&times;</span>-->
+<!--                    </div>-->
+<!--                </div>-->
+<!--            </div>-->
+
+<!--            &lt;!&ndash; Кнопка для отправки формы &ndash;&gt;-->
+<!--            <div class="form-section">-->
+<!--                <button type="submit" class="btn btn-primary">Сохранить</button>-->
+<!--            </div>-->
+<!--        </form>-->
+<!--    </div>-->
+<!--</div>-->
+<!--</body>-->
+<!--</html>-->
+
+<!--<!DOCTYPE html>-->
+<!--<html xmlns:th="http://www.thymeleaf.org">-->
+<!--<head>-->
+<!--    <meta charset="UTF-8"/>-->
+<!--    <title>Логистика и Дополнительные продажи</title>-->
+<!--    <meta name="viewport" content="width=device-width, initial-scale=1">-->
+<!--    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">-->
+
+<!--    <style>-->
+<!--        body {-->
+<!--            font-family: 'Inter', sans-serif;-->
+<!--        }-->
+
+<!--        h1 {-->
+<!--            font-size: 2rem;-->
+<!--            color: #333;-->
+<!--            margin-bottom: 30px;-->
+<!--            text-align: center;-->
+<!--        }-->
+
+<!--        label {-->
+<!--            font-weight: 600;-->
+<!--            color: #555;-->
+<!--        }-->
+
+<!--        input, select {-->
+<!--            border: 1px solid #ccc;-->
+<!--            border-radius: 8px;-->
+<!--            padding: 10px;-->
+<!--            font-size: 14px;-->
+<!--        }-->
+
+<!--        .device-card {-->
+<!--            background-color: #f5f5f5;-->
+<!--            border-radius: 10px;-->
+<!--            padding: 20px;-->
+<!--            margin-bottom: 20px;-->
+<!--            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);-->
+<!--        }-->
+
+<!--        .section-card {-->
+<!--            background-color: #f9f9f9;-->
+<!--            border-radius: 10px;-->
+<!--            padding: 20px;-->
+<!--            margin-bottom: 20px;-->
+<!--            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);-->
+<!--        }-->
+
+<!--        .container {-->
+<!--            max-width: 1000px;-->
+<!--            margin: 0 auto;-->
+<!--        }-->
+
+<!--        .form-row {-->
+<!--            display: flex;-->
+<!--            align-items: center;-->
+<!--            gap: 10px;-->
+<!--        }-->
+
+<!--        .form-group {-->
+<!--            margin-bottom: 15px;-->
+<!--        }-->
+
+<!--        .form-group input[type="number"] {-->
+<!--            width: 150px;-->
+<!--        }-->
+
+<!--        .remove-btn {-->
+<!--            color: red;-->
+<!--            cursor: pointer;-->
+<!--            font-size: 1.5em;-->
+<!--            margin-left: 10px;-->
+<!--            line-height: 1.5;-->
+<!--        }-->
+
+<!--        /* Стиль для кнопок */-->
+<!--        .btn-add, .btn-primary {-->
+<!--            background-color: #7ED6A6;-->
+<!--            color: white;-->
+<!--            border: none;-->
+<!--            border-radius: 50px;-->
+<!--            padding: 10px 20px;-->
+<!--            font-size: 14px;-->
+<!--            transition: background 0.3s ease, transform 0.3s ease;-->
+<!--        }-->
+
+<!--        .btn-add:hover, .btn-primary:hover {-->
+<!--            background-color: #6CC497;-->
+<!--            box-shadow: 0 5px 10px rgba(0, 0, 0, 0.1);-->
+<!--        }-->
+
+<!--        .btn-primary {-->
+<!--            font-size: 16px;-->
+<!--        }-->
+
+<!--        .btn-add {-->
+<!--            float: right;-->
+<!--        }-->
+
+<!--        .btn-container {-->
+<!--            display: flex;-->
+<!--            justify-content: flex-end;-->
+<!--        }-->
+
+<!--        /* Центрируем кнопку сохранения */-->
+<!--        .form-section {-->
+<!--            text-align: center;-->
+<!--        }-->
+
+<!--        @media (max-width: 768px) {-->
+<!--            .form-row {-->
+<!--                flex-direction: column;-->
+<!--                gap: 10px;-->
+<!--            }-->
+
+<!--            .btn-add {-->
+<!--                float: none;-->
+<!--                width: 100%;-->
+<!--                text-align: center;-->
+<!--            }-->
+
+<!--            .form-group input[type="number"],-->
+<!--            .remove-btn {-->
+<!--                width: 100%;-->
+<!--            }-->
+<!--        }-->
+<!--    </style>-->
+
+<!--    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>-->
+<!--    <script>-->
+<!--        $(document).ready(function () {-->
+<!--            // Логистика-->
+<!--            $('.logistic-item:gt(0)').hide();-->
+<!--            let logisticCount = 1;-->
+
+<!--            $('#add-logistic-btn').click(function (e) {-->
+<!--                e.preventDefault();-->
+<!--                if (logisticCount < 10) {-->
+<!--                    $('.logistic-item:hidden').first().show();-->
+<!--                    logisticCount++;-->
+<!--                    updateRemoveButtons('.logistic-item', '.remove-logistic-btn');-->
+<!--                }-->
+<!--            });-->
+
+<!--            $(document).on('click', '.remove-logistic-btn', function () {-->
+<!--                let logisticContainer = $(this).closest('.logistic-item');-->
+<!--                resetFields(logisticContainer);-->
+<!--                logisticContainer.hide();-->
+<!--                logisticCount&#45;&#45;;-->
+<!--                updateRemoveButtons('.logistic-item', '.remove-logistic-btn');-->
+<!--            });-->
+
+<!--            // Дополнительные продажи-->
+<!--            $('.asale-item:gt(0)').hide();-->
+<!--            let asaleCount = 1;-->
+
+<!--            $('#add-asale-btn').click(function (e) {-->
+<!--                e.preventDefault();-->
+<!--                if (asaleCount < 10) {-->
+<!--                    $('.asale-item:hidden').first().show();-->
+<!--                    asaleCount++;-->
+<!--                    updateRemoveButtons('.asale-item', '.remove-asale-btn');-->
+<!--                }-->
+<!--            });-->
+
+<!--            $(document).on('click', '.remove-asale-btn', function () {-->
+<!--                let asaleContainer = $(this).closest('.asale-item');-->
+<!--                resetFields(asaleContainer);-->
+<!--                asaleContainer.hide();-->
+<!--                asaleCount&#45;&#45;;-->
+<!--                updateRemoveButtons('.asale-item', '.remove-asale-btn');-->
+<!--            });-->
+
+<!--            // Сброс полей до значений по умолчанию-->
+<!--            function resetFields(container) {-->
+<!--                container.find('input').val('');-->
+<!--                container.find('select').val('');-->
+<!--            }-->
+
+<!--            // Показываем кнопку удаления только для последнего видимого элемента-->
+<!--            function updateRemoveButtons(itemClass, btnClass) {-->
+<!--                $(btnClass).hide();-->
+<!--                $(itemClass + ':visible').last().find(btnClass).show();-->
+<!--            }-->
+
+<!--            // Обновляем видимость кнопок при загрузке-->
+<!--            updateRemoveButtons('.logistic-item', '.remove-logistic-btn');-->
+<!--            updateRemoveButtons('.asale-item', '.remove-asale-btn');-->
+<!--        });-->
+<!--    </script>-->
+<!--</head>-->
+<!--<body>-->
+<!--<div class="container">-->
+<!--    <h1>Логистика и Дополнительные продажи</h1>-->
+
+<!--    &lt;!&ndash; Форма для Логистики и Дополнительных продаж &ndash;&gt;-->
+<!--    <form th:action="@{/input/saveLogisticAndASalesInput}" method="post">-->
+<!--        <input type="hidden" name="headerId" th:value="${headerId}"/>-->
+
+<!--        &lt;!&ndash; Подложка для Логистики &ndash;&gt;-->
+<!--        <div class="section-card">-->
+<!--            <h2>Логистика</h2>-->
+<!--            <div class="btn-container">-->
+<!--                <button id="add-logistic-btn" class="btn btn-add">Добавить логистику</button>-->
+<!--            </div>-->
+
+<!--            <div th:each="logistic, iterStat : ${logistics}">-->
+<!--                <div class="logistic-item">-->
+<!--                    <div class="form-row">-->
+<!--                        <div class="form-group">-->
+<!--                            <label th:for="|logistics[${iterStat.index}].description|">Описание:</label>-->
+<!--                            <input type="text" th:name="|logistics[${iterStat.index}].description|" th:value="${logistic.description}" class="form-control"/>-->
+<!--                        </div>-->
+<!--                        <div class="form-group">-->
+<!--                            <label th:for="|logistics[${iterStat.index}].price|">Стоимость:</label>-->
+<!--                            <input type="number" th:name="|logistics[${iterStat.index}].price|" th:value="${logistic.price}" class="form-control"/>-->
+<!--                        </div>-->
+<!--                        <div class="form-group">-->
+<!--                            <label th:for="|logistics[${iterStat.index}].count|">Количество:</label>-->
+<!--                            <input type="number" th:name="|logistics[${iterStat.index}].count|" th:value="${logistic.count}" class="form-control"/>-->
+<!--                        </div>-->
+<!--                        <span class="remove-logistic-btn remove-btn">&times;</span>-->
+<!--                    </div>-->
+<!--                </div>-->
+<!--            </div>-->
+<!--        </div>-->
+
+<!--        &lt;!&ndash; Подложка для Дополнительных продаж &ndash;&gt;-->
+<!--        <div class="section-card">-->
+<!--            <h2>Дополнительные продажи</h2>-->
+<!--            <div class="btn-container">-->
+<!--                <button id="add-asale-btn" class="btn btn-add">Добавить продажу</button>-->
+<!--            </div>-->
+
+<!--            <div th:each="asale, iterStat : ${asales}">-->
+<!--                <div class="asale-item">-->
+<!--                    <div class="form-row">-->
+<!--                        <div class="form-group">-->
+<!--                            <label th:for="|asales[${iterStat.index}].description|">Описание:</label>-->
+<!--                            <input type="text" th:name="|asales[${iterStat.index}].description|" th:value="${asale.description}" class="form-control"/>-->
+<!--                        </div>-->
+<!--                        <div class="form-group">-->
+<!--                            <label th:for="|asales[${iterStat.index}].price|">Стоимость:</label>-->
+<!--                            <input type="number" th:name="|asales[${iterStat.index}].price|" th:value="${asale.price}" class="form-control"/>-->
+<!--                        </div>-->
+<!--                        <div class="form-group">-->
+<!--                            <label th:for="|asales[${iterStat.index}].count|">Количество:</label>-->
+<!--                            <input type="number" th:name="|asales[${iterStat.index}].count|" th:value="${asale.count}" class="form-control"/>-->
+<!--                        </div>-->
+<!--                        <span class="remove-asale-btn remove-btn">&times;</span>-->
+<!--                    </div>-->
+<!--                </div>-->
+<!--            </div>-->
+<!--        </div>-->
+
+<!--        &lt;!&ndash; Кнопка для отправки формы &ndash;&gt;-->
+<!--        <div class="form-section">-->
+<!--            <button type="submit" class="btn btn-primary">Сохранить</button>-->
+<!--        </div>-->
+<!--    </form>-->
+<!--</div>-->
+<!--</body>-->
+<!--</html>-->
+
+
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <title>Логистика и Дополнительные продажи</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
+
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+
+        h1 {
+            font-size: 2rem;
+            color: #333;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        label {
+            font-weight: 600;
+            color: #555;
+        }
+
+        input, select {
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            padding: 10px;
+            font-size: 14px;
+        }
+
+        .device-card {
+            background-color: #f5f5f5;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        .section-card {
+            background-color: #f9f9f9;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        .form-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group input[type="number"] {
+            width: 150px;
+        }
+
+        .remove-btn {
+            color: red;
+            cursor: pointer;
+            font-size: 1.5em;
+            margin-left: 10px;
+            line-height: 1.5;
+        }
+
+        /* Стиль для кнопок */
+        .btn-add, .btn-primary {
+            background-color: #7ED6A6;
+            color: white;
+            border: none;
+            border-radius: 50px;
+            padding: 10px 20px;
+            font-size: 14px;
+            transition: background 0.3s ease, transform 0.3s ease;
+        }
+
+        .btn-add:hover, .btn-primary:hover {
+            background-color: #6CC497;
+            box-shadow: 0 5px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .btn-primary {
+            font-size: 16px;
+        }
+
+        .btn-add {
+            float: right;
+        }
+
+        .btn-container {
+            display: flex;
+            justify-content: flex-end;
+        }
+
+        /* Центрируем кнопку сохранения */
+        .form-section {
+            text-align: center;
+        }
+
+        @media (max-width: 768px) {
+            .form-row {
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            .btn-add {
+                float: none;
+                width: 100%;
+                text-align: center;
+            }
+
+            .form-group input[type="number"],
+            .remove-btn {
+                width: 100%;
+            }
+        }
+    </style>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        $(document).ready(function () {
+            // Логика для логистики
+            $('.logistic-item:gt(0)').hide();
+            let logisticCount = 1;
+
+            $('#add-logistic-btn').click(function (e) {
+                e.preventDefault();
+                if (logisticCount < 10) {
+                    $('.logistic-item:hidden').first().show();
+                    logisticCount++;
+                    updateRemoveButtons('.logistic-item', '.remove-logistic-btn');
+                }
+            });
+
+            $(document).on('click', '.remove-logistic-btn', function () {
+                let logisticContainer = $(this).closest('.logistic-item');
+                resetFields(logisticContainer);
+                logisticContainer.hide();
+                logisticCount--;
+                updateRemoveButtons('.logistic-item', '.remove-logistic-btn');
+            });
+
+            // Логика для дополнительных продаж (Асейлы)
+            $('.asale-item:gt(0)').hide();
+            let asaleCount = 1;
+
+            $('#add-asale-btn').click(function (e) {
+                e.preventDefault();
+                if (asaleCount < 10) {
+                    $('.asale-item:hidden').first().show();
+                    asaleCount++;
+                    updateRemoveButtons('.asale-item', '.remove-asale-btn');
+                }
+            });
+
+            $(document).on('click', '.remove-asale-btn', function () {
+                let asaleContainer = $(this).closest('.asale-item');
+                resetFields(asaleContainer);
+                asaleContainer.hide();
+                asaleCount--;
+                updateRemoveButtons('.asale-item', '.remove-asale-btn');
+            });
+
+            // Сброс полей до значений по умолчанию
+            function resetFields(container) {
+                container.find('input').val('');
+                container.find('select').val('');
+            }
+
+            // Показываем кнопку удаления только для последнего видимого элемента
+            function updateRemoveButtons(itemClass, btnClass) {
+                $(btnClass).hide();
+                $(itemClass + ':visible').last().find(btnClass).show();
+            }
+
+            // Инициализация кнопок удаления при загрузке
+            updateRemoveButtons('.logistic-item', '.remove-logistic-btn');
+            updateRemoveButtons('.asale-item', '.remove-asale-btn');
+        });
+    </script>
+</head>
+<body>
+<div class="container">
+    <h1>Логистика и Дополнительные продажи</h1>
+
+    <!-- Объединенная форма для Логистики и Дополнительных продаж -->
+    <form th:action="@{/input/saveLogisticAndASalesInput}" method="post">
+        <input type="hidden" name="headerId" th:value="${headerId}"/>
+
+        <!-- Логистика -->
+        <div class="section-card">
+            <h2>Логистика</h2>
+            <div class="btn-container">
+                <button id="add-logistic-btn" class="btn btn-add">Добавить логистику</button>
+            </div>
+            <div th:object="${headerLogistics}">
+                <div th:each="logistic, iterStat : ${headerLogistics.logistics}" class="logistic-item">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label th:for="|logistics[${iterStat.index}].description|">Описание:</label>
+                            <input type="text" th:field="*{logistics[__${iterStat.index}__].description}" class="form-control"/>
+                        </div>
+                        <div class="form-group">
+                            <label th:for="|logistics[${iterStat.index}].price|">Стоимость:</label>
+                            <input type="number" th:field="*{logistics[__${iterStat.index}__].price}" class="form-control"/>
+                        </div>
+                        <div class="form-group">
+                            <label th:for="|logistics[${iterStat.index}].count|">Количество:</label>
+                            <input type="number" th:field="*{logistics[__${iterStat.index}__].count}" class="form-control"/>
+                        </div>
+                        <span class="remove-logistic-btn remove-btn">&times;</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Дополнительные продажи (Асейлы) -->
+        <div class="section-card">
+            <h2>Дополнительные продажи</h2>
+            <div class="btn-container">
+                <button id="add-asale-btn" class="btn btn-add">Добавить продажу</button>
+            </div>
+            <div th:object="${headerAsales}">
+                <div th:each="asale, iterStat : ${headerAsales.aSales}" class="asale-item">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label th:for="|asales[${iterStat.index}].description|">Описание:</label>
+                            <input type="text" th:field="*{aSales[__${iterStat.index}__].description}" class="form-control"/>
+                        </div>
+                        <div class="form-group">
+                            <label th:for="|asales[${iterStat.index}].price|">Стоимость:</label>
+                            <input type="number" th:field="*{aSales[__${iterStat.index}__].price}" class="form-control"/>
+                        </div>
+                        <div class="form-group">
+                            <label th:for="|asales[${iterStat.index}].count|">Количество:</label>
+                            <input type="number" th:field="*{aSales[__${iterStat.index}__].count}" class="form-control"/>
+                        </div>
+                        <span class="remove-asale-btn remove-btn">&times;</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Кнопка для отправки формы -->
+        <div class="form-section">
+            <button type="submit" class="btn btn-primary">Сохранить</button>
+        </div>
+    </form>
+</div>
+</body>
+</html>
+

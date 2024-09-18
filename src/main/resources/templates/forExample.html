@@ -1,113 +1,208 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>File List</title>
+    <meta charset="UTF-8"/>
+    <title>Расходные материалы</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
+
     <style>
         body {
-            font-family: Arial, sans-serif;
-            background-color: #f4f4f4;
-            margin: 0;
-            padding: 0;
-        }
-
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 20px;
+            font-family: 'Inter', sans-serif;
         }
 
         h1 {
-            color: #3f51b5;
-            font-size: 28px;
-            margin-bottom: 20px;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-bottom: 20px;
-            background-color: #ffffff;
-            border-radius: 8px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-        }
-
-        table thead {
-            background-color: #f4f4f4;
-        }
-
-        table thead th {
-            text-align: left;
-            padding: 15px;
-            font-size: 14px;
-            color: #666;
-            border-bottom: 2px solid #ddd;
-        }
-
-        table tbody tr {
-            border-bottom: 1px solid #ddd;
-        }
-
-        table tbody tr:hover {
-            background-color: #f9f9f9;
-        }
-
-        table tbody td {
-            padding: 15px;
-            font-size: 14px;
+            font-size: 2rem;
             color: #333;
+            margin-bottom: 30px;
+            text-align: center;
         }
 
-        .actions button {
-            background-color: #3f51b5;
-            color: #fff;
-            border: none;
-            padding: 10px 15px;
-            margin-right: 5px;
-            border-radius: 4px;
-            cursor: pointer;
+        label {
+            font-weight: 600;
+            color: #555;
+            margin-bottom: 0; /* Чтобы не было дополнительного отступа */
+        }
+
+        input, select {
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            padding: 10px;
             font-size: 14px;
         }
 
-        .actions button.download {
-            background-color: #3f51b5;
+        .section-card {
+            background-color: #f9f9f9;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
         }
 
-        .actions button.edit {
-            background-color: #ff9800;
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
         }
 
-        .actions button.delete {
-            background-color: #f44336;
+        .form-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
         }
 
-        .actions button:hover {
-            opacity: 0.8;
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group input[type="number"], .form-group input[type="text"], .form-group select {
+            width: 150px;
+        }
+
+        .remove-btn {
+            color: red;
+            cursor: pointer;
+            font-size: 1.5em;
+            margin-left: 10px;
+            line-height: 1.5;
+        }
+
+        .btn-add, .btn-primary {
+            background-color: #7ED6A6;
+            color: white;
+            border: none;
+            border-radius: 50px;
+            padding: 10px 20px;
+            font-size: 14px;
+            transition: background 0.3s ease, transform 0.3s ease;
+        }
+
+        .btn-add:hover, .btn-primary:hover {
+            background-color: #6CC497;
+            box-shadow: 0 5px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .btn-primary {
+            font-size: 16px;
+        }
+
+        .btn-add {
+            float: right;
+        }
+
+        .btn-container {
+            display: flex;
+            justify-content: flex-end;
+            margin-bottom: 10px; /* Отступ, чтобы кнопка не прилипала к полям */
+        }
+
+        .form-section {
+            text-align: center;
+        }
+
+        .checkbox-inline {
+            display: flex;
+            align-items: center;
+            gap: 5px; /* Небольшой отступ между чекбоксом и надписью */
+        }
+
+        /* Стили для чекбокса */
+        .custom-checkbox {
+            width: 36px;
+            height: 36px;
+            margin-top: 4px; /* Чтобы выровнять по вертикали */
+        }
+
+        /* Добавим отступы для контроля положения чекбокса */
+        .custom-checkbox-adjust {
+            margin-top: 14px; /* Подвиньте это значение, если нужно подкорректировать */
+        }
+
+        /* Добавляем стиль для перемещения label у чекбокса */
+        .custom-label-adjust {
+            margin-top: -5px; /* Настройте значение по своему усмотрению */
+            margin-left: 5px; /* Настройте горизонтальное смещение, если нужно */
+        }
+
+        @media (max-width: 768px) {
+            .form-row {
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            .btn-add {
+                float: none;
+                width: 100%;
+                text-align: center;
+            }
+
+            .form-group input[type="number"],
+            .remove-btn {
+                width: 100%;
+            }
         }
     </style>
+
 </head>
 <body>
 <div class="container">
-    <h1>Список файлов</h1>
-    <table>
-        <thead>
-        <tr>
-            <th>Имя файла</th>
-            <th>Действия</th>
-        </tr>
-        </thead>
-        <tbody>
-        <tr th:each="file : ${files}">
-            <td><a th:href="@{|/files/${file}|}" th:text="${file}"></a></td>
-            <td class="actions">
-                <button class="download">Скачать</button>
-                <button class="edit">Редактировать</button>
-                <button class="delete">Удалить</button>
-            </td>
-        </tr>
-        </tbody>
-    </table>
+    <h1>Расходные материалы</h1>
+
+    <!-- Форма для Расходных материалов -->
+    <form th:action="@{/input/saveSupplies}" method="post">
+        <input type="hidden" name="headerId" th:value="${headerId}"/>
+        <input type="hidden" name="suppliesId" th:value="${suppliesId}"/>
+
+        <!-- Бейджи -->
+        <div class="section-card">
+            <h2>Бейджи</h2>
+            <div class="btn-container">
+                <button id="addBadge" class="btn btn-add">Добавить бейдж</button>
+            </div>
+            <div th:object="${badgeList}">
+                <div th:each="badge, iterStat : ${badgeList.badges}" class="form-row">
+                    <!-- Контейнер для чекбокса и метки -->
+                    <div class="form-group checkbox-inline custom-checkbox-adjust">
+                        <input type="hidden" name="rfid" th:value="false"/>
+                        <input type="checkbox" th:field="*{badges[__${iterStat.index}__].rfid}" class="custom-checkbox"/>
+                        <label th:for="|badges[${iterStat.index}].rfid|" class="custom-label-adjust">RFID:</label>
+                    </div>
+                    <div class="form-group">
+                        <label th:for="|badges[${iterStat.index}].badgeMaterial|">Материал:</label>
+                        <select th:field="*{badges[__${iterStat.index}__].badgeMaterial}" class="form-control">
+                            <option value="ПЕЧАТНЫЙ">ПЕЧАТНЫЙ</option>
+                            <option value="ПЛАСТИКОВЫЙ">ПЛАСТИКОВЫЙ</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label th:for="|badges[${iterStat.index}].laminationKind|">Ламинация:</label>
+                        <select th:field="*{badges[__${iterStat.index}__].laminationKind}" class="form-control">
+                            <option value="МАТОВЫЙ">МАТОВЫЙ</option>
+                            <option value="ГЛЯНЦЕВЫЙ">ГЛЯНЦЕВЫЙ</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label th:for="|badges[${iterStat.index}].size|">Размер:</label>
+                        <input type="text" th:field="*{badges[__${iterStat.index}__].size}" class="form-control"/>
+                    </div>
+                    <div class="form-group">
+                        <label th:for="|badges[${iterStat.index}].price|">Стоимость:</label>
+                        <input type="number" th:field="*{badges[__${iterStat.index}__].price}" class="form-control"/>
+                    </div>
+                    <div class="form-group">
+                        <label th:for="|badges[${iterStat.index}].count|">Количество:</label>
+                        <input type="number" th:field="*{badges[__${iterStat.index}__].count}" class="form-control"/>
+                    </div>
+                    <span class="remove-btn remove-staff-btn">&times;</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Кнопка для отправки формы -->
+        <div class="form-section">
+            <button type="submit" class="btn btn-primary">Сохранить</button>
+        </div>
+    </form>
 </div>
+
 </body>
 </html>

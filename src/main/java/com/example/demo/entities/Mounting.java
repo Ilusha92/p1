@@ -16,11 +16,12 @@ public class Mounting {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private int hours;
-    private int qStaff;
-    private int qPrice;
+    private String kindOfService;
+    private Integer workHours;
+    private Integer agentCount;
+    private Integer priceForHour;
 
     @JsonBackReference
-    @OneToOne
+    @ManyToOne
     private InputHeader header;
 }

@@ -11,18 +11,17 @@ import java.util.List;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PUBLIC)
-@Entity(name = "input_body")
-public class InputBody {
+@Entity(name = "input_staff")
+public class InputStaff {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @OneToMany(mappedBy = "body", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Device> devices;
+    @OneToMany(mappedBy = "staff", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Staff> staffs;
 
     @JsonBackReference
     @ManyToOne
     private InputHeader header;
-
 }

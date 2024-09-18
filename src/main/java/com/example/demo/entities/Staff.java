@@ -1,6 +1,5 @@
 package com.example.demo.entities;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -24,9 +23,9 @@ public class Staff {
     private Integer staffQuantity;
     private Integer betPerHour;
 
-    @JsonBackReference
     @ManyToOne
-    private InputHeader header;
+    @JoinColumn(name = "input_staff_id")
+    private InputStaff staff;
 
 }
 
